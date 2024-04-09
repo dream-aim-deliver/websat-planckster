@@ -12,6 +12,10 @@ jobs:
         run: |
           npm install
 
+      - name: Copy .env file
+        run: |
+          cp .env.example .env
+
       - name: Build NextJS App 🔧
         run: |
           npm run build
