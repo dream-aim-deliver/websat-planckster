@@ -1,0 +1,88 @@
+{% macro common_virtual_host_config(port) %}
+{% if HOSTNAME is defined %}
+ ServerName {{ HOSTNAME }}:{{ port }}
+{% endif %}
+ ServerAdmin {{ HTTPD_SERVER_ADMIN | default('msharma@mpi-sws.org')}}
+{% if enable_ssl == 'True' %}
+ SSLEngine on
+ SSLCertificateFile /etc/dad/hostcert.pem
+ SSLCertificateKeyFile /etc/dad/hostkey.pem
+ SSLCACertificateFile /etc/dad/ca.pem
+ SSLOptions +StdEnvVars
+ #AB: SSLv3 disable
+ SSLProtocol              all -SSLv2 -SSLv3
+ #AB: for Security
+ SSLCipherSuite           HIGH:!CAMELLIA:!ADH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!3DES
+{% endif %}
+{% if HTTPD_LOG_LEVEL is defined %}
+ LogLevel {{ HTTPD_LOG_LEVEL }}
+{% else %}
+ LogLevel info
+{% endif %}
+
+{% if HTTPD_ENABLE_LOGS|default('False') == 'True' %}
+{% if HTTPD_LOG_DIR is defined %}
+ CustomLog {{HTTPD_LOG_DIR}}/access_log combinedLog
+ ErrorLog {{HTTPD_LOG_DIR}}/error_log
+{% else %}
+ CustomLog logs/access_log combinedLog
+ ErrorLog logs/error_log
+{% endif %}
+{% else %}
+ CustomLog /dev/stdout combinedLog
+ ErrorLog /dev/stderr
+{% endif %}
+{% endmacro %}
+
+{% if HTTPD_ENABLE_SSL|default('False') == 'True' %}
+  {% set enable_ssl = 'True' %}
+{% else %}
+  {% set enable_ssl = 'False' %}
+{% endif %}
+
+{% if enable_ssl == 'True' %}
+LoadModule ssl_module /usr/lib64/httpd/modules/mod_ssl.so
+{% endif %}
+
+LoadModule unique_id_module modules/mod_unique_id.so
+LoadModule authn_core_module modules/mod_authn_core.so
+LoadModule cache_disk_module modules/mod_cache_disk.so
+
+CacheEnable disk /
+CacheRoot /tmp
+Listen 80
+Listen 443
+Header set X-DAD-Host "%{HTTP_HOST}e"
+RequestHeader add X-DAD-RequestId "%{UNIQUE_ID}e"
+
+{% if HTTPD_LOG_FORMAT is defined %}
+LogFormat "{{ HTTPD_LOG_FORMAT }}" combinedLog
+{% else %}
+LogFormat "%h\t%t\t%{X-DAD-Forwarded-For}i\t%T\t%D\t\"%{X-DAD-Auth-Token}i\"\t%{X-DAD-RequestId}i\t%{X-DAD-Client-Ref}i\t\"%r\"\t%>s\t%b\t%{Cookie}i" combinedLog
+{% endif %}
+
+<VirtualHost *:80>
+{% if HOSTNAME is defined %}
+ ServerName {{ HOSTNAME }}:80
+{% endif %}
+ {{ common_virtual_host_config(80) }}
+ Redirect permanent / https://{{ HOSTNAME }}/
+</VirtualHost>
+
+<VirtualHost *:443>
+ {{ common_virtual_host_config(port=443) }}
+ 
+ ProxyPass / http://localhost:3000/
+ ProxyPassReverse / http://localhost:3000/
+ ProxyPassReverseCookieDomain "{{ HOSTNAME }}:3000" "{{ HOSTNAME }}:443"
+ RequestHeader set Upgrade %{HTTP:Upgrade}e
+ RequestHeader set Connection "upgrade"
+ RequestHeader set Host %{Host}e
+ RequestHeader set X-Real-IP %{Remote_Addr}e
+ RequestHeader set X-Forwarded-For %{Proxy_Add_X_Forwarded_For}e
+ RequestHeader set X-Forwarded-Proto %{Scheme}e
+ RequestHeader set X-Forwarded-Host %{Host}e
+ RequestHeader set X-Forwarded-Port %{Server_Port}e
+</VirtualHost>
+
+

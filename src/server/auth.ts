@@ -37,12 +37,12 @@ export type TCredentials = {
 
 const VALID_CREDENTIALS = [
   { 
-      id: "1",
+      id: env.KP_CLIENT_ID || "1", // TODO: change this to the actual client ID
       username: env.PRIMARY_USER_USERNAME || 'admin',
       password: env.PRIMARY_USER_PASSWORD || '3987anjknk2309^&67'
   },
   {
-      id: "2",
+      id: env.KP_CLIENT_ID || "1", // TODO: change this to the actual client ID
       username: env.SECONDARY_USER_USERNAME || 'user',
       password: env.SECONDARY_USER_PASSWORD || '3987anjknk2309^&67'
   }

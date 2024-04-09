@@ -1,0 +1,25 @@
+module.exports = {
+    apps: [
+        {
+            name: "websat-planckster",
+            script: "npm run build && npm start",
+            env: {
+                NODE_ENV: "production",
+                OPENAI_API_KEY: "{{ OPENAI_API_KEY }}",
+                PRIMARY_USER_USERNAME: "{{ PRIMARY_USER_USERNAME }}",
+                PRIMARY_USER_PASSWORD: "{{ PRIMARY_USER_PASSWORD }}",
+                SECONDARY_USER_USERNAME: "{{ SECONDARY_USER_USERNAME }}",
+                SECONDARY_USER_PASSWORD: "{{ SECONDARY_USER_PASSWORD }}",
+                NEXTAUTH_SECRET: "{{ NEXTAUTH_SECRET }}",
+                {% if HTTPD_ENABLE_SSL|default('False') == 'True' %}
+                NEXTAUTH_URL: "https://{{ HOSTNAME }}",
+                {% else %}
+                NEXTAUTH_URL: "http://{{ HOSTNAME }}",
+                {% endif %}
+                KP_HOST: "{{ KP_HOST }}",
+                KP_AUTH_TOKEN: "{{ KP_AUTH_TOKEN }}",
+                KP_CLIENT_ID: "{{ KP_CLIENT_ID }}",
+            },
+        },
+    ],
+};
