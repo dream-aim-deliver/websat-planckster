@@ -1,6 +1,7 @@
 import { postRouter } from "~/server/api/routers/post";
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { researchContextRouter } from "./routers/research-contexts";
+import { conversationRouter } from "./routers/conversations";
 
 /**
  * This is the primary router for your server.
@@ -10,6 +11,7 @@ import { researchContextRouter } from "./routers/research-contexts";
 export const appRouter = createTRPCRouter({
   post: postRouter,
   researchContext: researchContextRouter,
+  conversation: conversationRouter,
 });
 
 // export type definition of API

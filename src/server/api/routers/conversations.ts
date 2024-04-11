@@ -1,0 +1,28 @@
+import { z } from "zod";
+
+import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+
+import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
+import { env } from "~/env";
+
+export const conversationRouter = createTRPCRouter({
+    list: protectedProcedure
+    .input(
+        z.object({
+            id: z.number(),
+            xAuthToken: z.string(),
+        }),
+    )
+    .query(async ({ input }) => {
+        const viewModel = await sdk.listConversations({
+            id: input.id,
+            xAuthToken: input.xAuthToken || env.KP_AUTH_TOKEN,
+        });
+        if(viewModel.status) {
+            const conversations = viewModel.conversations
+            return conversations;
+        }
+        // TODO: check if error can be handled, otherwise change KP's presenter
+        return [];
+    }),
+});
