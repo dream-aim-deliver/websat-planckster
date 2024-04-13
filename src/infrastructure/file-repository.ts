@@ -1,6 +1,8 @@
-import axios from 'axios';
 import fs from 'fs';
-import type * as stream from 'stream';
+import path from 'path';
+import fetchNode from 'node-fetch';
+import type { Response } from 'node-fetch';
+
 
 export type FileRepositoryDTO = {
     status: boolean;
@@ -13,61 +15,77 @@ export type FileRepositoryDTO = {
 
 export async function uploadFile(signedUrl: string, filePath: string) {
 
-  try {
-    // Read the file from the file system
-    const file = fs.createReadStream(filePath);
+    const fileData = fs.readFileSync(filePath);
 
-    // Use axios to upload the file to MinIO
-    await axios.put(signedUrl, file, {
-        headers: {
-        'Content-Type': 'application/octet-stream',
-        },
-    });
+    try {
 
-    const dto: FileRepositoryDTO = {
-        status: true,
-        code: -1
+        const response = await fetch(signedUrl, {
+            method: 'PUT',
+            body: fileData
+        });
+
+        if (!response.ok) {
+            throw new Error('Upload failed');
         }
-    return dto
 
-  } catch (error) {
-    const dto: FileRepositoryDTO = {
-        status: false,
-        code: 1,
-        errorCode: 1,
-        errorMessage: `error`,
-        errorName: "Upload Error",
-        errorType: "UploadError"
-    }
-    return dto
-  }
+        const dto: FileRepositoryDTO = {
+            status: true,
+            code: -1
+        };
+        return dto;
+    } catch (error) {
+        const dto: FileRepositoryDTO = {
+            status: false,
+            code: 1,
+            errorCode: 1,
+            errorMessage: `error`,
+            errorName: "Upload Error",
+            errorType: "UploadError"
+        };
+        return dto;
+    } 
 }
 
-export async function downloadFile(signedUrl: string, filePath: string) {
-  try {
-    // Use axios to download the file from MinIO
-    const response = await axios.get(signedUrl, {
-        responseType: 'stream',
-    });
-
-    // Write the file to the file system
-    (response.data as stream.Readable).pipe(fs.createWriteStream(filePath));
-
-    const dto: FileRepositoryDTO = {
-        status: true,
-        code: -1
+export async function downloadFile(signedUrl: string, filePath: string): Promise<FileRepositoryDTO> {
+    try {
+      // TODO: typing is broken here because the compiler doesn't understand node-fetch
+      const response: Response = await fetchNode(signedUrl);
+        if (!response.ok) {
+            throw new Error('Download failed');
         }
-    return dto
 
-  } catch (error) {
-    const dto: FileRepositoryDTO = {
-        status: false,
-        code: 1,
-        errorCode: 1,
-        errorMessage: `error`,
-        errorName: "Download Error",
-        errorType: "DownloadError"
+        // Ensure the directory exists
+        fs.mkdirSync(path.dirname(filePath), { recursive: true });
+
+        // Check if response.body is null
+        if (!response.body) {
+            throw new Error('No response body');
+        }
+
+        // Create a write stream to the file path
+        const fileStream = fs.createWriteStream(filePath);
+
+        // Pipe the response body into the file stream
+        response.body.pipe(fileStream);
+
+        // Wait for the file stream to finish
+        await new Promise((resolve, reject) => {
+            fileStream.on('finish', resolve);
+            fileStream.on('error', reject);
+        });
+
+        return {
+            status: true,
+            code: -1
+        };
+    } catch (error) {
+        return {
+            status: false,
+            code: 1,
+            errorCode: 1,
+            errorMessage: `error`,
+            errorName: "Download Error",
+            errorType: "DownloadError"
+        };
     }
-    return dto
-  }
 }
