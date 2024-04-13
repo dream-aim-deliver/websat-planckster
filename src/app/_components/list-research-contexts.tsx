@@ -40,7 +40,7 @@ export function ListResearchContextsPage(props: ListResearchContextsPageProps) {
           addNewContextMutation.mutate({
             title: "New Context",
             description: "New Context Description",
-            sourcesID: [1, 2, 3],
+            sourceDataIdList: [1, 2, 3],
           });
         }}
         apiUrl={props.kernelPlancksterHost}
