@@ -32,12 +32,7 @@ export const researchContextRouter = createTRPCRouter({
       z.object({
         title: z.string(),
         description: z.string(),
-        sourcesID : z.array(z.number()),
-        // TODO add sourceDataList
-        // sourceDataList: z.array(z.object({
-        //   lfn: z.object({
-
-        // })),
+        sourceDataIdList: z.array(z.number()),
       }),
     )
     .mutation(async ({ input }) => {
@@ -45,7 +40,7 @@ export const researchContextRouter = createTRPCRouter({
       const userID = session?.user.id;
       const viewModel: NewResearchContextViewModel = await sdk.createResearchContext({
         clientSub: userID,
-        requestBody: [],
+        requestBody: input.sourceDataIdList,
         xAuthToken: env.KP_AUTH_TOKEN,
         researchContextTitle: input.title,
         researchContextDescription: input.description,
