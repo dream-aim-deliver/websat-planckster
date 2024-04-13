@@ -11,7 +11,7 @@ export function ListConversationsPage(props: ListConversationsPageProps) {
   return (
     <ConversationPage
       convs={props.conversations}
-      onAddConversationClick={() => {console.log("Add conversation clicked")}}
+      onAddConversationClick={() => {console.log("Add conversation clicked")}}  // TODO: add the mutation here
       apiUrl={props.kernelPlancksterHost}
     />
   );

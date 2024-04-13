@@ -25,4 +25,24 @@ export const conversationRouter = createTRPCRouter({
         // TODO: check if error can be handled, otherwise change KP's presenter
         return [];
     }),
+
+    create: protectedProcedure
+        .input(
+            z.object({
+                id: z.number(),
+                title: z.string(),
+            }),
+        )
+        .mutation(async ({ input }) => {
+            const viewModel = await sdk.createConversation({
+                id: input.id,
+                xAuthToken: env.KP_AUTH_TOKEN,
+                conversationTitle: input.title,
+            });
+            if(viewModel.status) {
+                return viewModel;
+            }
+            // TODO: check if error can be handled, otherwise change KP's presenter
+            return {};
+        }),
 });

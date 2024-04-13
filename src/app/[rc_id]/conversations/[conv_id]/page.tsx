@@ -3,7 +3,7 @@ import { api } from "~/trpc/server";
 import { env } from "~/env";
 import { redirect } from "next/navigation";
 import { ListMessagesPage } from "../../../_components/list-messages";
-import type { ChatMessageProps, ChatPageProps } from "@maany_shr/planckster-ui-kit";
+import type { ChatMessageProps } from "@maany_shr/planckster-ui-kit";
 
 export default async function Home(
     { params }: { params: { conv_id: string } }
@@ -28,17 +28,24 @@ async function ListMessages({ conv_id }: { conv_id: string }) {
         { id: conv_id_int, xAuthToken: env.KP_AUTH_TOKEN },
     );
 
-    // TODO: convert here individual messages to chatMessageProp, need a Message model in the sdk
-    const cmProps: ChatMessageProps = {
+    const cmProps: ChatMessageProps[] = []
 
-    }
+    for (const message of messages) {
 
-    const props: ChatPageProps = {
-        chatMessageProps = cmProps
+        const role = message.sender_type === "user" ? "user" : "llm"
+
+        const cmProp: ChatMessageProps = {
+            senderName: message.sender,
+            message: message.content,
+            sentTime: message.timestamp,
+            role: role
+        }
+
+        cmProps.push(cmProp)
     }
 
     return (
-        <ListMessagesPage chatMessageProps={props}
+        <ListMessagesPage chatMessageProps={cmProps}
         />
     );
 
