@@ -2,6 +2,7 @@ import { getServerAuthSession } from "~/server/auth";
 import { api } from "~/trpc/server";
 import { env } from "~/env";
 import { redirect } from "next/navigation";
+
 import { ListMessagesPage } from "../../../_components/list-messages";
 import type { ChatMessageProps } from "@maany_shr/planckster-ui-kit";
 
@@ -25,7 +26,7 @@ async function ListMessages({ conv_id }: { conv_id: string }) {
     if (!session?.user) return null;
 
     const messages = await api.message.list(
-        { id: conv_id_int, xAuthToken: env.KP_AUTH_TOKEN },
+        { conversationId: conv_id_int, xAuthToken: env.KP_AUTH_TOKEN },
     );
 
     const cmProps: ChatMessageProps[] = []

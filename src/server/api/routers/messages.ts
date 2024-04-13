@@ -9,13 +9,13 @@ export const messageRouter = createTRPCRouter({
     list: protectedProcedure
     .input(
         z.object({
-            id: z.number(),
+            conversationId: z.number(),
             xAuthToken: z.string(),
         }),
     )
     .query(async ({ input }) => {
         const viewModel = await sdk.listMessages({
-            id: input.id,
+            id: input.conversationId,
             xAuthToken: input.xAuthToken || env.KP_AUTH_TOKEN,
         });
         if(viewModel.status) {
@@ -25,5 +25,7 @@ export const messageRouter = createTRPCRouter({
         // TODO: check if error can be handled, otherwise change KP's presenter
         return [];
     }),
+
+    // create logic: (1) send message to openAI; (2) if successful, register both the sent message and the response in KP
 
 });
