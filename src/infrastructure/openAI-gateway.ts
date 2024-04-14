@@ -21,6 +21,17 @@ export default class OpenAIGateway {
         this.openAIAssistantID = env.OPENAI_ASSISTANT_ID;
     }
 
+    uint8ArrayToBase64(uint8Array: Uint8Array): string {
+        // Convert the Uint8Array to a binary string
+        let binaryString = '';
+        uint8Array.forEach((byte) => {
+        binaryString += String.fromCharCode(byte);
+        });
+    
+        // Use btoa to convert the binary string to base64
+        return btoa(binaryString);
+    }
+
     async sendMessage(query: string): Promise<openAIDTO> {
         if (!this.openAIAPIKey) throw new Error('OPENAI_API_KEY is not defined in the environment variables')
         
@@ -78,13 +89,56 @@ export default class OpenAIGateway {
             }
             // if the run is completed, get the response message
             if (runStatus.status === 'completed') {
-                const threadMessages = await openai.beta.threads.messages.list(thread.id)
-                const responseMessage = threadMessages.data[-1]?.content.toString()
+
+                console.log('Run completed')
+
+                let page = await openai.beta.threads.messages.list(thread.id); 
+                let items  = page.getPaginatedItems();
+                while(page.hasNextPage()) {
+                    page = await page.getNextPage();
+                    items = items.concat(page.getPaginatedItems());
+                }
+                // TIP: For handling images, see https://community.openai.com/t/how-do-download-files-generated-in-ai-assistants/493516/3
+                const messages = [];
+                for (const item of items) {
+                    const content = item.content;
+                    for ( const message of content) {
+
+                        console.log(message)
+
+                        if (message.type === 'image_file') {
+                            console.log("image message")
+
+                            const fileId = message.image_file.file_id;
+                            const file = await openai.files.content(fileId);
+                            const bufferView = new Uint8Array(await file.arrayBuffer());
+                            const base64 = this.uint8ArrayToBase64(bufferView);
+                            messages.push({
+                                "content": base64,
+                                "role": item.role === 'user' ? 'user' : 'agent',
+                                "type": 'image',
+                                "timestamp": item.created_at
+                            })
+                        } else if (message.type === 'text') {
+                            console.log("text message")
+                            messages.push({
+                                "content": message.text.value,
+                                "role": item.role === 'user' ? 'user' : 'agent',
+                                "type": 'text',
+                                "timestamp": item.created_at
+                            })
+                        }
+                    }}
+                messages.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+                const lastMessage = messages.slice(-1);
+                const lastMessageContent = lastMessage[0]!.content;
+                console.log(`Last message: ${lastMessageContent}`);
 
                 const dto: openAIDTO = {
                     status: true,
                     code: 200,
-                    responseMessage: responseMessage,
+                    responseMessage: lastMessageContent,
                 }
 
                 return dto

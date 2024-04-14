@@ -27,7 +27,6 @@ export const messageRouter = createTRPCRouter({
         return [];
     }),
 
-    // create logic: (1) send message to openAI, together with a context composed of the first message plus the latest 10 of the KP-conversation; (2) if response is successful, register both the sent message and the response in KP
     create: protectedProcedure
     .input(
         z.object({
@@ -38,7 +37,7 @@ export const messageRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
         // get Unix timestamp for the user's message, as number
-        const userMessageTimestamp = new Date().getTime(); 
+        const userMessageTimestamp = Math.floor(new Date().getTime() / 1000); 
 
         // 1. Use KP to get the first message of a conversation, plus the latest 10
         const viewModel = await sdk.listMessages({
@@ -76,13 +75,16 @@ export const messageRouter = createTRPCRouter({
 
             if (openAIDTO.status) {
                 // assert that we got a response message
+                console.log(`Response message: ${openAIDTO.responseMessage}`)
                 const responseMessage = openAIDTO.responseMessage!;
                 // get the timestamp for the agent's response, as number
-                const aiMessageTimestamp = new Date().getTime();
+                const aiMessageTimestamp = Math.floor(new Date().getTime() / 1000);
 
                 // 3. Register both messages using KP
 
                 // 3.1 Register the user's message
+                console.log(userMessageTimestamp)
+
                 const newUserMessageVM = await sdk.createMessage({
                     id: input.conversationId,
                     messageContent: input.messageContent,
@@ -105,10 +107,12 @@ export const messageRouter = createTRPCRouter({
                         return [newUserMessageVM, newAgentMessageVM];
                     }
                     // TODO: handle registering agent's message error
+                    console.error('Error registering agent message:', newAgentMessageVM); 
                     return [];
 
                 }
                 // TODO: handle registering user's message error
+                console.error('Error registering user message:', newUserMessageVM);
                 return [];
 
 

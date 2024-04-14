@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { ListMessagesPage } from "../../../_components/list-messages";
 import type { ChatMessageProps } from "@maany_shr/planckster-ui-kit";
+import { DummySendMessage } from "~/app/_components/dummy-send-message";
 
 export default async function Home(
     { params }: { params: { conv_id: string } }
@@ -29,25 +30,39 @@ async function ListMessages({ conv_id }: { conv_id: string }) {
         { conversationId: conv_id_int, xAuthToken: env.KP_AUTH_TOKEN },
     );
 
-    const cmProps: ChatMessageProps[] = []
+    //const cmProps: ChatMessageProps[] = []
 
-    for (const message of messages) {
+    //for (const message of messages) {
 
-        const role = message.sender_type === "user" ? "user" : "llm"
+        //const role = message.sender_type === "user" ? "user" : "llm"
 
-        const cmProp: ChatMessageProps = {
-            senderName: message.sender,
-            message: message.content,
-            sentTime: message.timestamp,
-            role: role
-        }
+        //const cmProp: ChatMessageProps = {
+            //senderName: message.sender,
+            //message: message.content,
+            //sentTime: message.timestamp,
+            //role: role
+        //}
 
-        cmProps.push(cmProp)
-    }
+        //cmProps.push(cmProp)
+    //}
+            //<ListMessagesPage chatMessageProps={cmProps}
+             ///>
 
     return (
-        <ListMessagesPage chatMessageProps={cmProps}
-        />
+        <div>
+            <ul>
+                {messages.map((msg, index) => (
+                <li key={index}>
+                    {`sender: ${msg.sender} ::: content: ${msg.content}`}
+                </li>
+                ))}
+            </ul>   
+            <DummySendMessage
+                conversationId={conv_id_int}
+                xAuthToken={env.KP_AUTH_TOKEN}
+                messageContent="This is a hard-coded test message from websat planckster. Now greet me"
+            />
+        </div>
     );
 
 
