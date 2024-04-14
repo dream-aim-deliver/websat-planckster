@@ -34,11 +34,12 @@ export async function uploadFile(signedUrl: string, filePath: string) {
         };
         return dto;
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         const dto: FileRepositoryDTO = {
             status: false,
             code: 1,
             errorCode: 1,
-            errorMessage: `error`,
+            errorMessage: errorMessage,
             errorName: "Upload Error",
             errorType: "UploadError"
         };
@@ -79,11 +80,12 @@ export async function downloadFile(signedUrl: string, filePath: string): Promise
             code: -1
         };
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
         return {
             status: false,
             code: 1,
             errorCode: 1,
-            errorMessage: `error`,
+            errorMessage: errorMessage,
             errorName: "Download Error",
             errorType: "DownloadError"
         };

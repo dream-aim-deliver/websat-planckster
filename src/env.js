@@ -28,6 +28,8 @@ export const env = createEnv({
     KP_HOST: z.string(),
     KP_AUTH_TOKEN: z.string(),
     KP_CLIENT_ID: z.number(),
+    OPENAI_API_KEY: z.string(),
+    OPENAI_ASSISTANT_ID: z.string(),
   },
 
   /**
@@ -54,6 +56,8 @@ export const env = createEnv({
     KP_HOST: process.env.KP_HOST,
     KP_AUTH_TOKEN: process.env.KP_AUTH_TOKEN,
     KP_CLIENT_ID: parseInt(process.env.KP_CLIENT_ID ?? "0"),
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    OPENAI_ASSISTANT_ID: process.env.OPENAI_ASSISTANT_ID,
 
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
