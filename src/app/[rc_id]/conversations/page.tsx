@@ -1,8 +1,8 @@
-import { getServerAuthSession } from "~/server/auth";
-import { api } from "~/trpc/server";
 import { env } from "~/env";
 import { redirect } from "next/navigation";
 import { ListConversationsPage } from "../../_components/list-conversations";
+import { getServerAuthSession } from "~/lib/server/auth";
+import { api } from "~/lib/server/infrastructure/config/trpc/server";
 
 export default async function Home(
     { params }: { params: { rc_id: string } }

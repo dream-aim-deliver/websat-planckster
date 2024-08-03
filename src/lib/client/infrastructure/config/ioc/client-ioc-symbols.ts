@@ -1,0 +1,5 @@
+const SIGNALS = {
+    S_CLIENT_KP_CONNECTION_STATUS: Symbol.for("S_KP_CONNECTION_STATUS"),
+}
+
+export { SIGNALS };

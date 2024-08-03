@@ -1,11 +1,11 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/lib/server/infrastructure/config/trpc/trpc";
 
 import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
 import type { NewResearchContextViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
 import { env } from "~/env";
-import { getServerAuthSession } from "~/server/auth";
+import { getServerAuthSession } from "~/lib/server/infrastructure/config/auth";
 
 export const researchContextRouter = createTRPCRouter({
   list: protectedProcedure

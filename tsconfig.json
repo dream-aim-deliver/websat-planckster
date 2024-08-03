@@ -26,8 +26,13 @@
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
-      "~/*": ["./src/*"]
-    }
+      "~/*": ["./src/*"],
+      "@/sdk/*": ["./src/sdk/*"]
+    },
+
+    /** Iversify */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
   },
   "include": [
     ".eslintrc.cjs",
@@ -38,5 +43,5 @@
     "**/*.js",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "coverage", ".storybook", ".next", "dist"]
 }

@@ -1,8 +1,9 @@
+
 import { env } from "~/env";
 
 import OpenAI from 'openai';
 
-export type openAIDTO = {
+export type openaiDTO = {
     status: boolean;
     code: number;
     errorCode?: number | null;
@@ -32,7 +33,7 @@ export default class OpenAIGateway {
         return btoa(binaryString);
     }
 
-    async sendMessage(query: string): Promise<openAIDTO> {
+    async sendMessage(query: string): Promise<openaiDTO> {
         if (!this.openAIAPIKey) throw new Error('OPENAI_API_KEY is not defined in the environment variables')
         
         if (!this.openAIAssistantID) throw new Error('OPENAI_ASSISTANT_ID is not defined in the environment variables')
@@ -78,7 +79,7 @@ export default class OpenAIGateway {
             const runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id)
             // If the run had an error, return ErrorDTO
             if (runStatus.status === 'cancelling' || runStatus.status == 'expired' || runStatus.status == 'failed' || runStatus.status == 'cancelled') {
-            const errorDTO: openAIDTO = {
+            const errorDTO: openaiDTO = {
                 status: false,
                 code: 500,
                 errorMessage: `POST Run error: ${run.status}}`,
@@ -135,7 +136,7 @@ export default class OpenAIGateway {
                 const lastMessageContent = lastMessage[0]!.content;
                 console.log(`Last message: ${lastMessageContent}`);
 
-                const dto: openAIDTO = {
+                const dto: openaiDTO = {
                     status: true,
                     code: 200,
                     responseMessage: lastMessageContent,
@@ -146,7 +147,7 @@ export default class OpenAIGateway {
             }
 
         }
-        const dto: openAIDTO = {
+        const dto: openaiDTO = {
             status: false,
             code: 500,
             errorMessage: `The Run Status loop did not return any DTOs. Loop ended with run status: ${run.status}`,
@@ -157,7 +158,7 @@ export default class OpenAIGateway {
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : String(error);
-            const dto: openAIDTO = {
+            const dto: openaiDTO = {
                 status: false,
                 code: 1,
                 errorCode: 1,

@@ -1,9 +1,9 @@
-import { getServerAuthSession } from "~/server/auth";
-import { api } from "~/trpc/server";
 import { env } from "~/env";
 import { redirect } from "next/navigation";
 import { DummyUploadComponent } from "../_components/dummy-upload";
 import { DummyDownloadComponent } from "../_components/dummy-download";
+import { getServerAuthSession } from "~/lib/server/auth";
+import { api } from "~/lib/server/infrastructure/config/trpc/server";
 
 export default async function Home() {
   const session = await getServerAuthSession();

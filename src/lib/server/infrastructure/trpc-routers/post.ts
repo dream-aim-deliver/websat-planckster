@@ -4,7 +4,7 @@ import {
   createTRPCRouter,
   protectedProcedure,
   publicProcedure,
-} from "~/server/api/trpc";
+} from "~/lib/server/infrastructure/config/trpc/trpc";
 
 let post = {
   id: 1,

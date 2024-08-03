@@ -1,5 +1,6 @@
 "use client";
-import { api } from "~/trpc/react";
+
+import { api } from "~/lib/client/infrastructure/config/trpc/react";
 
 export type DummyDownloadProps = {
     clientId: number,

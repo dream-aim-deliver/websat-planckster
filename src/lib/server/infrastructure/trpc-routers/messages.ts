@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/lib/server/infrastructure/config/trpc/trpc";
 
 import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
 import { env } from "~/env";
-import OpenAIGateway from "~/infrastructure/openAI-gateway";
+import OpenAIGateway from "~/lib/server/infrastructure/gateway/openai-gateway";
 
 export const messageRouter = createTRPCRouter({
     list: protectedProcedure

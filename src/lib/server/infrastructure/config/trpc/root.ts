@@ -1,9 +1,11 @@
-import { postRouter } from "~/server/api/routers/post";
-import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
-import { researchContextRouter } from "./routers/research-contexts";
-import { conversationRouter } from "./routers/conversations";
-import { messageRouter } from "./routers/messages";
-import { sourceDataRouter } from "./routers/source-data";
+import { postRouter } from "~/lib/server/infrastructure/trpc-routers/post";
+import { createCallerFactory, createTRPCRouter } from "~/lib/server/infrastructure/config/trpc/trpc";
+import { researchContextRouter } from "../../trpc-routers/research-contexts";
+import { conversationRouter } from "../../trpc-routers/conversations";
+import { messageRouter } from "../../trpc-routers/messages";
+import { sourceDataRouter } from "../../trpc-routers/source-data";
+import { kernelPlancksterHealthCheckRouter } from "../../trpc-routers/health-check";
+
 
 /**
  * This is the primary router for your server.
@@ -16,6 +18,7 @@ export const appRouter = createTRPCRouter({
   conversation: conversationRouter,
   message: messageRouter,
   sourceData: sourceDataRouter,
+  healthCheck: kernelPlancksterHealthCheckRouter,
 });
 
 // export type definition of API

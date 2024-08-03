@@ -1,0 +1,4 @@
+const SIGNALS = {
+}
+
+export { SIGNALS };

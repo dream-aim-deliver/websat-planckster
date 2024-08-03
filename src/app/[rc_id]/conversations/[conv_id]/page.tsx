@@ -1,11 +1,9 @@
-import { getServerAuthSession } from "~/server/auth";
-import { api } from "~/trpc/server";
 import { env } from "~/env";
 import { redirect } from "next/navigation";
 
-import { ListMessagesPage } from "../../../_components/list-messages";
-import type { ChatMessageProps } from "@maany_shr/planckster-ui-kit";
 import { DummySendMessage } from "~/app/_components/dummy-send-message";
+import { getServerAuthSession } from "~/lib/server/auth";
+import { api } from "~/lib/server/infrastructure/config/trpc/server";
 
 export default async function Home(
     { params }: { params: { conv_id: string } }

@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { createTRPCRouter, protectedProcedure } from "~/lib/server/infrastructure/config/trpc/trpc";
 
 import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
 
-import { downloadFile, uploadFile } from "~/infrastructure/file-repository";
+import { downloadFile, uploadFile } from "~/lib/server/infrastructure/repository/file-repository";
 
 import { env } from "~/env";
 
