@@ -1,8 +1,11 @@
 import "~/styles/globals.css";
+import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 
 import { Inter } from "next/font/google";
-import { TRPCReactProvider } from "~/lib/client/infrastructure/config/trpc/react";
+import { TRPCReactProvider } from "~/lib/infrastructure/client/trpc/react";
 
+// Explicitly load the container to ensure all dependencies are loaded, else the optimization of the build will fail
+serverContainer.load();
 
 const inter = Inter({
   subsets: ["latin"],

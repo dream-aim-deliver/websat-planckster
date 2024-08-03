@@ -2,10 +2,13 @@ import { env } from "~/env";
 import { redirect } from "next/navigation";
 import { ListResearchContextsPage } from "./_components/list-research-contexts";
 import type { ResearchContext } from "@maany_shr/kernel-planckster-sdk-ts";
-import { getServerAuthSession } from "~/lib/server/auth";
-import { api } from "~/lib/server/infrastructure/config/trpc/server";
+import { api } from "~/lib/infrastructure/trpc/server";
+import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 export default async function Home() {
-  const session = await getServerAuthSession();
+  const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+  const session = await authGateway.getSession();
   if (!session?.user) {
     redirect("/auth/login");
   };
@@ -16,9 +19,6 @@ export default async function Home() {
 
 async function ListResearchContexts() {
   const isConnected = false
-  const session = await getServerAuthSession();
-  if (!session?.user) return null;
-
   let researchContexts: ResearchContext[] = [];
 
   if (isConnected) {

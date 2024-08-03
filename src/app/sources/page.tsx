@@ -2,30 +2,33 @@ import { env } from "~/env";
 import { redirect } from "next/navigation";
 import { DummyUploadComponent } from "../_components/dummy-upload";
 import { DummyDownloadComponent } from "../_components/dummy-download";
-import { getServerAuthSession } from "~/lib/server/auth";
-import { api } from "~/lib/server/infrastructure/config/trpc/server";
+import { api } from "~/lib/infrastructure/trpc/server";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
+import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 
 export default async function Home() {
-  const session = await getServerAuthSession();
+  const authGateway = serverContainer.get<AuthGatewayOutputPort>(
+    GATEWAYS.AUTH_GATEWAY,
+  );
+  const session = await authGateway.getSession();
   if (!session?.user) {
     redirect("/auth/login");
-  };
-  return (
-        <ListSourceData />
-  );
+  }
+  return <ListSourceData />;
 }
 
 async function ListSourceData() {
-
-  const session = await getServerAuthSession();
+  const authGateway = serverContainer.get<AuthGatewayOutputPort>(
+    GATEWAYS.AUTH_GATEWAY,
+  );
+  const session = await authGateway.getSession();
   if (!session?.user) return null;
-  
-  const sourceData = await api.sourceData.listForClient(
-    {
-        clientId: env.KP_CLIENT_ID, 
-        xAuthToken: env.KP_AUTH_TOKEN
-    }
-  )
+
+  const sourceData = await api.sourceData.listForClient({
+    clientId: env.KP_CLIENT_ID,
+    xAuthToken: env.KP_AUTH_TOKEN,
+  });
 
   // Return a simple HTML unordered list
   // Plus something to see the uploadSourceData result
@@ -33,11 +36,9 @@ async function ListSourceData() {
     <div>
       <ul>
         {sourceData.map((data, index) => (
-          <li key={index}>
-            {data.relative_path}
-          </li>
+          <li key={index}>{data.relative_path}</li>
         ))}
-      </ul>   
+      </ul>
       <DummyUploadComponent
         clientId={env.KP_CLIENT_ID}
         protocol="s3"
@@ -54,8 +55,5 @@ async function ListSourceData() {
         localFilePath="/home/alebg/test/mdtest1_downloaded_from_websat.md"
       />
     </div>
-
   );
-
-
 }

@@ -33,15 +33,18 @@
     /** Iversify */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+
   },
   "include": [
     ".eslintrc.cjs",
     "next-env.d.ts",
+    "**/*.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "**/*.cjs",
     "**/*.js",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "@types/**/*.d.ts"
   ],
   "exclude": ["node_modules", "coverage", ".storybook", ".next", "dist"]
 }

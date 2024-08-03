@@ -1,12 +1,15 @@
 import { env } from "~/env";
 import { redirect } from "next/navigation";
-import { getServerAuthSession } from "~/lib/server/auth";
-import { api } from "~/lib/server/infrastructure/config/trpc/server";
+import { api } from "~/lib/infrastructure/trpc/server";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
+import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 
 export default async function Home(
     { params }: { params: { rc_id: string } }
 ) {
-  const session = await getServerAuthSession();
+  const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+  const session = await authGateway.getSession();
   if (!session?.user) {
     redirect("/auth/login");
   };
@@ -19,7 +22,8 @@ async function ListSourceData({ rc_id }: { rc_id: string }) {
 
   const rc_id_int = parseInt(rc_id);
   
-  const session = await getServerAuthSession();
+  const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+  const session = await authGateway.getSession();
   if (!session?.user) return null;
   
   const sourceData = await api.sourceData.listForResearchContext(

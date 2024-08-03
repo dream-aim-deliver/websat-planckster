@@ -1,7 +1,7 @@
 "use client";
 import { ResearchContextPage } from "@maany_shr/planckster-ui-kit";
 import { type ResearchContext } from "node_modules/@maany_shr/kernel-planckster-sdk-ts";
-import { api } from "~/lib/client/infrastructure/config/trpc/react";
+import { api } from "~/lib/infrastructure/client/trpc/react";
 
 export type ListResearchContextsPageProps = {
   researchContexts: ResearchContext[];
