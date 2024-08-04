@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import type { NextAuthOptions } from "next-auth";
 import NextAuthCredentialsProvider from "./next-auth-credentials-provider";
+import { SessionSchema } from "~/lib/core/entity/auth/session";
 
 
 /**
@@ -11,8 +12,6 @@ import NextAuthCredentialsProvider from "./next-auth-credentials-provider";
 export const authOptions: NextAuthOptions = {
   callbacks: {
     jwt: async ({token, user}) => {
-      console.log("jwt", token);
-      console.log("user", user);
       user && (token.user = user)
       return token;
     },
@@ -20,6 +19,10 @@ export const authOptions: NextAuthOptions = {
       console.log("session", session);
       console.log("token", token);
       token.user &&  (session.user = token.user);
+      const validationResponse = SessionSchema.safeParse(session);
+      if (!validationResponse.success) {
+        throw new Error("Session schema validation failed");
+      }
       return session;
     },
   },

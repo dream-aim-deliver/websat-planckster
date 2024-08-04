@@ -11,3 +11,15 @@ export const GetSessionDTOSchema = DTOSchemaFactory(
 )
 
 export type GetSessionDTO = z.infer<typeof GetSessionDTOSchema>;
+
+export const ExtractKPCredentialsDTOSchema = DTOSchemaFactory(
+    z.object({
+        xAuthToken: z.string(),
+        clientID: z.number(),
+    }),
+    z.object({
+        message: z.string(),
+    })
+)
+
+export type ExtractKPCredentialsDTO = z.infer<typeof ExtractKPCredentialsDTOSchema>;

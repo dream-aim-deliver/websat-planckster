@@ -9,15 +9,11 @@ export type ListResearchContextsPageProps = {
   researchContexts: ResearchContext[];
   kernelPlancksterHost: string;
 };
- const IdiotPage = ({children}: {children: React.ReactNode}) => {
-  return (
-    <div>
-      {children}
-    </div>
-  )
- }
+
 export function ListResearchContextsPage(props: ListResearchContextsPageProps) {
-  const api = clientContainer.get<TClientComponentAPI>(TRPC.REACT_CLIENT_COMPONENTS_API);
+  const api = clientContainer.get<TClientComponentAPI>(
+    TRPC.REACT_CLIENT_COMPONENTS_API,
+  );
   const addNewContextMutation = api.kernel.researchContext.create.useMutation({
     onSuccess: () => {
       // TODO: handle success
@@ -25,14 +21,8 @@ export function ListResearchContextsPage(props: ListResearchContextsPageProps) {
     },
   });
 
-  const MySecyButton = (<button
-    
-  >Sexy</button>)
   return (
     <div>
-      <IdiotPage>
-        {MySecyButton}
-      </IdiotPage>
       <button disabled={false} />
       {addNewContextMutation.isError && (
         <div>Error: {addNewContextMutation.error.message}</div>
