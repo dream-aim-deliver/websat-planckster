@@ -26,7 +26,8 @@ export default class NextAuthCredentialsProvider {
                         kp: {
                             client_id: env.KP_CLIENT_ID || 1,
                             auth_token: env.KP_AUTH_TOKEN
-                        }
+                        },
+                        role: "USER",
                     };
 
                     return Promise.resolve(user);

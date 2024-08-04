@@ -8,8 +8,8 @@ import { GATEWAYS, TRPC } from "~/lib/infrastructure/server/config/ioc/server-io
 import type { TServerComponentAPI } from "~/lib/infrastructure/server/trpc/server-api";
 export default async function Home() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
-  const session = await authGateway.getSession();
-  if (!session?.user) {
+  const sessionDTO = await authGateway.getSession();
+  if (!sessionDTO.success) {
     redirect("/auth/login");
   };
   return (

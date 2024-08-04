@@ -11,8 +11,8 @@ export default async function Home() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(
     GATEWAYS.AUTH_GATEWAY,
   );
-  const session = await authGateway.getSession();
-  if (!session?.user) {
+  const sessionDTO = await authGateway.getSession();
+  if (!sessionDTO.success) {
     redirect("/auth/login");
   }
   return <ListSourceData />;
@@ -20,11 +20,6 @@ export default async function Home() {
 
 async function ListSourceData() {
   const api: TServerComponentAPI = serverContainer.get(TRPC.REACT_SERVER_COMPONENTS_API);
-  const authGateway = serverContainer.get<AuthGatewayOutputPort>(
-    GATEWAYS.AUTH_GATEWAY,
-  );
-  const session = await authGateway.getSession();
-  if (!session?.user) return null;
 
   const sourceData = await api.kernel.sourceData.listForClient({
     clientId: env.KP_CLIENT_ID,

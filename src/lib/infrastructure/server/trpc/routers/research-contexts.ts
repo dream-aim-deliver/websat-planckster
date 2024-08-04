@@ -39,8 +39,11 @@ export const researchContextRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
-      const session = await authGateway.getSession();
-      const userID = session?.user.id;
+      const sessionDTO = await authGateway.getSession();
+      if (!sessionDTO.success) {
+        return Promise.reject(new Error("User not authenticated"));
+      }
+      const userID = sessionDTO.data.user.id;
       const viewModel: NewResearchContextViewModel = await sdk.createResearchContext({
         clientSub: userID,
         requestBody: input.sourceDataIdList,

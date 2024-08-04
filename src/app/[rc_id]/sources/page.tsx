@@ -9,8 +9,8 @@ export default async function Home(
     { params }: { params: { rc_id: string } }
 ) {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
-  const session = await authGateway.getSession();
-  if (!session?.user) {
+  const sessionDTO = await authGateway.getSession();
+  if (!sessionDTO.success) {
     redirect("/auth/login");
   };
   return (
@@ -21,10 +21,6 @@ export default async function Home(
 async function ListSourceData({ rc_id }: { rc_id: string }) {
   const api: TServerComponentAPI = serverContainer.get(TRPC.REACT_SERVER_COMPONENTS_API);
   const rc_id_int = parseInt(rc_id);
-  
-  const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
-  const session = await authGateway.getSession();
-  if (!session?.user) return null;
   
   const sourceData = await api.kernel.sourceData.listForResearchContext(
     {

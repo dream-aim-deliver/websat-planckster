@@ -28,10 +28,10 @@ import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symb
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
-  const session = await authGateway.getSession();
+  const sessionDTO = await authGateway.getSession();
 
   return {
-    session,
+    session: sessionDTO,
     ...opts,
   };
 };
@@ -96,13 +96,13 @@ export const publicProcedure = t.procedure;
  * @see https://trpc.io/docs/procedures
  */
 export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
-  if (!ctx.session?.user) {
+  if (!ctx.session ) {
     throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({
     ctx: {
       // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
+      session: { ...ctx.session.data},
     },
   });
 });

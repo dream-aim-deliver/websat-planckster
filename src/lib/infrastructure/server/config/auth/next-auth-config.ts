@@ -10,18 +10,17 @@ import NextAuthCredentialsProvider from "./next-auth-credentials-provider";
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
+    jwt: async ({token, user}) => {
+      console.log("jwt", token);
+      console.log("user", user);
+      user && (token.user = user)
+      return token;
+    },
     session: ({ session, token }) => {
       console.log("session", session);
       console.log("token", token);
-      return (
-        {
-          user: {
-            ...session.user,
-            id: token.sub,
-          },
-          expires: session.expires,
-          role: session.role,
-        })
+      token.user &&  (session.user = token.user);
+      return session;
     },
   },
 

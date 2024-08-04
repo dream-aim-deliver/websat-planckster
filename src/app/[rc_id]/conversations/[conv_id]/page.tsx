@@ -15,8 +15,8 @@ export default async function Home({
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(
     GATEWAYS.AUTH_GATEWAY,
   );
-  const session = await authGateway.getSession();
-  if (!session?.user) {
+  const sessionDTO = await authGateway.getSession();
+  if (!sessionDTO.success) {
     redirect("/auth/login");
   }
   return <ListMessages conv_id={params.conv_id} />;
@@ -25,12 +25,6 @@ export default async function Home({
 async function ListMessages({ conv_id }: { conv_id: string }) {
   const api: TServerComponentAPI = serverContainer.get(TRPC.REACT_SERVER_COMPONENTS_API);
   const conv_id_int = parseInt(conv_id);
-  const authGateway = serverContainer.get<AuthGatewayOutputPort>(
-    GATEWAYS.AUTH_GATEWAY,
-  );
-  const session = await authGateway.getSession();
-  if (!session?.user) return null;
-
   const messages = await api.kernel.message.list({
     conversationId: conv_id_int,
     xAuthToken: env.KP_AUTH_TOKEN,
