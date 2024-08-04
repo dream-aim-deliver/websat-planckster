@@ -1,7 +1,9 @@
 "use client";
 import { ResearchContextPage } from "@maany_shr/planckster-ui-kit";
 import { type ResearchContext } from "node_modules/@maany_shr/kernel-planckster-sdk-ts";
-import { api } from "~/lib/infrastructure/client/trpc/react";
+import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
+import type { TClientComponentAPI } from "~/lib/infrastructure/client/trpc/react-api";
+import { TRPC } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 
 export type ListResearchContextsPageProps = {
   researchContexts: ResearchContext[];
@@ -15,7 +17,8 @@ export type ListResearchContextsPageProps = {
   )
  }
 export function ListResearchContextsPage(props: ListResearchContextsPageProps) {
-  const addNewContextMutation = api.researchContext.create.useMutation({
+  const api = clientContainer.get<TClientComponentAPI>(TRPC.REACT_CLIENT_COMPONENTS_API);
+  const addNewContextMutation = api.kernel.researchContext.create.useMutation({
     onSuccess: () => {
       // TODO: handle success
       console.log("Context created");

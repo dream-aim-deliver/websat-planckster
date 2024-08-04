@@ -1,5 +1,6 @@
-const SIGNALS = {
-    S_CLIENT_KP_CONNECTION_STATUS: Symbol.for("S_KP_CONNECTION_STATUS"),
+export const SIGNALS = {
 }
 
-export { SIGNALS };
+export const TRPC = {
+    REACT_CLIENT_COMPONENTS_API: Symbol("TRPC_REACT_CLIENT_API"),
+}

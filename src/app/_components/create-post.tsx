@@ -2,13 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { api } from "~/lib/infrastructure/client/trpc/react";
+import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
+import type { TClientComponentAPI } from "~/lib/infrastructure/client/trpc/react-api";
+import { TRPC } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 
 
 export function CreatePost() {
   const router = useRouter();
   const [name, setName] = useState("");
 
+  const api = clientContainer.get<TClientComponentAPI>(TRPC.REACT_CLIENT_COMPONENTS_API);
   const createPost = api.post.create.useMutation({
     onSuccess: () => {
       router.refresh();

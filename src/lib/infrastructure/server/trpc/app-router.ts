@@ -13,12 +13,15 @@ import { createTRPCRouter } from "~/lib/infrastructure/server/trpc/server";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+  kernel: {
+    researchContext: researchContextRouter,
+    conversation: conversationRouter,
+    message: messageRouter,
+    sourceData: sourceDataRouter,
+    healthCheck: kernelPlancksterHealthCheckRouter,
+  },
   post: postRouter,
-  researchContext: researchContextRouter,
-  conversation: conversationRouter,
-  message: messageRouter,
-  sourceData: sourceDataRouter,
-  healthCheck: kernelPlancksterHealthCheckRouter,
+
 });
 
 // export type definition of API

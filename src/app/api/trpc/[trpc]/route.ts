@@ -2,7 +2,9 @@ import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { type NextRequest } from "next/server";
 
 import { env } from "~/env";
-import { appRouter } from "~/lib/infrastructure/server/trpc/app-router";
+import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
+import { TRPC } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
+import { type AppRouter } from "~/lib/infrastructure/server/trpc/app-router";
 import { createTRPCContext } from "~/lib/infrastructure/server/trpc/server";
 
 /**
@@ -15,8 +17,9 @@ const createContext = async (req: NextRequest) => {
   });
 };
 
-const handler = (req: NextRequest) =>
-  fetchRequestHandler({
+const handler = (req: NextRequest) => {
+  const appRouter: AppRouter = serverContainer.get(TRPC.APP_ROUTER);
+  return fetchRequestHandler({
     endpoint: "/api/trpc",
     req,
     router: appRouter,
@@ -29,6 +32,6 @@ const handler = (req: NextRequest) =>
             );
           }
         : undefined,
-  });
+  })};
 
 export { handler as GET, handler as POST };

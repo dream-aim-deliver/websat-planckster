@@ -20,3 +20,5 @@ export const createCaller = createCallerFactory(appRouter);
  * This is the tRPC caller that is used to make tRPC calls from React Server Components.
  */
 export const api = createCaller(createContext);
+
+export type TServerComponentAPI = typeof api;

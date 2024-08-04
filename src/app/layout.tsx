@@ -2,7 +2,7 @@ import "~/styles/globals.css";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 
 import { Inter } from "next/font/google";
-import { TRPCReactProvider } from "~/lib/infrastructure/client/trpc/react";
+import { TRPCReactProvider } from "~/lib/infrastructure/client/trpc/react-provider";
 
 // Explicitly load the container to ensure all dependencies are loaded, else the optimization of the build will fail
 serverContainer.load();

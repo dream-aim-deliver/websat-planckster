@@ -1,6 +1,8 @@
 "use client";
 
-import { api } from "~/lib/infrastructure/client/trpc/react";
+import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
+import type { TClientComponentAPI } from "~/lib/infrastructure/client/trpc/react-api";
+import { TRPC } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 
 export type DummyDownloadProps = {
     clientId: number,
@@ -13,7 +15,8 @@ export type DummyDownloadProps = {
 export function DummyDownloadComponent(
     props: DummyDownloadProps
 ) {
-    const downloadSourceDataMutation = api.sourceData.download.useMutation({
+    const api = clientContainer.get<TClientComponentAPI>(TRPC.REACT_CLIENT_COMPONENTS_API);
+    const downloadSourceDataMutation = api.kernel.sourceData.download.useMutation({
         onSuccess: () => {
             console.log("Source data downloaded");
         },

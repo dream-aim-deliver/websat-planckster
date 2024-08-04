@@ -2,10 +2,10 @@ import { env } from "~/env";
 import { redirect } from "next/navigation";
 import { DummyUploadComponent } from "../_components/dummy-upload";
 import { DummyDownloadComponent } from "../_components/dummy-download";
-import { api } from "~/lib/infrastructure/server/trpc/server-api";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
-import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
+import { GATEWAYS, TRPC } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
+import type { TServerComponentAPI } from "~/lib/infrastructure/server/trpc/server-api";
 
 export default async function Home() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(
@@ -19,13 +19,14 @@ export default async function Home() {
 }
 
 async function ListSourceData() {
+  const api: TServerComponentAPI = serverContainer.get(TRPC.REACT_SERVER_COMPONENTS_API);
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(
     GATEWAYS.AUTH_GATEWAY,
   );
   const session = await authGateway.getSession();
   if (!session?.user) return null;
 
-  const sourceData = await api.sourceData.listForClient({
+  const sourceData = await api.kernel.sourceData.listForClient({
     clientId: env.KP_CLIENT_ID,
     xAuthToken: env.KP_AUTH_TOKEN,
   });

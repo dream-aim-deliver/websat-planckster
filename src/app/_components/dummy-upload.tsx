@@ -1,5 +1,7 @@
 "use client";
-import { api } from "~/lib/infrastructure/client/trpc/react";
+import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
+import type { TClientComponentAPI } from "~/lib/infrastructure/client/trpc/react-api";
+import { TRPC } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 
 export type DummyUploadProps = {
     clientId: number,
@@ -13,7 +15,8 @@ export type DummyUploadProps = {
 export function DummyUploadComponent(
     props: DummyUploadProps
 ) {
-    const uploadSourceDataMutation = api.sourceData.create.useMutation({
+    const api = clientContainer.get<TClientComponentAPI>(TRPC.REACT_CLIENT_COMPONENTS_API);
+    const uploadSourceDataMutation = api.kernel.sourceData.create.useMutation({
         onSuccess: () => {
             console.log("Source data uploaded");
         },
