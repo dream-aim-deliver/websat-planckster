@@ -7,4 +7,5 @@ export const CONSTANTS = {
 
 export const GATEWAYS = {
     AUTH_GATEWAY: Symbol.for('AUTH_GATEWAY'),
+    TRPC: Symbol.for('TRPC'),
 }

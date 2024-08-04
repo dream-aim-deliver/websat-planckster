@@ -10,6 +10,10 @@ export const SessionSchema = z.object({
         name: z.string(),
         email: z.string(),
         image: z.string(),
+        kp: z.object({
+            client_id: z.number(),
+            auth_token: z.string(),
+        }),
     }),
     expires: z.string(),
     role: z.enum(["USER", "ADMIN"]),

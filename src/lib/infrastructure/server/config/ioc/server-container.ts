@@ -11,6 +11,8 @@ const serverContainer = new Container();
 /**NextAuthOptions */
 serverContainer.bind(CONSTANTS.NEXT_AUTH_OPTIONS).toConstantValue(authOptions);
 
+/** TRPC Server Side Router */
+
 /**AuthGatewayOutputPort */
 serverContainer.bind<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY).to(NextAuthGateway).inSingletonScope();
 export default serverContainer;

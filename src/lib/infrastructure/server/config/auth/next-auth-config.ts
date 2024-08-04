@@ -10,21 +10,26 @@ import NextAuthCredentialsProvider from "./next-auth-credentials-provider";
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, token }) => ({
-      user: {
-        ...session.user,
-        id: token.sub,
-      },
-      expires: session.expires,
-      role: session.role,
-    }),
+    session: ({ session, token }) => {
+      console.log("session", session);
+      console.log("token", token);
+      return (
+        {
+          user: {
+            ...session.user,
+            id: token.sub,
+          },
+          expires: session.expires,
+          role: session.role,
+        })
+    },
   },
 
   pages: {
     signIn: "/auth/signin",
     error: "/auth/error",
   },
-  
+
   providers: [
     new NextAuthCredentialsProvider().getProvider(),
     /**
