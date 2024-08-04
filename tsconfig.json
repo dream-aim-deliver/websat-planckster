@@ -27,7 +27,8 @@
     "baseUrl": ".",
     "paths": {
       "~/*": ["./src/*"],
-      "@/sdk/*": ["./src/sdk/*"]
+      "@/sdk/*": ["./src/sdk/*"],
+      "@/app/*": ["./src/app/*"],
     },
 
     /** Iversify */

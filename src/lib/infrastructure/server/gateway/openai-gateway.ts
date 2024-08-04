@@ -12,7 +12,6 @@ export type openaiDTO = {
     errorType?: string | null;
     responseMessage?: string | null;
 }
-
 export default class OpenAIGateway {
     private openAIAPIKey: string | undefined;
     private openAIAssistantID: string | undefined;
