@@ -1,10 +1,5 @@
 import { z } from "zod";
-
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "~/lib/infrastructure/trpc/trpc";
+import { createTRPCRouter, publicProcedure, protectedProcedure } from "../server";
 
 let post = {
   id: 1,

@@ -22,7 +22,7 @@ export default class NextAuthCredentialsProvider {
                         id: env.KP_CLIENT_ID.toString() || "1",
                         name: username,
                         email: "planckster-example@mpi-sws.org",
-                        image: "https://cdn-icons-png.freepik.com/512/3177/3177440.png", // TODO: change this to the actual image
+                        image: "https://api.multiavatar.com/user.svg", // TODO: change this to the actual image
                         kp: {
                             client_id: env.KP_CLIENT_ID || 1,
                             auth_token: env.KP_AUTH_TOKEN

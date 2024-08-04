@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import "server-only";
 
-import { createCallerFactory } from "./trpc";
-import { appRouter } from "../server/config/trpc/root";
-import createContext from "../server/config/trpc/context";
+import { appRouter } from "./app-router";
+import createContext from "./context";
+import { createCallerFactory } from "./server";
 
 /**
  * Create a server-side caller for the tRPC API.

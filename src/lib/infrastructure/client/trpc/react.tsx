@@ -8,7 +8,7 @@ import { loggerLink, unstable_httpBatchStreamLink } from "@trpc/client";
 import { createTRPCReact } from "@trpc/react-query";
 import { useState } from "react";
 import SuperJSON from "superjson";
-import type { AppRouter } from "~/lib/infrastructure/server/config/trpc/root";
+import type { AppRouter } from "~/lib/infrastructure/server/trpc/app-router";
 
 
 const createQueryClient = () => new QueryClient();

@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/trpc/trpc";
 
 import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
 
 import { downloadFile, uploadFile } from "~/lib/infrastructure/server/repository/file-repository";
 
 import { env } from "~/env";
+import { createTRPCRouter, protectedProcedure } from "../server";
 
 export const sourceDataRouter = createTRPCRouter({
     listForClient: protectedProcedure

@@ -10,8 +10,8 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import serverContainer from "../server/config/ioc/server-container";
-import { GATEWAYS } from "../server/config/ioc/server-ioc-symbols";
+import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
+import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 
 
 /**

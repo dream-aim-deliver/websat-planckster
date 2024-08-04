@@ -1,6 +1,6 @@
 import { env } from "~/env";
 import { redirect } from "next/navigation";
-import { api } from "~/lib/infrastructure/trpc/server";
+import { api } from "~/lib/infrastructure/server/trpc/server-api";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";

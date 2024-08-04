@@ -1,13 +1,13 @@
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/trpc/trpc";
 
 import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
 import type { NewResearchContextViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
 import { env } from "~/env";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import serverContainer from "../config/ioc/server-container";
-import { GATEWAYS } from "../config/ioc/server-ioc-symbols";
+import serverContainer from "../../config/ioc/server-container";
+import { GATEWAYS } from "../../config/ioc/server-ioc-symbols";
+import { createTRPCRouter, protectedProcedure } from "../server";
 
 export const researchContextRouter = createTRPCRouter({
   list: protectedProcedure
