@@ -15,7 +15,7 @@ export const sourceDataRouter = createTRPCRouter({
         const kpCredentialsDTO = await authGateway.extractKPCredentials();
 
         if (!kpCredentialsDTO.success) {
-            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO}`);
+            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
             return [];
         }
 
@@ -27,7 +27,7 @@ export const sourceDataRouter = createTRPCRouter({
             const sources = viewModel.source_data_list
             return sources;
         }
-        console.error(`Failed to get source data for client. Dumping view model: ${viewModel}`);
+        console.error(`Failed to get source data for client. Dumping view model: ${viewModel.errorMessage}`);
         return [];
 
     }),
@@ -45,7 +45,7 @@ export const sourceDataRouter = createTRPCRouter({
         const kpCredentialsDTO = await authGateway.extractKPCredentials();
 
         if (!kpCredentialsDTO.success) {
-            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO}`);
+            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
             return [];
         }
 
@@ -60,7 +60,7 @@ export const sourceDataRouter = createTRPCRouter({
           const signedUrl = signedUrlViewModel.signed_url
           return signedUrl;
         }
-          console.error(`Failed to get signed URL for upload. Dumping view model: ${signedUrlViewModel}`);
+          console.error(`Failed to get signed URL for upload. Dumping view model: ${signedUrlViewModel.errorMessage}`);
           return [];
       }),
 
@@ -78,7 +78,7 @@ export const sourceDataRouter = createTRPCRouter({
         const kpCredentialsDTO = await authGateway.extractKPCredentials();
 
         if (!kpCredentialsDTO.success) {
-            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO}`);
+            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
             return [];
         }
 
@@ -93,7 +93,7 @@ export const sourceDataRouter = createTRPCRouter({
           if (registerSourceDataViewModel.status) {
               return registerSourceDataViewModel;
           }
-          console.error(`Failed to register source data. Dumping view model: ${registerSourceDataViewModel}`);
+          console.error(`Failed to register source data. Dumping view model: ${registerSourceDataViewModel.errorMessage}`);
           return [];
       }
       ),
@@ -103,16 +103,15 @@ export const sourceDataRouter = createTRPCRouter({
         z.object({
             protocol: z.string(),
             relativePath: z.string(),
-            localFilePath: z.string(),
         }),
       )
-      .mutation(async ({ input }) => {
+      .query(async ({ input }) => {
 
         const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
         const kpCredentialsDTO = await authGateway.extractKPCredentials();
 
         if (!kpCredentialsDTO.success) {
-          console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO}`);
+          console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
           return [];
         }
 
@@ -127,7 +126,7 @@ export const sourceDataRouter = createTRPCRouter({
 
           return signedUrl;
         }
-          console.error(`Failed to get signed URL for download. Dumping view model: ${signedUrlViewModel}`);
+          console.error(`Failed to get signed URL for download. Dumping view model: ${signedUrlViewModel.errorMessage}`);
           return [];
       }),
 
@@ -143,7 +142,7 @@ export const sourceDataRouter = createTRPCRouter({
         const kpCredentialsDTO = await authGateway.extractKPCredentials();
 
         if (!kpCredentialsDTO.success) {
-            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO}`);
+            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
             return [];
         }
 
@@ -155,7 +154,7 @@ export const sourceDataRouter = createTRPCRouter({
             const sources = viewModel.source_data_list
             return sources;
         }
-        console.error(`Failed to get source data for research context. Dumping view model: ${viewModel}`); 
+        console.error(`Failed to get source data for research context. Dumping view model: ${viewModel.errorMessage}`); 
         return [];
     }),
 });

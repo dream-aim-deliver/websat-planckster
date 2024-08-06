@@ -27,10 +27,7 @@ export default async function ListResearchContexts() {
   let researchContexts: ResearchContext[] = [];
 
   if (isConnected && isAuthorizedKPUser) {
-    researchContexts = await api.kernel.researchContext.list({
-      id: kpCredentialsDTO.data.clientID,
-      xAuthToken: kpCredentialsDTO.data.xAuthToken,
-    });
+    researchContexts = await api.kernel.researchContext.list();
   }
 
   return (

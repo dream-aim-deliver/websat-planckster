@@ -22,7 +22,6 @@ async function ListConversations({ rc_id }: { rc_id: string }) {
   const rc_id_int = parseInt(rc_id);
   const conversations = await api.kernel.conversation.list({
     id: rc_id_int,
-    xAuthToken: env.KP_AUTH_TOKEN! as string,
   });
 
   return (

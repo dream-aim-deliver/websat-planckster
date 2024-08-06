@@ -1,4 +1,5 @@
 export const SIGNALS = {
+    KERNEL_FILE_UPLOADING: Symbol("KERNEL_FILE_UPLOADING"),
 }
 
 export const TRPC = {
@@ -7,4 +8,13 @@ export const TRPC = {
 
 export const REPOSITORY = {
     FILE_REPOSITORY: Symbol("FILE_REPOSITORY"),
+    KERNEL_FILE_REPOSITORY: Symbol("KERNEL_FILE_REPOSITORY"),
+}
+
+export const PRESENTER = {
+    BROWSER_FILE_UPLOAD_PRESENTER: Symbol("BROWSER_FILE_UPLOAD_PRESENTER"),
+}
+
+export const CONTROLLERS = {
+    KERNEL_FILE_UPLOAD_CONTROLLER: Symbol("KERNEL_FILE_UPLOAD_CONTROLLER"),
 }

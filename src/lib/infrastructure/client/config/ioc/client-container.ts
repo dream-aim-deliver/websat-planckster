@@ -1,8 +1,10 @@
 import "reflect-metadata";
 import { Container } from "inversify";
-import { REPOSITORY, TRPC } from "./client-ioc-symbols";
+import { CONTROLLERS, PRESENTER, REPOSITORY, TRPC } from "./client-ioc-symbols";
 import { api } from "~/lib/infrastructure/client/trpc/react-api";
-import BrowserFileRepository from "~/lib/infrastructure/client/repository/browser-file-repository";
+import BrowserFileUploadPresenter from "~/lib/infrastructure/client/presenter/browser-file-upload-presenter";
+import KernelFileClientRepository from "../../repository/kernel-planckster-file-repository";
+import BrowserFileUploadController from "../../controller/browser-file-upload-controller";
 
 const clientContainer = new Container();
 
@@ -10,6 +12,9 @@ const clientContainer = new Container();
 clientContainer.bind(TRPC.REACT_CLIENT_COMPONENTS_API).toConstantValue(api);
 
 /** REPOSITORY */
-clientContainer.bind(REPOSITORY.FILE_REPOSITORY).to(BrowserFileRepository);
+clientContainer.bind(REPOSITORY.KERNEL_FILE_REPOSITORY).to(KernelFileClientRepository);
+
+/** CONTROLLER */
+clientContainer.bind(CONTROLLERS.KERNEL_FILE_UPLOAD_CONTROLLER).to(BrowserFileUploadController);
 
 export default  clientContainer;

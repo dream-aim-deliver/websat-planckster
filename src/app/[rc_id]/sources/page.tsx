@@ -1,4 +1,3 @@
-import env from "~/lib/infrastructure/server/config/env";
 import { redirect } from "next/navigation";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
@@ -25,7 +24,6 @@ async function ListSourceData({ rc_id }: { rc_id: string }) {
   const sourceData = await api.kernel.sourceData.listForResearchContext(
     {
         researchContextId: rc_id_int,
-        xAuthToken: env.KP_AUTH_TOKEN!,
     }
   )
 

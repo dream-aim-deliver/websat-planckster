@@ -1,4 +1,3 @@
-import env from "~/lib/infrastructure/server/config/env";
 import { redirect } from "next/navigation";
 import { DummyUploadComponent } from "../_components/dummy-upload";
 import { DummyDownloadComponent } from "../_components/dummy-download";
@@ -21,10 +20,7 @@ export default async function Home() {
 async function ListSourceData() {
   const api: TServerComponentAPI = serverContainer.get(TRPC.REACT_SERVER_COMPONENTS_API);
 
-  const sourceData = await api.kernel.sourceData.listForClient({
-    clientId: env.KP_CLIENT_ID! as number,
-    xAuthToken: env.KP_AUTH_TOKEN! as string,
-  });
+  const sourceData = await api.kernel.sourceData.listForClient();
 
   // Return a simple HTML unordered list
   // Plus something to see the uploadSourceData result
@@ -35,20 +31,11 @@ async function ListSourceData() {
           <li key={index}>{data.relative_path}</li>
         ))}
       </ul>
-      <DummyUploadComponent
-        clientId={env.KP_CLIENT_ID! as number}
-        protocol="s3"
-        xAuthToken={env.KP_AUTH_TOKEN! as string}
-        relativePath="mdtest1.md"
-        sourceDataName="Test Markdown File #1"
-        localFilePath="/home/alebg/test/mdtest.md"
-      />
+      <DummyUploadComponent />
       <DummyDownloadComponent
-        clientId={env.KP_CLIENT_ID! as number}
-        protocol="s3"
-        xAuthToken={env.KP_AUTH_TOKEN! as string}
-        relativePath="mdtest1.md"
-        localFilePath="/home/alebg/test/mdtest1_downloaded_from_websat.md"
+        //protocol="s3"
+        //relativePath="mdtest1.md"
+        //localFilePath="/home/alebg/test/mdtest1_downloaded_from_websat.md"
       />
     </div>
   );
