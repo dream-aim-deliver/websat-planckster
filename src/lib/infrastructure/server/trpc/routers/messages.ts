@@ -1,23 +1,31 @@
 import { z } from "zod";
 
-
 import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
-import env from "~/lib/infrastructure/server/config/env";
 import OpenAIGateway from "~/lib/infrastructure/server/gateway/openai-gateway-old";
 import { createTRPCRouter, protectedProcedure } from "../server";
+import serverContainer from "../../config/ioc/server-container";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import { GATEWAYS } from "../../config/ioc/server-ioc-symbols";
 
 export const messageRouter = createTRPCRouter({
     list: protectedProcedure
     .input(
         z.object({
             conversationId: z.number(),
-            xAuthToken: z.string(),
         }),
     )
     .query(async ({ input }) => {
+
+        const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+        const kpCredentialsDTO = await authGateway.extractKPCredentials();
+
+        if (!kpCredentialsDTO.success) {
+            return [];
+        }
+
         const viewModel = await sdk.listMessages({
             id: input.conversationId,
-            xAuthToken: input.xAuthToken || env.KP_AUTH_TOKEN! as string,
+            xAuthToken: kpCredentialsDTO.data.xAuthToken, 
         });
         if(viewModel.status) {
             const messages = viewModel.message_list
@@ -31,18 +39,25 @@ export const messageRouter = createTRPCRouter({
     .input(
         z.object({
             conversationId: z.number(),
-            xAuthToken: z.string(),
             messageContent: z.string(),
         }),
     )
     .mutation(async ({ input }) => {
+
+        const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+        const kpCredentialsDTO = await authGateway.extractKPCredentials();
+
+        if (!kpCredentialsDTO.success) {
+            return [];
+        }
+
         // get Unix timestamp for the user's message, as number
         const userMessageTimestamp = Math.floor(new Date().getTime() / 1000); 
 
         // 1. Use KP to get the first message of a conversation, plus the latest 10
         const viewModel = await sdk.listMessages({
             id: input.conversationId,
-            xAuthToken: input.xAuthToken || env.KP_AUTH_TOKEN! as string,
+            xAuthToken: kpCredentialsDTO.data.xAuthToken, 
         });
 
         if (viewModel.status){
@@ -90,7 +105,7 @@ export const messageRouter = createTRPCRouter({
                     messageContent: input.messageContent,
                     senderType: "user",
                     unixTimestamp: userMessageTimestamp,
-                    xAuthToken: input.xAuthToken || env.KP_AUTH_TOKEN! as string,
+                    xAuthToken: kpCredentialsDTO.data.xAuthToken,
                 })
 
                 if (newUserMessageVM.status){
@@ -100,7 +115,7 @@ export const messageRouter = createTRPCRouter({
                         messageContent: responseMessage,
                         senderType: "agent",
                         unixTimestamp: aiMessageTimestamp,
-                        xAuthToken: input.xAuthToken || env.KP_AUTH_TOKEN! as string,
+                        xAuthToken:  kpCredentialsDTO.data.xAuthToken,
                     })
 
                     if (newAgentMessageVM.status){

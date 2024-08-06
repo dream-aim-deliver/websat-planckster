@@ -1,147 +1,161 @@
 import { z } from "zod";
 
-
 import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
-
-import { downloadFile, uploadFile } from "~/lib/infrastructure/server/repository/file-repository";
-
-import env from "~/lib/infrastructure/server/config/env";
 import { createTRPCRouter, protectedProcedure } from "../server";
+import serverContainer from "../../config/ioc/server-container";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import { GATEWAYS } from "../../config/ioc/server-ioc-symbols";
 
 export const sourceDataRouter = createTRPCRouter({
+
     listForClient: protectedProcedure
-    .input(
-        z.object({
-            clientId: z.number(),
-            xAuthToken: z.string(),
-        }),
-    )
-    .query(async ({ input }) => {
+    .query(async () => {
+
+        const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+        const kpCredentialsDTO = await authGateway.extractKPCredentials();
+
+        if (!kpCredentialsDTO.success) {
+            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO}`);
+            return [];
+        }
+
         const viewModel = await sdk.listSourceData({
-            id: input.clientId ?? env.KP_CLIENT_ID,
-            xAuthToken: input.xAuthToken || env.KP_AUTH_TOKEN! as string,
+            id: kpCredentialsDTO.data.clientID, 
+            xAuthToken: kpCredentialsDTO.data.xAuthToken,
         });
         if(viewModel.status) {
             const sources = viewModel.source_data_list
             return sources;
         }
-        // TODO: handle errors
+        console.error(`Failed to get source data for client. Dumping view model: ${viewModel}`);
         return [];
 
     }),
 
+    getUploadSignedUrl: protectedProcedure
+      .input(
+        z.object({
+            protocol: z.string(),
+            relativePath: z.string(), // TODO: validate that's a path that KP likes
+        }),
+      )
+      .query(async ({ input }) => {
+
+        const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+        const kpCredentialsDTO = await authGateway.extractKPCredentials();
+
+        if (!kpCredentialsDTO.success) {
+            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO}`);
+            return [];
+        }
+
+        const signedUrlViewModel = await sdk.getClientDataForUpload({
+            id: kpCredentialsDTO.data.clientID,
+            protocol: input.protocol,
+            relativePath: input.relativePath,
+            xAuthToken: kpCredentialsDTO.data.xAuthToken,
+        })
+
+        if (signedUrlViewModel.status) {
+          const signedUrl = signedUrlViewModel.signed_url
+          return signedUrl;
+        }
+          console.error(`Failed to get signed URL for upload. Dumping view model: ${signedUrlViewModel}`);
+          return [];
+      }),
+
     create: protectedProcedure
       .input(
         z.object({
-            clientId: z.number(),
             protocol: z.string(),
-            xAuthToken: z.string(),
             relativePath: z.string(), // TODO: validate that's a path that KP likes
             sourceDataName: z.string(),
-            localFilePath: z.string(),
         }),
       )
       .mutation(async ({ input }) => {
-        const clientID = input.clientId ?? env.KP_CLIENT_ID
-        const authToken = input.xAuthToken || env.KP_AUTH_TOKEN! as string
 
-        // 1. Use KP to get signed URL
-        const signedUrlViewModel = await sdk.getClientDataForUpload({
-            id: clientID,
-            protocol: input.protocol,
-            relativePath: input.relativePath,
-            xAuthToken: authToken,
-        })
-        if (signedUrlViewModel.status) {
-          const signedUrl = signedUrlViewModel.signed_url
+        const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+        const kpCredentialsDTO = await authGateway.extractKPCredentials();
 
-          // 2. Use File Repository to upload
-          const uploadDto: {status: boolean}= await uploadFile(signedUrl, input.localFilePath)
-          
-          if (uploadDto.status) {
-
-            // 3. Use KP to register the uploaded source data
-            const registerSourceDataViewModel = await sdk.registerSourceData({
-                id: clientID,
-                sourceDataName: input.sourceDataName,
-                sourceDataProtocol: input.protocol,
-                sourceDataRelativePath: input.relativePath,
-                xAuthToken: authToken,
-            })
-
-            if (registerSourceDataViewModel.status) {
-                return registerSourceDataViewModel;
-            }
-            // TODO: handle register error; note that this means there's an uploaded file whose metadata is NOT registered
+        if (!kpCredentialsDTO.success) {
+            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO}`);
             return [];
-
-          }
-          // TODO: handle upload error
-          return [];
-
         }
-        // TODO: handle signed URL fail error
-        return [];
 
+          const registerSourceDataViewModel = await sdk.registerSourceData({
+              id: kpCredentialsDTO.data.clientID,
+              sourceDataName: input.sourceDataName,
+              sourceDataProtocol: input.protocol,
+              sourceDataRelativePath: input.relativePath,
+              xAuthToken: kpCredentialsDTO.data.xAuthToken,
+          })
 
-      }),
+          if (registerSourceDataViewModel.status) {
+              return registerSourceDataViewModel;
+          }
+          console.error(`Failed to register source data. Dumping view model: ${registerSourceDataViewModel}`);
+          return [];
+      }
+      ),
 
-    // download logic: (1) use KP to get signed URL, (2) use thin file repository to download the file
-    // IN: relative path, client ID, xAuthToken, protocol
-    download: protectedProcedure
+    getDownloadSignedUrl: protectedProcedure
       .input(
         z.object({
-            clientId: z.number(),
             protocol: z.string(),
-            xAuthToken: z.string(),
             relativePath: z.string(),
             localFilePath: z.string(),
         }),
       )
       .mutation(async ({ input }) => {
-        const clientID = input.clientId ?? env.KP_CLIENT_ID
-        const authToken = input.xAuthToken || env.KP_AUTH_TOKEN! as string
 
-        // 1. Use KP to get signed URL
+        const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+        const kpCredentialsDTO = await authGateway.extractKPCredentials();
+
+        if (!kpCredentialsDTO.success) {
+          console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO}`);
+          return [];
+        }
+
         const signedUrlViewModel = await sdk.getClientDataForDownload({
-            id: clientID,
+            id: kpCredentialsDTO.data.clientID,
             protocol: input.protocol,
             relativePath: input.relativePath,
-            xAuthToken: authToken,
+            xAuthToken: kpCredentialsDTO.data.xAuthToken,
         })
         if (signedUrlViewModel.status) {
           const signedUrl = signedUrlViewModel.signed_url
 
-          // 2. Use File Repository to download
-          const downloadDto = await downloadFile(signedUrl, input.localFilePath)
-          
-          if (downloadDto.status) {
-            return downloadDto;
-          }
-          // TODO: handle download error
-          return [];
+          return signedUrl;
         }
-        // TODO: handle signed URL fail error
-        return [];
+          console.error(`Failed to get signed URL for download. Dumping view model: ${signedUrlViewModel}`);
+          return [];
       }),
 
     listForResearchContext: protectedProcedure
     .input(
         z.object({
             researchContextId: z.number(),
-            xAuthToken: z.string(),
         }),
     )
     .query(async ({ input }) => {
+
+        const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+        const kpCredentialsDTO = await authGateway.extractKPCredentials();
+
+        if (!kpCredentialsDTO.success) {
+            console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO}`);
+            return [];
+        }
+
         const viewModel = await sdk.listSourceDataForResearchContext({
             id: input.researchContextId,
-            xAuthToken: input.xAuthToken || env.KP_AUTH_TOKEN! as string,
+            xAuthToken: kpCredentialsDTO.data.xAuthToken,
         });
         if(viewModel.status) {
             const sources = viewModel.source_data_list
             return sources;
         }
-        // TODO: check if error can be handled
+        console.error(`Failed to get source data for research context. Dumping view model: ${viewModel}`); 
         return [];
     }),
 });

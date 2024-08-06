@@ -1,26 +1,27 @@
 import { z } from "zod";
 
-
 import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
 import type { NewResearchContextViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
-import env from "~/lib/infrastructure/server/config/env";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "../../config/ioc/server-container";
 import { GATEWAYS } from "../../config/ioc/server-ioc-symbols";
 import { createTRPCRouter, protectedProcedure } from "../server";
 
 export const researchContextRouter = createTRPCRouter({
+
   list: protectedProcedure
-    .input(
-      z.object({
-        id: z.number(),
-        xAuthToken: z.string(),
-      }),
-    )
-    .query(async ({ input }) => {
+    .query(async () => {
+
+      const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+      const kpCredentialsDTO = await authGateway.extractKPCredentials();
+
+      if (!kpCredentialsDTO.success) {
+        return [];
+      }
+
       const viewModel = await sdk.listResearchContexts({
-        id: input.id ?? env.KP_CLIENT_ID,
-        xAuthToken: input.xAuthToken || env.KP_AUTH_TOKEN!,
+        id: kpCredentialsDTO.data.clientID,
+        xAuthToken: kpCredentialsDTO.data.xAuthToken,
       });
       if (viewModel.status) {
         const researchContexts = viewModel.research_contexts;
@@ -29,6 +30,7 @@ export const researchContextRouter = createTRPCRouter({
       // TODO: handle error
       return [];
     }),
+
   create: protectedProcedure
     .input(
       z.object({
@@ -38,16 +40,23 @@ export const researchContextRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+
       const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+
       const sessionDTO = await authGateway.getSession();
       if (!sessionDTO.success) {
-        return Promise.reject(new Error("User not authenticated"));
+        return [];
       }
-      const userID = sessionDTO.data.user.id;
+
+      const kpCredentialsDTO = await authGateway.extractKPCredentials();
+      if (!kpCredentialsDTO.success) {
+        return []
+      }
+
       const viewModel: NewResearchContextViewModel = await sdk.createResearchContext({
-        clientSub: userID,
+        clientSub: sessionDTO.data.user.email,  // TODO: fix this, sub is not always going to be the email
         requestBody: input.sourceDataIdList,
-        xAuthToken: env.KP_AUTH_TOKEN!,
+        xAuthToken: kpCredentialsDTO.data.xAuthToken,
         researchContextTitle: input.title,
         researchContextDescription: input.description,
       })

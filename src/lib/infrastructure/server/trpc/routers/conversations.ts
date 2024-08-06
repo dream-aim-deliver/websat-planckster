@@ -1,22 +1,30 @@
 import { z } from "zod";
 
-
 import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
-import env from "~/lib/infrastructure/server/config/env";
 import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/server/trpc/server";
+import serverContainer from "../../config/ioc/server-container";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import { GATEWAYS } from "../../config/ioc/server-ioc-symbols";
 
 export const conversationRouter = createTRPCRouter({
     list: protectedProcedure
     .input(
         z.object({
-            id: z.number(),
-            xAuthToken: z.string(),
+            id: z.number(),  // Research context ID
         }),
     )
     .query(async ({ input }) => {
+
+        const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+        const kpCredentialsDTO = await authGateway.extractKPCredentials();
+
+        if (!kpCredentialsDTO.success) {
+            return [];
+        }
+
         const viewModel = await sdk.listConversations({
             id: input.id,
-            xAuthToken: input.xAuthToken ?? env.KP_AUTH_TOKEN!,
+            xAuthToken: kpCredentialsDTO.data.xAuthToken,
         });
         if(viewModel.status) {
             const conversations = viewModel.conversations
@@ -29,14 +37,22 @@ export const conversationRouter = createTRPCRouter({
     create: protectedProcedure
         .input(
             z.object({
-                id: z.number(),
+                id: z.number(),  // Research context ID
                 title: z.string(),
             }),
         )
         .mutation(async ({ input }) => {
+
+            const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+            const kpCredentialsDTO = await authGateway.extractKPCredentials();
+
+            if (!kpCredentialsDTO.success) {
+                return {};
+            }
+
             const viewModel = await sdk.createConversation({
                 id: input.id,
-                xAuthToken: env.KP_AUTH_TOKEN! as string,
+                xAuthToken: kpCredentialsDTO.data.xAuthToken,
                 conversationTitle: input.title,
             });
             if(viewModel.status) {
