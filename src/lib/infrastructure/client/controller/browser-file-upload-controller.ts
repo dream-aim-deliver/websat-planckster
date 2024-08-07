@@ -1,6 +1,6 @@
 import { injectable } from "inversify";
 import clientContainer from "../config/ioc/client-container";
-import { PRESENTER, REPOSITORY } from "../config/ioc/client-ioc-symbols";
+import { REPOSITORY } from "../config/ioc/client-ioc-symbols";
 import BrowserFileUploadPresenter from "../presenter/browser-file-upload-presenter";
 import type KernelFileClientRepository from "../repository/kernel-planckster-file-repository";
 import { TFileUploadingViewModel } from "~/lib/core/view-models/file-upload-view-model";

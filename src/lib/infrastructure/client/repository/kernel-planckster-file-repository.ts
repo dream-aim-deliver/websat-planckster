@@ -1,27 +1,20 @@
 import path from "path";
 import axios from "axios";
 
-import { inject, injectable } from "inversify";
-import KernelFileRepositoryOutputPort from "~/lib/core/ports/secondary/kernel-file-repository-output-port";
-import { TRPC } from "../config/ioc/client-ioc-symbols";
-import { type TClientComponentAPI } from "../trpc/react-api";
-import { GetDownloadSignedUrlDTO, GetUploadSignedUrlDTO } from "~/lib/core/dto/kernel-file-repository-dto";
-import { UploadFileDTO, DownloadFileDTO } from "~/lib/core/dto/file-repository-dto";
-import { LocalFile, RemoteFile } from "~/lib/core/entity/file";
+import type KernelFileRepositoryOutputPort from "~/lib/core/ports/secondary/kernel-file-repository-output-port";
+import type{ GetDownloadSignedUrlDTO, GetUploadSignedUrlDTO } from "~/lib/core/dto/kernel-file-repository-dto";
+import type{ UploadFileDTO, DownloadFileDTO } from "~/lib/core/dto/file-repository-dto";
+import type{ LocalFile, RemoteFile } from "~/lib/core/entity/file";
+import type { TClientComponentAPI } from "../trpc/react-api";
 
-
-@injectable()
-export default class KernelFileClientRepository implements KernelFileRepositoryOutputPort {
-
+export default class KernelFileClientRepository implements KernelFileRepositoryOutputPort{
     constructor(
-        @inject(TRPC.REACT_CLIENT_COMPONENTS_API) private api: TClientComponentAPI
-    ) {
-        this.api = api;
-    }
+        private api: TClientComponentAPI
+    ){}
 
     async getUploadSignedUrl(protocol: string, relativePath: string): Promise<GetUploadSignedUrlDTO> {
         try {
-
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const getUploadSignedUrlQuery = this.api.kernel.sourceData.getUploadSignedUrl.useQuery({
                 protocol: protocol,
                 relativePath: relativePath,
@@ -123,7 +116,7 @@ export default class KernelFileClientRepository implements KernelFileRepositoryO
     }
 
     async uploadFile(file: File): Promise<UploadFileDTO> {
-        try{
+        try {
 
             // 1. Craft relative path and get signed URL
             const relativePath = `user-uploads/${path.basename(file.name)}`;
@@ -198,7 +191,7 @@ export default class KernelFileClientRepository implements KernelFileRepositoryO
             const signedUrl = signedUrlDTO.data.url;
 
             // 2. Fetch file from signed URL
-            const response = await fetch (signedUrl);
+            const response = await fetch(signedUrl);
 
             if (!response.ok) {
                 return {
@@ -222,7 +215,7 @@ export default class KernelFileClientRepository implements KernelFileRepositoryO
             document.body.removeChild(link);
 
 
-            const localFile: LocalFile ={
+            const localFile: LocalFile = {
                 type: "local",
                 path: localPath  // NOTE: this is the default download path, user might have changed it
             }
@@ -241,7 +234,7 @@ export default class KernelFileClientRepository implements KernelFileRepositoryO
                     message: `An error occurred: ${err.message}`
                 }
             }
-        
+
         }
 
     }

@@ -17,14 +17,36 @@ export default class NextAuthGateway implements AuthGatewayOutputPort {
             return {
                 success: false,
                 data: {
-                    notFound: true,
+                    operation: "NextAuthGateway#GetSession",
                     message: "Session not found",
                 },
             };
         }
+        if(!session.user) {
+            return {
+                success: false,
+                data: {
+                    operation: "NextAuthGateway#GetSession",
+                    message: "User not found in session",
+                },
+            };
+        }
+        // validate user schema
+        const schemaValidationResult = SessionSchema.safeParse(session);
+        if (!schemaValidationResult.success) {
+            return {
+                success: false,
+                data: {
+                    operation: "NextAuthGateway#GetSession",
+                    message: "Session schema validation failed. Dumping errors: " + schemaValidationResult.error.message,
+                },
+            };
+        }
+
+        console.log("[NextAuthGateway] getSession: session", session);
         return {
             success: true,
-            data: session as TSession
+            data: session as unknown as TSession,
 
         };
     }
@@ -36,16 +58,6 @@ export default class NextAuthGateway implements AuthGatewayOutputPort {
                 success: false,
                 data: {
                     message: "User not authenticated",
-                },
-            };
-        }
-        const session = sessionDTO.data;
-        const schemaValidationResult = SessionSchema.safeParse(session);
-        if (!schemaValidationResult.success) {
-            return {
-                success: false,
-                data: {
-                    message: "Session schema validation failed",
                 },
             };
         }

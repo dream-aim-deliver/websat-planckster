@@ -1,8 +1,7 @@
 import "reflect-metadata";
 import { Container } from "inversify";
-import { CONTROLLERS, PRESENTER, REPOSITORY, TRPC } from "./client-ioc-symbols";
+import { CONTROLLERS, REPOSITORY, TRPC } from "./client-ioc-symbols";
 import { api } from "~/lib/infrastructure/client/trpc/react-api";
-import BrowserFileUploadPresenter from "~/lib/infrastructure/client/presenter/browser-file-upload-presenter";
 import KernelFileClientRepository from "../../repository/kernel-planckster-file-repository";
 import BrowserFileUploadController from "../../controller/browser-file-upload-controller";
 

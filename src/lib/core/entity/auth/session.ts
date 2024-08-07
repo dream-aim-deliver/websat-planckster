@@ -16,7 +16,6 @@ export const SessionSchema = z.object({
         }),
         role: z.enum(["USER", "ADMIN"]),
     }),
-    expires: z.string(),
 });
 
 export type TSession = z.infer<typeof SessionSchema>;

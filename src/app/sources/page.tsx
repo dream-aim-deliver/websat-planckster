@@ -5,6 +5,7 @@ import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { GATEWAYS, TRPC } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 import type { TServerComponentAPI } from "~/lib/infrastructure/server/trpc/server-api";
+import DummyPosts from "../_components/dummy-posts";
 
 export default async function Home() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(
@@ -19,14 +20,13 @@ export default async function Home() {
 
 async function ListSourceData() {
   const api: TServerComponentAPI = serverContainer.get(TRPC.REACT_SERVER_COMPONENTS_API);
-
   const sourceData = await api.kernel.sourceData.listForClient();
-
+  
   // Return a simple HTML unordered list
   // Plus something to see the uploadSourceData result
   return (
-    <div>
-      <ul>
+    <div className="flex flex-col items-center justify-between gap-4 p-4">
+      <ul className="flex flex-col rounded-md border-x-lime-300">
         {sourceData.map((data, index) => (
           <li key={index}>{data.relative_path}</li>
         ))}
@@ -37,6 +37,7 @@ async function ListSourceData() {
         //relativePath="mdtest1.md"
         //localFilePath="/home/alebg/test/mdtest1_downloaded_from_websat.md"
       />
+      <DummyPosts />
     </div>
   );
 }

@@ -16,13 +16,14 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     session: ({ session, token }) => {
-      console.log("session", session);
-      console.log("token", token);
+      // console.log("initial session", session);
       token.user &&  (session.user = token.user);
       const validationResponse = SessionSchema.safeParse(session);
       if (!validationResponse.success) {
         throw new Error("Session schema validation failed");
       }
+      // console.log("final session", session);
+
       return session;
     },
   },
