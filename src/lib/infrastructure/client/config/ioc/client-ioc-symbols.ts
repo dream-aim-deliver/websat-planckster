@@ -4,6 +4,7 @@ export const SIGNALS = {
 
 export const TRPC = {
     REACT_CLIENT_COMPONENTS_API: Symbol("TRPC_REACT_CLIENT_API"),
+    VANILLA_CLIENT: Symbol("TRPC_VANILLA_CLIENT"),
 }
 
 export const REPOSITORY = {

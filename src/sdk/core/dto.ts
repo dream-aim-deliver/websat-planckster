@@ -37,3 +37,5 @@ export const BaseErrorDTOSchema = z.object({
     operation: z.string(),
     message: z.string(),
 });
+
+export type TBaseErrorDTOData = z.infer<typeof BaseErrorDTOSchema>;

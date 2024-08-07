@@ -5,38 +5,50 @@ import type KernelFileRepositoryOutputPort from "~/lib/core/ports/secondary/kern
 import type{ GetDownloadSignedUrlDTO, GetUploadSignedUrlDTO } from "~/lib/core/dto/kernel-file-repository-dto";
 import type{ UploadFileDTO, DownloadFileDTO } from "~/lib/core/dto/file-repository-dto";
 import type{ LocalFile, RemoteFile } from "~/lib/core/entity/file";
-import type { TClientComponentAPI } from "../trpc/react-api";
+import { inject, injectable } from "inversify";
+import { TRPC } from "../config/ioc/client-ioc-symbols";
+import type { TVanillaAPI } from "../trpc/vanilla-api";
 
+@injectable()
 export default class KernelFileClientRepository implements KernelFileRepositoryOutputPort{
     constructor(
-        private api: TClientComponentAPI
+        @inject(TRPC.VANILLA_CLIENT) private api: TVanillaAPI
     ){}
 
     async getUploadSignedUrl(protocol: string, relativePath: string): Promise<GetUploadSignedUrlDTO> {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const getUploadSignedUrlQuery = this.api.kernel.sourceData.getUploadSignedUrl.useQuery({
+            const response = await this.api.kernel.sourceData.getUploadSignedUrl.query({
                 protocol: protocol,
                 relativePath: relativePath,
             });
+           
 
-            if (getUploadSignedUrlQuery.error) {
+            if (!response) {
                 return {
                     success: false,
                     data: {
-                        message: `An error occurred. TRPC server query failed: ${JSON.stringify(getUploadSignedUrlQuery.error)}`,
+                        message: `Could not get signed url from the TRPC server.`,
+                        operation: "kp-file-repository#get-upload-signed-url",
+                    }
+                }
+            }
+            if(!response.success) {
+                return {
+                    success: false,
+                    data: {
+                        message: `An error occurred. Error: ${JSON.stringify(response.data, null, 2)}`,
                         operation: "kp#get-upload-signed-url",
                     }
                 }
             }
+            
+            const signedUrl = response.data;
 
-            const signedUrl = getUploadSignedUrlQuery.data;
-
-            if (!signedUrl || signedUrl.length === 0 || typeof signedUrl !== 'string') {
+            if (!signedUrl || typeof signedUrl !== 'string') {
                 return {
                     success: false,
                     data: {
-                        message: `An error occurred. Signed URL received from TRPC server is null: ${getUploadSignedUrlQuery.error}`,
+                        message: `An error occurred. Signed URL received from TRPC server is null: ${JSON.stringify(response)}`,
                         operation: "kp#get-upload-signed-url",
                     }
                 }
@@ -64,54 +76,55 @@ export default class KernelFileClientRepository implements KernelFileRepositoryO
     }
 
     async getDownloadSignedUrl(protocol: string, relativePath: string): Promise<GetDownloadSignedUrlDTO> {
-        try {
+        throw new Error("Method not implemented.");
+        // try {
 
-            const getDownloadSignedUrlQuery = this.api.kernel.sourceData.getDownloadSignedUrl.useQuery({
-                protocol: protocol,
-                relativePath: relativePath,
-            });
+        //     const getDownloadSignedUrlQuery = this.api.kernel.sourceData.getDownloadSignedUrl.useQuery({
+        //         protocol: protocol,
+        //         relativePath: relativePath,
+        //     });
 
-            if (getDownloadSignedUrlQuery.error) {
-                return {
-                    success: false,
-                    data: {
-                        message: `An error occurred. TRPC server query failed: ${JSON.stringify(getDownloadSignedUrlQuery.error)}`,
-                        operation: "kp#get-download-signed-url",
-                    }
-                }
-            }
+        //     if (getDownloadSignedUrlQuery.error) {
+        //         return {
+        //             success: false,
+        //             data: {
+        //                 message: `An error occurred. TRPC server query failed: ${JSON.stringify(getDownloadSignedUrlQuery.error)}`,
+        //                 operation: "kp#get-download-signed-url",
+        //             }
+        //         }
+        //     }
 
-            const signedUrl = getDownloadSignedUrlQuery.data;
+        //     const signedUrl = getDownloadSignedUrlQuery.data;
 
-            if (!signedUrl || signedUrl.length === 0 || typeof signedUrl !== 'string') {
-                return {
-                    success: false,
-                    data: {
-                        message: `An error occurred. Signed URL received from TRPC server is null: ${getDownloadSignedUrlQuery.error}`,
-                        operation: "kp#get-download-signed-url",
-                    }
-                }
-            }
+        //     if (!signedUrl || signedUrl.length === 0 || typeof signedUrl !== 'string') {
+        //         return {
+        //             success: false,
+        //             data: {
+        //                 message: `An error occurred. Signed URL received from TRPC server is null: ${getDownloadSignedUrlQuery.error}`,
+        //                 operation: "kp#get-download-signed-url",
+        //             }
+        //         }
+        //     }
 
-            return {
-                success: true,
-                data: {
-                    type: "download-signed-url",
-                    url: signedUrl
-                }
-            }
-        }
+        //     return {
+        //         success: true,
+        //         data: {
+        //             type: "download-signed-url",
+        //             url: signedUrl
+        //         }
+        //     }
+        // }
 
-        catch (error: unknown) {
-            const err = error as Error;
-            return {
-                success: false,
-                data: {
-                    message: `An error occurred. Error: ${err.message}`,
-                    operation: "kp#get-download-signed-url",
-                }
-            }
-        }
+        // catch (error: unknown) {
+        //     const err = error as Error;
+        //     return {
+        //         success: false,
+        //         data: {
+        //             message: `An error occurred. Error: ${err.message}`,
+        //             operation: "kp#get-download-signed-url",
+        //         }
+        //     }
+        // }
 
     }
 

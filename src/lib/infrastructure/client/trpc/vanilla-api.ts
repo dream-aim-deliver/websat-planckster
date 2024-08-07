@@ -19,4 +19,6 @@ const client = createTRPCClient<AppRouter>({
   ],
 });
 
+export type TVanillaAPI = typeof client;
+
 export const api = client;
