@@ -1,8 +1,25 @@
-import { type Signal } from "@preact/signals-react";
+export class TSignal<TValue> {
+  name: string;
+  description: string;
+  value: TValue;
+  private _update?: (value: TValue) => void | undefined;
 
+  constructor(
+    name: string,
+    description: string,
+    initialValue: TValue,
+    update?: (value: TValue) => void,
+  ) {
+    this.name = name;
+    this.description = description;
+    this.value = initialValue;
+    this._update = update;
+  }
 
-export interface TSignal<TValue> {
-    name: string;
-    description: string;
-    value: Signal<TValue>;
+  update(value: TValue) {
+    this.value = value;
+    if (this._update) {
+      this._update(value);
+    }
+  }
 }

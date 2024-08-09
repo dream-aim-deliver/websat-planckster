@@ -1,4 +1,3 @@
-import { inject, injectable } from "inversify";
 import { type TSignal } from "../../../core/entity/signals";
 import { type FileUploadOutputPort } from "../../../core/ports/primary/file-repository-input-port";
 import { type TFileUploadProgressResponse } from "../../../core/usecase-models/file-upload-usecase-models";
@@ -11,26 +10,26 @@ export default class BrowserFileUploadPresenter implements FileUploadOutputPort<
     }
 
     presentProgress(progress: TFileUploadProgressResponse): void {
-        this.response.value.value = {
+        this.response.update({
             status: "progress",
             message: progress.message,
             progress: progress.progress
-        }
+        });
     }
 
     presentError(error: { message: string }): void {
-        this.response.value.value = {
+        this.response.update({
             status: "error",
             message: error.message
-        }
+        })
     }
 
     presentSuccess(success: { message: string; fileName: string }): void {
-        this.response.value.value = {
+        this.response.update({
             status: "success",
             message: success.message,
             fileName: success.fileName
-        }
+        })
     }
 
 }

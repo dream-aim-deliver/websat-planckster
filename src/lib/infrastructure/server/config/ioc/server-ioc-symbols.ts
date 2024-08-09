@@ -15,6 +15,10 @@ export const OPENAI = {
     OPENAI_FILE_REPOSITORY: Symbol.for('OPENAI_FILE_REPOSITORY'),
 }
 
+export const KERNEL = {
+    KERNEL_SDK: Symbol.for('KERNEL_OPENAPI_CLIENT'),
+}
+
 export const GATEWAYS = {
     AUTH_GATEWAY: Symbol.for('AUTH_GATEWAY'),
     AGENT_GATEWAY: Symbol.for('AGENT_GATEWAY'),

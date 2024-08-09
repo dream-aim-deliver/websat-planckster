@@ -7,4 +7,3 @@ export type UploadFileDTO = z.infer<typeof UploadFileDTOSchema>;
 
 export const DownloadFileDTOSchema = DTOSchemaFactory(LocalFileSchema, BaseErrorDTOSchema);
 export type DownloadFileDTO = z.infer<typeof DownloadFileDTOSchema>;
-

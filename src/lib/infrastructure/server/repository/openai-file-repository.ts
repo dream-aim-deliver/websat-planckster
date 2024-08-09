@@ -1,12 +1,12 @@
 import { inject, injectable } from "inversify";
-import type { UploadFileDTO, DownloadFileDTO } from "~/lib/core/dto/file-repository-dto";
+import type { UploadFileDTO, DownloadFileDTO } from "~/lib/core/dto/remote-storage-repository-dto";
 import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
-import type FileRepositoryOutputPort from "~/lib/core/ports/secondary/file-repository-output-port";
 import { OPENAI } from "../config/ioc/server-ioc-symbols";
 import OpenAI from "openai";
+import RemoteStorageElementOutputPort from "~/lib/core/ports/secondary/remote-storage-element-output-port";
 
 @injectable()
-export default class OpenAIFileRepository implements FileRepositoryOutputPort {
+export default class OpenAIFileRepository implements RemoteStorageElementOutputPort {
     constructor(
         @inject(OPENAI.OPENAI_CLIENT) private openai: OpenAI
     ) {

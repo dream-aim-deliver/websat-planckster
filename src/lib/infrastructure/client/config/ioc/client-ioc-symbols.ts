@@ -1,4 +1,4 @@
-export const SIGNALS = {
+export const SIGNAL_FACTORY = {
     KERNEL_FILE_UPLOAD: Symbol("KERNEL_FILE_UPLOADING"),
 }
 

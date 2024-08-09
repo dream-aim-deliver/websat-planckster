@@ -12,7 +12,7 @@ if (process.env.SKIP_ENV_VALIDATION) {
 }
 /** @type {import("next").NextConfig} */
 const config = {
-  transpilePackages: ["superjson", "@maany_shr/planckster-ui-kit"],
+  transpilePackages: ["superjson", "@maany_shr/planckster-ui-kit", "@preact/signals-react", "@preact/signals-core"],
 };
 
 export default config;

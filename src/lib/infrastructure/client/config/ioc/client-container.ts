@@ -3,7 +3,7 @@ import { Container } from "inversify";
 import { CONTROLLERS, REPOSITORY, TRPC } from "./client-ioc-symbols";
 import { api } from "~/lib/infrastructure/client/trpc/react-api";
 import { api as vanilla } from "~/lib/infrastructure/client/trpc/vanilla-api";
-import KernelFileClientRepository from "../../repository/kernel-planckster-file-repository";
+import KernelFileClientRepository from "../../repository/kernel-remote-storage-element";
 import BrowserFileUploadController from "../../controller/browser-file-upload-controller";
 
 const clientContainer = new Container();

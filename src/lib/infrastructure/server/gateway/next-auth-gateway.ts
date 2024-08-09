@@ -43,7 +43,6 @@ export default class NextAuthGateway implements AuthGatewayOutputPort {
             };
         }
 
-        console.log("[NextAuthGateway] getSession: session", session);
         return {
             success: true,
             data: session as unknown as TSession,
