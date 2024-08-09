@@ -161,22 +161,41 @@ export const sourceDataRouter = createTRPCRouter({
 
       if (!kpCredentialsDTO.success) {
         console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
-        return [];
+        return {
+          success: false,
+          data: {
+            operation: "sourceDataRouter#getDownloadSignedUrl",
+            message: "Failed to get KP credentials",
+          } as TBaseErrorDTOData
+        };
       }
 
-      const signedUrlViewModel = await sdk.getClientDataForDownload({
+      const kernelSDK: TKernelSDK = serverContainer.get(KERNEL.KERNEL_SDK);
+
+      const signedUrlViewModel = await kernelSDK.getClientDataForDownload({
         id: kpCredentialsDTO.data.clientID,
         protocol: input.protocol,
         relativePath: input.relativePath,
         xAuthToken: kpCredentialsDTO.data.xAuthToken,
       })
+
       if (signedUrlViewModel.status) {
         const signedUrl = signedUrlViewModel.signed_url
-
-        return signedUrl;
+        return {
+          success: true,
+          data: signedUrl,
+        };
       }
+
       console.error(`Failed to get signed URL for download. Dumping view model: ${signedUrlViewModel.errorMessage}`);
-      return [];
+
+      return {
+        success: false,
+        data: {
+          operation: "sourceDataRouter#getDownloadSignedUrl",
+          message: "Failed to get signed URL for download",
+        } as TBaseErrorDTOData
+      };
     }),
 
   listForResearchContext: protectedProcedure
