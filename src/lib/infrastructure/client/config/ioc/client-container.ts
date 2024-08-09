@@ -12,7 +12,7 @@ const clientContainer = new Container();
 clientContainer.bind(TRPC.REACT_CLIENT_COMPONENTS_API).toConstantValue(api);
 clientContainer.bind(TRPC.VANILLA_CLIENT).toConstantValue(vanilla);
 /** REPOSITORY */
-clientContainer.bind(REPOSITORY.KERNEL_FILE_REPOSITORY).to(KernelFileClientRepository);
+clientContainer.bind(REPOSITORY.KERNEL_FILE_REPOSITORY).to(KernelFileClientRepository).inSingletonScope();
 
 /** CONTROLLER */
 clientContainer.bind(CONTROLLERS.KERNEL_FILE_UPLOAD_CONTROLLER).to(BrowserFileUploadController);

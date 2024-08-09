@@ -33,10 +33,7 @@ export default class BrowserFileUploadController {
     const presenter = new BrowserFileUploadPresenter(
       controllerParameters.response,
     );
-    const kernelFileRepository =
-      clientContainer.get<KernelFileClientRepository>(
-        REPOSITORY.KERNEL_FILE_REPOSITORY,
-      ); // would be injected
+    const kernelFileRepository =  clientContainer.get<KernelFileClientRepository>(REPOSITORY.KERNEL_FILE_REPOSITORY); // would be injected
     const api = clientContainer.get<TVanillaAPI>(TRPC.VANILLA_CLIENT);
 
     presenter.presentProgress({
