@@ -23,3 +23,8 @@ export const GATEWAYS = {
     AUTH_GATEWAY: Symbol.for('AUTH_GATEWAY'),
     AGENT_GATEWAY: Symbol.for('AGENT_GATEWAY'),
 }
+
+export const REPOSITORY = {
+    KERNEL_FILE_REPOSITORY: Symbol.for('FILE_REPOSITORY'),
+}
+

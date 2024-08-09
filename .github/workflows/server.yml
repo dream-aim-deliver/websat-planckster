@@ -21,8 +21,5 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         run: npm install
-      - name: Copy .env file
-        run: |
-          cp .env.example .env
       - name: Run Server Tests
         run: npm run test:server
