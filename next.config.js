@@ -13,6 +13,9 @@ if (process.env.SKIP_ENV_VALIDATION) {
 /** @type {import("next").NextConfig} */
 const config = {
   transpilePackages: ["superjson", "@maany_shr/planckster-ui-kit", "@preact/signals-react", "@preact/signals-core"],
+  experimental: {
+    serverComponentsExternalPackages: ["pino", "pino-pretty"],
+  },
 };
 
 export default config;

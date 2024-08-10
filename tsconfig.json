@@ -32,7 +32,11 @@
 
     /** Iversify */
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+
+    /** TSLog */
+    "sourceMap": true,
+    
   },
   "include": [
     ".eslintrc.cjs",

@@ -7,6 +7,9 @@ export const TRPC = {
     VANILLA_CLIENT: Symbol("TRPC_VANILLA_CLIENT"),
 }
 
+export const UTILS = {
+    LOGGER_FACTORY: Symbol("LOGGER_FACTORY"),
+}
 export const REPOSITORY = {
     FILE_REPOSITORY: Symbol("FILE_REPOSITORY"),
     KERNEL_FILE_REPOSITORY: Symbol("KERNEL_FILE_REPOSITORY"),
