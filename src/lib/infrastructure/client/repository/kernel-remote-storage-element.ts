@@ -6,10 +6,11 @@ import type {
 } from "~/lib/core/dto/remote-storage-repository-dto";
 import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
 import { inject, injectable } from "inversify";
-import { TRPC } from "../config/ioc/client-ioc-symbols";
+import { TRPC, UTILS } from "../config/ioc/client-ioc-symbols";
 import type { TVanillaAPI } from "../trpc/vanilla-api";
 import RemoteStorageElementOutputPort from "~/lib/core/ports/secondary/remote-storage-element-output-port";
 import { TBaseErrorDTOData } from "~/sdk/core/dto";
+import { Logger } from "pino";
 
 /**
  * Represents a class that interacts with a remote storage element that is managed by kernel.
@@ -17,10 +18,14 @@ import { TBaseErrorDTOData } from "~/sdk/core/dto";
  * Uploads and Downloads are done using signed URLs.
  */
 @injectable()
-export default class KernelRemoteStorageElement
-  implements RemoteStorageElementOutputPort
-{
-  constructor(@inject(TRPC.VANILLA_CLIENT) private api: TVanillaAPI) {}
+export default class KernelRemoteStorageElement implements RemoteStorageElementOutputPort {
+  private logger: Logger
+  constructor(
+    @inject(TRPC.VANILLA_CLIENT) private api: TVanillaAPI,
+    @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger
+  ) {
+    this.logger = this.loggerFactory("KernelRemoteStorageElement")
+  }
 
   /**
    * Retrieves the signed URL for uploading a file to the remote storage.
@@ -29,25 +34,21 @@ export default class KernelRemoteStorageElement
    * @param relativePath - The relative path of the file.
    * @returns A promise that resolves to an object containing the signed URL and the provider, or an object containing an error message.
    */
-  private async __getUploadSignedUrl(
-    protocol: string,
-    relativePath: string,
-  ): Promise<
+  private async __getUploadSignedUrl(protocol: string, relativePath: string): Promise<
     | {
-        success: true;
-        data: {
-          url: string;
-          provider: string;
-        };
-      }
+      success: true;
+      data: {
+        url: string;
+        provider: string;
+      };
+    }
     | {
-        success: false;
-        data: TBaseErrorDTOData;
-      }
+      success: false;
+      data: TBaseErrorDTOData;
+    }
   > {
     try {
-      const response =
-        await this.api.kernel.sourceData.getUploadSignedUrl.query({
+      const response = await this.api.kernel.sourceData.getUploadSignedUrl.query({
           protocol: protocol,
           relativePath: relativePath,
         });
@@ -114,12 +115,12 @@ export default class KernelRemoteStorageElement
     relativePath: string,
   ): Promise<
     | {
-        success: true;
-        data: {
-          url: string;
-          provider: string;
-        };
-      }
+      success: true;
+      data: {
+        url: string;
+        provider: string;
+      };
+    }
     | { success: false; data: TBaseErrorDTOData }
   > {
     throw new Error("Method not implemented.");

@@ -17,11 +17,13 @@ export const DummyUploadComponent = () => {
     status: "request",
     message: "File upload not started",
   });
-  const signalFactory = signalsContainer.get<
-    (update: (value: TFileUploadingViewModel) => void) => TSignal<TFileUploadingViewModel>
+  const signalFactory = signalsContainer.get<(update: (value: TFileUploadingViewModel) => void, initialValue: TFileUploadingViewModel ) => TSignal<TFileUploadingViewModel>
   >(SIGNAL_FACTORY.KERNEL_FILE_UPLOAD);
 
-  const S_KERNEL_FILE_UPLOAD_VIEW_MODEL = signalFactory(setUploadViewModel);
+  const S_KERNEL_FILE_UPLOAD_VIEW_MODEL = signalFactory(setUploadViewModel, {
+    status: "request",
+    message: "File upload not started",
+  } );
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files?.[0]) {
@@ -75,7 +77,7 @@ export const DummyUploadComponent = () => {
 
           <div>File selected: {selectedFile.name}</div>
 
-          <UIKitComponent status={UploadViewModel.status} message={UploadViewModel.message} />
+          <UIKitComponent {...UploadViewModel} />
         </div>
       )}
     </div>
