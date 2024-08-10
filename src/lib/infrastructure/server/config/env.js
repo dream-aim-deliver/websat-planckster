@@ -24,6 +24,7 @@ const serverEnvSchema = z.object({
   KP_AUTH_TOKEN: z.string(),
   KP_CLIENT_ID: z.number(),
   OPENAI_API_KEY: z.string(),
+  SCRATCH_DIR: z.string().optional().default("/tmp/planckster"),
 });
 
 const runtimeEnv = {
@@ -36,6 +37,7 @@ const runtimeEnv = {
   KP_AUTH_TOKEN: process.env.KP_AUTH_TOKEN,
   KP_CLIENT_ID: parseInt(process.env.KP_CLIENT_ID ?? "0"),
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  SCRATCH_DIR: process.env.SCRATCH_DIR ?? "/tmp/planckster",
 };
 
 const envValidationResult = serverEnvSchema.safeParse(runtimeEnv);

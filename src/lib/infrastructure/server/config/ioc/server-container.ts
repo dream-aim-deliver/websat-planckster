@@ -10,7 +10,7 @@ import { api } from "~/lib/infrastructure/server/trpc/server-api";
 import OpenAIAgentGateway from "../../gateway/openai-agent-gateway";
 import OpenAIClient from "../openai/openai-client";
 import { KernelSDK } from "../kernel/kernel-sdk";
-import OpenAIFileRepository from "../../repository/openai-remote-storage-element";
+import OpenAIRemoteStorageElement from "../../repository/openai-remote-storage-element";
 import KernelFileRepository from "../../repository/kernel-remote-storage-element";
 import type { Logger } from "pino";
 import rootLogger from "../log/pino-server-config";
@@ -37,7 +37,7 @@ serverContainer.bind<interfaces.Factory<Logger>>(UTILS.LOGGER_FACTORY).toFactory
 
 /** OPENAI */
 serverContainer.bind(OPENAI.OPENAI_CLIENT).toConstantValue(OpenAIClient);
-serverContainer.bind(OPENAI.OPENAI_FILE_REPOSITORY).to(OpenAIFileRepository)
+serverContainer.bind(OPENAI.OPENAI_REMOTE_STORAGE_ELEMENT).to(OpenAIRemoteStorageElement)
 
 /** KERNEL */
 serverContainer.bind(KERNEL.KERNEL_SDK).toConstantValue(KernelSDK);
