@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure, protectedProcedure } from "../server";
 import serverContainer from "../../config/ioc/server-container";
-import AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import { GATEWAYS } from "../../config/ioc/server-ioc-symbols";
 
 let post = {
