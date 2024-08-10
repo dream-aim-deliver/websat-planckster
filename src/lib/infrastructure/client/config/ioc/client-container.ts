@@ -8,6 +8,7 @@ import KernelFileClientRepository from "../../repository/kernel-remote-storage-e
 import BrowserFileUploadController from "../../controller/browser-file-upload-controller";
 import config from "./log/tslog-browser-config";
 import { Logger } from "tslog";
+import BrowserFileDownloadController from "../../controller/browser-file-download-controller";
 
 const clientContainer = new Container();
 
@@ -32,5 +33,6 @@ clientContainer.bind(REPOSITORY.KERNEL_FILE_REPOSITORY).to(KernelFileClientRepos
 
 /** CONTROLLER */
 clientContainer.bind(CONTROLLERS.KERNEL_FILE_UPLOAD_CONTROLLER).to(BrowserFileUploadController);
+clientContainer.bind(CONTROLLERS.KERNEL_FILE_DOWNLOAD_CONTROLLER).to(BrowserFileDownloadController);
 
 export default clientContainer;

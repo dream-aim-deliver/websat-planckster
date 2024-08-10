@@ -1,5 +1,5 @@
 import { type TSignal } from "../../../core/entity/signals";
-import { type FileUploadOutputPort } from "../../../core/ports/primary/file-repository-input-port";
+import { type FileUploadOutputPort } from "../../../core/ports/primary/file-upload-primary-ports";
 import { type TFileUploadProgressResponse } from "../../../core/usecase-models/file-upload-usecase-models";
 import { type TFileUploadingViewModel } from "../../../core/view-models/file-upload-view-model";
 

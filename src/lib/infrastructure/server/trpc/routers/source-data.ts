@@ -88,7 +88,7 @@ export const sourceDataRouter = createTRPCRouter({
         success: false,
         data: {
           operation: "sourceDataRouter#getUploadSignedUrl",
-          message: "Failed to get signed URL for upload",
+          message: `Failed to get signed URL for upload: ${signedUrlViewModel.errorMessage}`,
         } as TBaseErrorDTOData
       }; // TODO: clean this, return a proper error DTO or a view model probably
 
@@ -193,9 +193,10 @@ export const sourceDataRouter = createTRPCRouter({
         success: false,
         data: {
           operation: "sourceDataRouter#getDownloadSignedUrl",
-          message: "Failed to get signed URL for download",
+          message: `Failed to get signed URL for download: ${signedUrlViewModel.errorMessage}`,
         } as TBaseErrorDTOData
       };
+
     }),
 
   listForResearchContext: protectedProcedure

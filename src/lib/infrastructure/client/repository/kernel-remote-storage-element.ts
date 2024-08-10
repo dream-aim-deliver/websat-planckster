@@ -1,4 +1,5 @@
 import axios from "axios";
+import { saveAs } from "file-saver";
 
 import type {
   UploadFileDTO,
@@ -123,55 +124,64 @@ export default class KernelRemoteStorageElement implements RemoteStorageElementO
     }
     | { success: false; data: TBaseErrorDTOData }
   > {
-    throw new Error("Method not implemented.");
-    // try {
+     try {
 
-    //     const getDownloadSignedUrlQuery = this.api.kernel.sourceData.getDownloadSignedUrl.useQuery({
-    //         protocol: protocol,
-    //         relativePath: relativePath,
-    //     });
+         const response = await this.api.kernel.sourceData.getDownloadSignedUrl.query({
+             protocol: protocol,
+             relativePath: relativePath,
+         });
 
-    //     if (getDownloadSignedUrlQuery.error) {
-    //         return {
-    //             success: false,
-    //             data: {
-    //                 message: `An error occurred. TRPC server query failed: ${JSON.stringify(getDownloadSignedUrlQuery.error)}`,
-    //                 operation: "kp#get-download-signed-url",
-    //             }
-    //         }
-    //     }
+         if (!response) {
+             return {
+                 success: false,
+                 data: {
+                     message: `Could not get signed url from the TRPC server.`,
+                     operation: "kp-file-repository#get-download-signed-url",
+                 }
+             }
+         }
 
-    //     const signedUrl = getDownloadSignedUrlQuery.data;
+         if (!response.success) {
+              return {
+                  success: false,
+                  data: {
+                      message: `An error occurred. Error: ${JSON.stringify(response.data, null, 2)}`,
+                      operation: "kp#get-download-signed-url",
+                  }
+              }
+         }
 
-    //     if (!signedUrl || signedUrl.length === 0 || typeof signedUrl !== 'string') {
-    //         return {
-    //             success: false,
-    //             data: {
-    //                 message: `An error occurred. Signed URL received from TRPC server is null: ${getDownloadSignedUrlQuery.error}`,
-    //                 operation: "kp#get-download-signed-url",
-    //             }
-    //         }
-    //     }
+         const signedUrl = response.data;
 
-    //     return {
-    //         success: true,
-    //         data: {
-    //             type: "download-signed-url",
-    //             url: signedUrl
-    //         }
-    //     }
-    // }
+          if (!signedUrl || typeof signedUrl !== 'string') {
+              return {
+                  success: false,
+                  data: {
+                      message: `An error occurred. Signed URL received from TRPC server is null: ${JSON.stringify(response)}`,
+                      operation: "kp#get-download-signed-url",
+                  }
+              }
+          }
 
-    // catch (error: unknown) {
-    //     const err = error as Error;
-    //     return {
-    //         success: false,
-    //         data: {
-    //             message: `An error occurred. Error: ${err.message}`,
-    //             operation: "kp#get-download-signed-url",
-    //         }
-    //     }
-    // }
+          return {
+              success: true,
+              data: {
+                  url: signedUrl,
+                  provider: "kernel#s3",
+              }
+         };
+     }
+
+     catch (error: unknown) {
+         const err = error as Error;
+         return {
+             success: false,
+             data: {
+                 message: `An error occurred. Error: ${err.message}`,
+                 operation: "kp#get-download-signed-url",
+             }
+         }
+     }
   }
 
   /**
@@ -267,7 +277,7 @@ export default class KernelRemoteStorageElement implements RemoteStorageElementO
         return {
           success: false,
           data: {
-            operation: "kp#download",
+            operation: `${signedUrlDTO.data.operation}`,
             message: `Failed to get signed URL for download: ${signedUrlDTO.data.message}`,
           },
         };
@@ -276,38 +286,32 @@ export default class KernelRemoteStorageElement implements RemoteStorageElementO
       const signedUrl = signedUrlDTO.data.url;
 
       // 2. Fetch file from signed URL
-      const response = await fetch(signedUrl);
+        const response = await axios.get<Blob>(signedUrl, {responseType: "blob"});
 
-      if (!response.ok) {
-        return {
-          success: false,
-          data: {
-            operation: "kp#download",
-            message: `Failed to download file. Status code: ${response.status}. Message: ${response.statusText}`,
-          },
-        };
-      }
+        if (response.status !== 200 || !response.data) {
+          return {
+            success: false,
+            data: {
+              operation: "kp#download",
+              message: `Failed to download file. Status code: ${response.status}. Message: ${response.statusText}`,
+            },
+          };
+        }
 
-      // 3. Create a blob from the response
-      const blob = await response.blob();
+      // 3. Save file to local path
+      saveAs(response.data, localPath);
 
-      // 4. Create a link element and trigger the download
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = localPath;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
+      // 4. Return local file object
       const localFile: LocalFile = {
         type: "local",
-        path: localPath, // NOTE: this is the default download path, user might have changed it
+        path: localPath,
       };
 
       return {
         success: true,
         data: localFile,
       };
+
     } catch (error: unknown) {
       const err = error as Error;
       return {
