@@ -7,7 +7,7 @@ import { Logger } from "pino";
 import { RemoteFile } from "~/lib/core/entity/file";
 
 @injectable()
-export default class OpenAISourceDataRepository implements SourceDataRepositoryOutputPort {
+export default class OpenAISourceDataRepository implements SourceDataRepositoryOutputPort<string> {
     private logger: Logger;
     constructor(
         @inject(OPENAI.OPENAI_CLIENT) private openai: OpenAI,

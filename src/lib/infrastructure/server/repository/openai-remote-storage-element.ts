@@ -1,21 +1,34 @@
 import { inject, injectable } from "inversify";
 import type { UploadFileDTO, DownloadFileDTO } from "~/lib/core/dto/remote-storage-repository-dto";
 import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
-import { OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
+import { GATEWAYS, OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
 import OpenAI from "openai";
 import RemoteStorageElementOutputPort from "~/lib/core/ports/secondary/remote-storage-element-output-port";
 import fs from "fs";
 import { Logger } from "pino";
 import serverEnv from "~/lib/infrastructure/server/config/env";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import { generateLocalFilename, generateOpenAIFilename } from "../config/openai/openai-utils";
 @injectable()
 export default class OpenAIRemoteStorageElement implements RemoteStorageElementOutputPort {
     private logger: Logger;
     constructor(
         @inject(OPENAI.OPENAI_CLIENT) private openai: OpenAI,
+        @inject(GATEWAYS.AUTH_GATEWAY) private authGateway: AuthGatewayOutputPort,
         @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger
     ) {
         this.logger = loggerFactory("OpenAIRemoteStorageElement");
     }
+    
+
+    /**
+     * Saves a local file as {clientID}_{file_path}_{file_name} to OpenAI.
+     * The file is copied to the scratch directory before uploading.
+     * The file is uploaded to OpenAI with the purpose "assistants".
+     * @param file A local file object with path to the file on the local disk.
+     * @returns A DTO with the success status and the remote file object if successful.
+     * The remote file object has the provider as "openai", and the path as the OpenAI file ID.
+     */
     async uploadFile(file: LocalFile): Promise<UploadFileDTO> {
 
         // check if file exists at the path
@@ -30,8 +43,44 @@ export default class OpenAIRemoteStorageElement implements RemoteStorageElementO
             return Promise.resolve(errorDTO);
         }
 
-        const fileStream = fs.createReadStream(file.path);
-        this.logger.info(`Uploading file ${file.path} to OpenAI.`);
+        // Get client ID of the current user
+        const clientIDDTO = await this.authGateway.extractKPCredentials();
+        if(!clientIDDTO.success) {
+            console.log({clientIDDTO} , `Failed to get KP client ID. This is required to create a unique identified in OpenAI for the user data.`);
+            const errorDTO: UploadFileDTO = {
+                success: false,
+                data: {
+                    operation: "upload",
+                    message: clientIDDTO.data.message
+                }
+            }
+            return Promise.resolve(errorDTO);
+        }
+        const clientID = clientIDDTO.data.clientID;
+
+        const openAIFilename = generateOpenAIFilename(clientID.toString(), file);
+
+        // Copy file to `scratch` directory
+        const localPath = `${serverEnv.SCRATCH_DIR}/${openAIFilename}`;
+        try {
+        this.logger.info(`Copying file ${file.path} to ${localPath}.`);
+        fs.copyFileSync(file.path, localPath);
+        } catch (error) {
+            this.logger.error({ error }, `Failed to copy file ${file.path} to ${localPath}.`);
+            const errorDTO: UploadFileDTO = {
+                success: false,
+                data: {
+                    operation: "upload",
+                    message: `Failed to copy file ${file.path} to ${localPath}.`
+                }
+            }
+            return Promise.resolve(errorDTO);
+        }
+
+
+        const fileStream = fs.createReadStream(localPath);
+        this.logger.info(`Uploading file ${file.path} as ${localPath} to OpenAI.`);
+
         try {
             const openAIFile = await this.openai.files.create({
                 file: fileStream,
@@ -41,7 +90,7 @@ export default class OpenAIRemoteStorageElement implements RemoteStorageElementO
                 type: "remote",
                 path: openAIFile.id,
                 provider: "openai",
-                name: openAIFile.filename
+                name: file.name
             }
 
             const successDTO: UploadFileDTO = {
@@ -63,6 +112,12 @@ export default class OpenAIRemoteStorageElement implements RemoteStorageElementO
         }
     }
 
+    /**
+     * Downloads a file from OpenAI and saves it to the local disk at the {SCRATCH_DIRECTORY}/{sanitized_file_name}.
+     * The file name is generated from the OpenAI file name to clean up details like client ID.
+     * @param file A remote file object with provider as "openai", and path as the OpenAI file ID.
+     * @returns 
+     */
     async downloadFile(file: RemoteFile): Promise<DownloadFileDTO> {
         const openAIFileID = file.path;
         if (!openAIFileID) {
@@ -80,7 +135,8 @@ export default class OpenAIRemoteStorageElement implements RemoteStorageElementO
         try {
             this.logger.debug(`Getting file details for ${openAIFileID} from OpenAI.`);
             const openAIFile = await this.openai.files.retrieve(openAIFileID);
-            localFileName = openAIFile.filename;
+            const openAIFilename = openAIFile.filename;
+            localFileName = generateLocalFilename(openAIFilename).name;
 
         } catch (error) {
             this.logger.error({ error }, `Failed to get file details for ${openAIFileID} from OpenAI.`);
@@ -136,6 +192,5 @@ export default class OpenAIRemoteStorageElement implements RemoteStorageElementO
             }
             return Promise.resolve(errorDTO);
         }
-
     }
 }

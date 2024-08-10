@@ -6,7 +6,7 @@ import type { Logger } from "pino";
 import type SourceDataRepositoryOutputPort from "~/lib/core/ports/secondary/source-data-repository-output-port";
 
 export default async function OpenAIServerComponent() {
-    const OpenAISourceDataRepository = serverContainer.get<SourceDataRepositoryOutputPort>(OPENAI.OPENAI_SOURCE_DATA_REPOSITORY);
+    const OpenAISourceDataRepository = serverContainer.get<SourceDataRepositoryOutputPort<string>>(OPENAI.OPENAI_SOURCE_DATA_REPOSITORY);
 
     const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
     const logger = loggerFactory("OpenAIServerComponent");
