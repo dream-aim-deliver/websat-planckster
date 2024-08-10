@@ -3,6 +3,7 @@ import { DummyUploadComponent } from "../_components/dummy-upload";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
+import { DummyDownloadComponent } from "../_components/dummy-download";
 
 export default async function Home() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(
@@ -12,6 +13,14 @@ export default async function Home() {
   if (!sessionDTO.success) {
     redirect("/auth/login");
   }
-  return <DummyUploadComponent />;
+  return (
+   <div className="flex flex-col gap-4">
+
+      <DummyUploadComponent />
+
+      <DummyDownloadComponent />
+
+   </div> 
+  );
 }
 
