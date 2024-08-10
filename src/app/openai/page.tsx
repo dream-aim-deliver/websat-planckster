@@ -12,14 +12,16 @@ export default async function OpenAIServerComponent() {
     const logger = loggerFactory("OpenAIServerComponent");
     const file: LocalFile = {
         type: "local",
-        path: "hello.txt"
+        path: "hello.txt",
+        name: "hello.txt"
     }
     fs.writeFileSync(file.path, "Hello, World!");
 
     const dto = await OpenAIRSE.downloadFile({
         type: "remote",
         provider: "openai",
-        path: "file-jMpOuxGJXgqddGKDaWnhlW3t"
+        path: "file-jMpOuxGJXgqddGKDaWnhlW3t",
+        name: "hello.txt"
     });
     logger.info({ dto }, `Uploaded file ${file.path} to OpenAI.`);
     return (

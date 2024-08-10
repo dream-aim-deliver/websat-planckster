@@ -33,6 +33,7 @@ export default class BrowserFileDownloadController {
                     type: "remote",
                     path: relativePath,
                     provider: "kernel#s3",
+                    name: path.basename(relativePath),
                 };
             }
             );

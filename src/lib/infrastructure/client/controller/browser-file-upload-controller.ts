@@ -26,6 +26,7 @@ export default class BrowserFileUploadController {
       type: "local",
       raw: file,
       path: file.name,
+      name: file.name,
     };
     /************************************************************/
     /* TODO: move to USECASE */

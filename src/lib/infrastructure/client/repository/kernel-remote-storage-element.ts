@@ -240,6 +240,7 @@ export default class KernelRemoteStorageElement implements RemoteStorageElementO
         type: "remote",
         provider: "kernel#s3",
         path: relativePath,
+        name: fileName,
       };
 
       return {
@@ -305,6 +306,7 @@ export default class KernelRemoteStorageElement implements RemoteStorageElementO
       const localFile: LocalFile = {
         type: "local",
         path: localPath,
+        name: file.name,
       };
 
       return {

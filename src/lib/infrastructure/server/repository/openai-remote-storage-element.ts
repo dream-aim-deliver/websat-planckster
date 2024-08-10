@@ -40,7 +40,8 @@ export default class OpenAIRemoteStorageElement implements RemoteStorageElementO
             const remoteFile: RemoteFile = {
                 type: "remote",
                 path: openAIFile.id,
-                provider: "openai"
+                provider: "openai",
+                name: openAIFile.filename
             }
 
             const successDTO: UploadFileDTO = {

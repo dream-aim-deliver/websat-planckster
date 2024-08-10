@@ -93,6 +93,7 @@ export default class KernelFileRepository implements FileRepositoryOutputPort {
                 type: "remote",
                 provider: "kernel#s3",
                 path: remotePath,
+                name: file.name,
             }
 
             return {
