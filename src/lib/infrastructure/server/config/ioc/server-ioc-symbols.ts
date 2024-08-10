@@ -17,6 +17,7 @@ export const UTILS = {
 export const OPENAI = {
     OPENAI_CLIENT: Symbol.for('OPENAI_CLIENT'),
     OPENAI_REMOTE_STORAGE_ELEMENT: Symbol.for('OPENAI_FILE_REPOSITORY'),
+    OPENAI_SOURCE_DATA_REPOSITORY: Symbol.for('OPENAI_SOURCE_DATA_REPOSITORY'),
 }
 
 export const KERNEL = {

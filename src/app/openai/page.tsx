@@ -1,35 +1,27 @@
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { OpenAIClientComponent } from "./client";
-import type OpenAIRemoteStorageElement from "~/lib/infrastructure/server/repository/openai-remote-storage-element";
 import { OPENAI, UTILS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
-import fs from "fs";
-import { LocalFile } from "~/lib/core/entity/file";
-import { Logger } from "pino";
+import type {  File } from "~/lib/core/entity/file";
+import type { Logger } from "pino";
+import type SourceDataRepositoryOutputPort from "~/lib/core/ports/secondary/source-data-repository-output-port";
 
 export default async function OpenAIServerComponent() {
-    const OpenAIRSE  = serverContainer.get<OpenAIRemoteStorageElement>(OPENAI.OPENAI_REMOTE_STORAGE_ELEMENT);
+    const OpenAISourceDataRepository = serverContainer.get<SourceDataRepositoryOutputPort>(OPENAI.OPENAI_SOURCE_DATA_REPOSITORY);
+
     const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
     const logger = loggerFactory("OpenAIServerComponent");
-    const file: LocalFile = {
-        type: "local",
-        path: "hello.txt",
-        name: "hello.txt"
+    const listSourceDataDTO = await OpenAISourceDataRepository.list();
+    let files: File[] = []
+    if(listSourceDataDTO.success) {
+        files = listSourceDataDTO.data;
+    } else {
+        logger.error({listSourceDataDTO}, "Failed to list source data.");
     }
-    fs.writeFileSync(file.path, "Hello, World!");
-
-    const dto = await OpenAIRSE.downloadFile({
-        type: "remote",
-        provider: "openai",
-        path: "file-jMpOuxGJXgqddGKDaWnhlW3t",
-        name: "hello.txt"
-    });
-    logger.info({ dto }, `Uploaded file ${file.path} to OpenAI.`);
+    
     return (
         <div>
             <h1>OpenAI Server Component</h1>
-            
-            <p>File uploaded to OpenAI</p>
-            <OpenAIClientComponent />
+            <OpenAIClientComponent files={files}/>
         </div>
     )
 }

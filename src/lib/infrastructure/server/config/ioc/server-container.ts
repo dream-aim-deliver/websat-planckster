@@ -14,6 +14,7 @@ import OpenAIRemoteStorageElement from "../../repository/openai-remote-storage-e
 import KernelFileRepository from "../../repository/kernel-remote-storage-element";
 import type { Logger } from "pino";
 import rootLogger from "../log/pino-server-config";
+import OpenAISourceDataRepository from "../../repository/openai-source-data-repository";
 
 const serverContainer = new Container();
 
@@ -38,6 +39,7 @@ serverContainer.bind<interfaces.Factory<Logger>>(UTILS.LOGGER_FACTORY).toFactory
 /** OPENAI */
 serverContainer.bind(OPENAI.OPENAI_CLIENT).toConstantValue(OpenAIClient);
 serverContainer.bind(OPENAI.OPENAI_REMOTE_STORAGE_ELEMENT).to(OpenAIRemoteStorageElement)
+serverContainer.bind(OPENAI.OPENAI_SOURCE_DATA_REPOSITORY).to(OpenAISourceDataRepository);
 
 /** KERNEL */
 serverContainer.bind(KERNEL.KERNEL_SDK).toConstantValue(KernelSDK);
