@@ -3,11 +3,13 @@ import { GetSourceDataDTO, ListSourceDataDTO, DeleteSourceDataDTO } from "~/lib/
 import SourceDataRepositoryOutputPort from "~/lib/core/ports/secondary/source-data-repository-output-port";
 import { OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
 import OpenAI from "openai";
+import { File } from "~/lib/core/entity/file";
 import { Logger } from "pino";
 import { RemoteFile } from "~/lib/core/entity/file";
+import { generateOpenAIFilename } from "../config/openai/openai-utils";
 
 @injectable()
-export default class OpenAISourceDataRepository implements SourceDataRepositoryOutputPort<string> {
+export default class OpenAISourceDataRepository implements SourceDataRepositoryOutputPort {
     private logger: Logger;
     constructor(
         @inject(OPENAI.OPENAI_CLIENT) private openai: OpenAI,
@@ -16,30 +18,47 @@ export default class OpenAISourceDataRepository implements SourceDataRepositoryO
     ) {
         this.logger = loggerFactory("OpenAISourceDataRepository");
     }
-    async get(id: string): Promise<GetSourceDataDTO> {
-        try {
-            const sourceData = await this.openai.files.retrieve(id);
-            const dto: GetSourceDataDTO = {
-                success: true,
-                data: {
-                    provider: "openai",
-                    type: "remote",
-                    path: sourceData.id,
-                    name: sourceData.filename,
-                }
+
+    /**
+     * The files uploaded by the user to OpenAI are stored in the format {client_id}_{filepath}_{filename}.
+     * 
+     * @param id 
+     * @returns 
+     */
+    async get(file: File): Promise<GetSourceDataDTO> {
+        return {
+            success: false,
+            data: {
+                operation: "openai#getFile",
+                message: "Method not implemented."
             }
-            return dto;
-        } catch (error) {
-            this.logger.error({ error }, `Failed to retrieve source data with id ${id}.`);
-            const errorDTO: GetSourceDataDTO = {
-                success: false,
-                data: {
-                    operation: "openai#files#retrieve",
-                    message: `Failed to retrieve source data with id ${id}.`
-                }
-            }
-            return errorDTO;
         }
+        // try {
+        //     // Convert the core file to the OpenAI file name
+        //     this.logger.debug(`Retrieving source data with id ${id}.`);
+        //     const sourceData = await this.openai.files.retrieve(id);
+        //     this.logger.debug({sourceData}, `Retrieved source data with id ${id}.`);
+        //     const dto: GetSourceDataDTO = {
+        //         success: true,
+        //         data: {
+        //             provider: "openai",
+        //             type: "remote",
+        //             path: sourceData.id,
+        //             name: sourceData.filename,
+        //         }
+        //     }
+        //     return dto;
+        // } catch (error) {
+        //     this.logger.error({ error }, `Failed to retrieve source data with id ${id}.`);
+        //     const errorDTO: GetSourceDataDTO = {
+        //         success: false,
+        //         data: {
+        //             operation: "openai#files#retrieve",
+        //             message: `Failed to retrieve source data with id ${id}.`
+        //         }
+        //     }
+        //     return errorDTO;
+        // }
     }
 
     async list(): Promise<ListSourceDataDTO> {
@@ -70,56 +89,63 @@ export default class OpenAISourceDataRepository implements SourceDataRepositoryO
             return errorDTO;
         }
     }
-    async delete(id: string): Promise<DeleteSourceDataDTO> {
+    async delete(file: RemoteFile): Promise<DeleteSourceDataDTO> {
+        return {
+            success: false,
+            data: {
+                operation: "openai#files#del",
+                message: "Method not implemented."
+            }
+        }
         // Get the file from openai
-        const fileDTO = await this.get(id)
-        if (!fileDTO.success) {
-            this.logger.error(`Failed to get source data with id ${id}. File may not exist.`);
-            const dto: DeleteSourceDataDTO = {
-                success: true,
-                data: {
-                    type: "remote",
-                    provider: "openai",
-                    path: id,
-                    name: id,
-                }
-            }
-            return dto;
-        }
+        // const fileDTO = await this.get(id)
+        // if (!fileDTO.success) {
+        //     this.logger.error(`Failed to get source data with id ${id}. File may not exist.`);
+        //     const dto: DeleteSourceDataDTO = {
+        //         success: true,
+        //         data: {
+        //             type: "remote",
+        //             provider: "openai",
+        //             path: id,
+        //             name: id,
+        //         }
+        //     }
+        //     return dto;
+        // }
 
-        try {
-            const res = await this.openai.files.del(id);
-            if (!res.deleted) {
-                this.logger.error(`Failed to delete source data with id ${id}.`);
-                const errorDTO: DeleteSourceDataDTO = {
-                    success: false,
-                    data: {
-                        operation: "openai#files#del",
-                        message: `Failed to delete source data with id ${id}.`
-                    }
-                }
-                return errorDTO;
-            }
-            const dto: DeleteSourceDataDTO = {
-                success: true,
-                data: {
-                    provider: "openai",
-                    type: "remote",
-                    path: id,
-                    name: fileDTO.data.name,
-                }
-            }
-            return dto;
-        } catch (error) {
-            this.logger.error({ error }, `Exception occured while trying to delete source data with id ${id}.`);
-            const errorDTO: DeleteSourceDataDTO = {
-                success: false,
-                data: {
-                    operation: "openai#files#del",
-                    message: `Failed to delete source data with id ${id}.`
-                }
-            }
-            return errorDTO;
-        }
+        // try {
+        //     const res = await this.openai.files.del(id);
+        //     if (!res.deleted) {
+        //         this.logger.error(`Failed to delete source data with id ${id}.`);
+        //         const errorDTO: DeleteSourceDataDTO = {
+        //             success: false,
+        //             data: {
+        //                 operation: "openai#files#del",
+        //                 message: `Failed to delete source data with id ${id}.`
+        //             }
+        //         }
+        //         return errorDTO;
+        //     }
+        //     const dto: DeleteSourceDataDTO = {
+        //         success: true,
+        //         data: {
+        //             provider: "openai",
+        //             type: "remote",
+        //             path: id,
+        //             name: fileDTO.data.name,
+        //         }
+        //     }
+        //     return dto;
+        // } catch (error) {
+        //     this.logger.error({ error }, `Exception occured while trying to delete source data with id ${id}.`);
+        //     const errorDTO: DeleteSourceDataDTO = {
+        //         success: false,
+        //         data: {
+        //             operation: "openai#files#del",
+        //             message: `Failed to delete source data with id ${id}.`
+        //         }
+        //     }
+        //     return errorDTO;
+        // }
     }
 }

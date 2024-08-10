@@ -47,4 +47,11 @@ if (!envValidationResult.success) {
       JSON.stringify(envValidationResult.error.format(), null, 4),
   );
 }
+
+// make sure scratch dir exists
+import fs from "fs";
+if (!fs.existsSync(envValidationResult.data.SCRATCH_DIR)) {
+  fs.mkdirSync(envValidationResult.data.SCRATCH_DIR);
+}
+
 export default envValidationResult.data;
