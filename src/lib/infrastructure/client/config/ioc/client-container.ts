@@ -9,7 +9,7 @@ import BrowserFileUploadController from "../../controller/browser-file-upload-co
 import config from "./log/tslog-browser-config";
 import { Logger } from "tslog";
 import BrowserFileDownloadController from "../../controller/browser-file-download-controller";
-import BrowserSourceDataRepository from "../../repository/browser-source-data-repository";
+import BrowserSourceDataGateway from "../../gateway/browser-source-data-gateway";
 import CreateResearchContextBrowserController from "../../controller/browser-create-research-context-controller";
 import BrowserCreateConversationController from "../../controller/browser-create-conversation-controller";
 import BrowserListConversationsController from "../../controller/browser-list-conversations-controller";
@@ -53,8 +53,7 @@ clientContainer.bind(TRPC.REACT_CLIENT_COMPONENTS_API).toConstantValue(api);
 clientContainer.bind(TRPC.VANILLA_CLIENT).toConstantValue(vanilla);
 
 /** REPOSITORY */
-clientContainer.bind(REPOSITORY.KERNEL_FILE_REPOSITORY).to(KernelFileClientRepository).inSingletonScope();
-clientContainer.bind(REPOSITORY.BROWSER_SOURCE_DATA_REPOSITORY).to(BrowserSourceDataRepository).inSingletonScope();
+clientContainer.bind(REPOSITORY.BROWSER_RESEARCH_CONTEXT_REPOSITORY).to(BrowserResearchContextRepository).inSingletonScope();
 
 
 /** GATEWAYS */
@@ -63,6 +62,7 @@ clientContainer.bind(GATEWAYS.CONVERSATION_GATEWAY).to(BrowserConversationGatewa
 clientContainer.bind(GATEWAYS.RESEARCH_CONTEXT_GATEWAY).to(BrowserResearchContextGateway).inSingletonScope();
 clientContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(BrowserVectorStoreGateway).inSingletonScope();
 
+clientContainer.bind(GATEWAYS.SOURCE_DATA_GATEWAY).to(BrowserSourceDataGateway).inSingletonScope();
 
 /** CONTROLLER */
 clientContainer.bind(CONTROLLERS.KERNEL_FILE_UPLOAD_CONTROLLER).to(BrowserFileUploadController);

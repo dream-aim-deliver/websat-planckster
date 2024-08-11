@@ -1,14 +1,14 @@
-import type { DeleteSourceDataDTO, GetSourceDataDTO, ListSourceDataDTO } from "~/lib/core/dto/source-data-repository-dto";
+import type { DeleteSourceDataDTO, DownloadSourceDataDTO, GetSourceDataDTO, ListSourceDataDTO, UploadSourceDataDTO } from "~/lib/core/dto/source-data-gateway-dto";
 import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
 /**
- * Represents the output port for the SourceDataRepository.
+ * Represents the output port for the SourceDataGateway.
  * This interface defines the methods for retrieving, listing, and deleting source data.
  */
-export default interface SourceDataRepositoryOutputPort {
+export default interface SourceDataGatewayOutputPort {
     list(clientID: string): Promise<ListSourceDataDTO>;
     listForResearchContext(clientID: string, researchContextID: string): Promise<ListSourceDataDTO>;
     get(clientID: string, fileID: string): Promise<GetSourceDataDTO>;
-    upload(file: LocalFile, relativePath: string): Promise<GetSourceDataDTO>;
-    download(file: RemoteFile, localPath?: string): Promise<GetSourceDataDTO>;
+    upload(file: LocalFile, relativePath: string): Promise<UploadSourceDataDTO>;
+    download(file: RemoteFile, localPath?: string): Promise<DownloadSourceDataDTO>;
     delete(file: RemoteFile): Promise<DeleteSourceDataDTO>;
 }

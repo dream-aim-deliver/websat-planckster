@@ -1,9 +1,9 @@
 import type { ListSourceDataDTO, GetSourceDataDTO, DeleteSourceDataDTO } from "~/lib/core/dto/source-data-repository-dto";
 import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
-import type SourceDataRepositoryOutputPort from "~/lib/core/ports/secondary/source-data-repository-output-port";
+import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 
 // TODO: only need list and download methods
-export default class KernelSourceDataRepository implements SourceDataRepositoryOutputPort {
+export default class KernelSourceDataRepository implements SourceDataGatewayOutputPort {
     list(clientID: string): Promise<ListSourceDataDTO> {
         
         throw new Error("Method not implemented.");
