@@ -6,12 +6,11 @@ import { GATEWAYS, KERNEL, UTILS } from "../config/ioc/server-ioc-symbols";
 import { Logger } from "pino";
 import type { TKernelSDK } from "../config/kernel/kernel-sdk";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import axios, { Axios } from "axios";
+import axios from "axios";
 import fs from "fs";
 import * as stream from 'stream';
 import { promisify } from 'util';
 import { TBaseErrorDTOData } from "~/sdk/core/dto";
-import { error } from "console";
 
 // TODO: only need list and download methods
 @injectable()
@@ -45,12 +44,13 @@ export default class KernelSourceDataGateway implements SourceDataGatewayOutputP
                 xAuthToken: kpCredentialsDTO.data.xAuthToken,
             })
         } catch (error) {
+            const err = error as Error
             this.logger.error(error, `Failed to get source data list.`)
             return {
                 success: false,
                 data: {
                     operation: "kernel#source-data#list",
-                    message: `Failed to get source data list. Error: ${error}`
+                    message: `Failed to get source data list. Error: ${err.message}`
                 }
             }
         }
@@ -105,12 +105,13 @@ export default class KernelSourceDataGateway implements SourceDataGatewayOutputP
                 xAuthToken: kpCredentialsDTO.data.xAuthToken,
             })
         }catch(error){
+            const err = error as Error
             this.logger.error(error, `Failed to get source data list for research context ${researchContextID}.`)
             return {
                 success: false,
                 data: {
-                    operation: "kernel#source-data#list",
-                    message: `Failed to get source data list for research context ${researchContextID}. Error: ${error}`
+                    operation: "kernel#source-data__list",
+                    message: `Failed to get source data list for research context ${researchContextID}. Error: ${err.message}`
                 }
             }
         }
@@ -171,8 +172,8 @@ export default class KernelSourceDataGateway implements SourceDataGatewayOutputP
      */
     async download(file: RemoteFile, localPath?: string): Promise<DownloadSourceDataDTO> {
         // check if local scratch dir exists and generate local file path
-        const scratchDir = process.env.SCRATCH_DIR || "/tmp";
-        const localFilePath = localPath || `${scratchDir}/${file.relativePath}`;
+        const scratchDir = process.env.SCRATCH_DIR ?? "/tmp";
+        const localFilePath = localPath ?? `${scratchDir}/${file.relativePath}`;
         if (!fs.existsSync(scratchDir)) {
             this.logger.error(`Scratch directory ${scratchDir} does not exist.`)
             return {
@@ -249,7 +250,8 @@ export default class KernelSourceDataGateway implements SourceDataGatewayOutputP
         const response = await axios.get(signedUrl, {
             responseType: 'stream',
         })
-
+        /* eslint-disable @typescript-eslint/no-unsafe-call */
+        /* eslint-disable @typescript-eslint/no-unsafe-member-access */
         response.data.pipe(fileStream);
 
         try {
