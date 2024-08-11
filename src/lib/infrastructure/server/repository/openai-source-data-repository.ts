@@ -6,7 +6,7 @@ import OpenAI from "openai";
 import { File, LocalFile } from "~/lib/core/entity/file";
 import { Logger } from "pino";
 import { RemoteFile } from "~/lib/core/entity/file";
-import { generateOpenAIFilename } from "../config/openai/openai-utils";
+import { generateSystemFilename, generateOpenAIFilename } from "../config/openai/openai-utils";
 import fs from "fs";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 @injectable()
@@ -21,36 +21,120 @@ export default class OpenAISourceDataRepository implements SourceDataGatewayOutp
         this.logger = loggerFactory("OpenAISourceDataRepository");
     }
     async listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO> {
-        this.logger.error("Method not implemented. Tried accessing an unimplemented method 'listForResearchContext' in OpenAISourceDataRepository.")
+        this.logger.error("Use Kernel Source Data Repository!!! Tried accessing an unimplemented method 'listForResearchContext' in OpenAISourceDataRepository.")
         return {
             success: false,
             data: {
                 operation: "openai#listForResearchContext",
-                message: "Method not implemented."
+                message: "Method not implemented. Use Kernel Source Data Repository."
             }
         }
+
     }
+
     async list(): Promise<ListSourceDataDTO> {
-        this.logger.error("Method not implemented. Tried accessing an unimplemented method 'list' in OpenAISourceDataRepository.")
-        return {
-            success: false,
-            data: {
-                operation: "openai#list",
-                message: "Method not implemented."
+        const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
+        if (!kpCredentialsDTO.success) {
+            this.logger.error({ kpCredentialsDTO }, `Failed to get KP credentials. This is required to list files in OpenAI.`);
+            return {
+                success: false,
+                data: {
+                    operation: "openai#list",
+                    message: "Failed to get KP credentials",
+                }
+            };
+        }
+        let files
+        try {
+            files = await this.openai.files.list();
+        } catch (error) {
+            this.logger.error({ error }, `Failed to list source data from OpenAI.`);
+            return {
+                success: false,
+                data: {
+                    operation: "openai#list",
+                    message: `Failed to list source data.`
+                }
             }
         }
+        // Convert the OpenAI files to RemoteFile objects
+        const sourceDataList: RemoteFile[] = files.data.map((sourceData) => {
+            return {
+                provider: "openai",
+                type: "remote",
+                id: sourceData.id,
+                name: sourceData.filename,
+                relativePath: sourceData.filename,
+                createdAt: sourceData.created_at.toString(), // TODO: convert to ISO string
+            }
+        });
+        let pageCount = 1;
+        try {
+            while (files.hasNextPage()) {
+                pageCount++;
+                this.logger.info(`Fetching next page of files from OpenAI. Page ${pageCount}.`);
+                const page = await files.getNextPage()
+                this.logger.info(`Fetched page ${pageCount} of files from OpenAI.`);
+                const pageSourceDataList: RemoteFile[] = page.data.map((sourceData) => {
+                    return {
+                        provider: "openai",
+                        type: "remote",
+                        id: sourceData.id,
+                        name: sourceData.filename,
+                        relativePath: sourceData.filename,
+                        createdAt: sourceData.created_at.toString(), // TODO: convert to ISO string
+                    }
+                })
+                sourceDataList.push(...pageSourceDataList)
+            }
+        } catch (error) {
+            this.logger.error({ error }, `Failed to list source data from OpenAI.`);
+            return {
+                success: false,
+                data: {
+                    operation: "openai#list",
+                    message: `Failed to list source data.`
+                }
+            }
+        }
+        const dto: ListSourceDataDTO = {
+            success: true,
+            data: sourceDataList
+        }
+        return dto;
+
     }
 
     async get(fileID: string): Promise<GetSourceDataDTO> {
-        this.logger.error("Method not implemented. Tried accessing an unimplemented method 'get' in OpenAISourceDataRepository.")
-        return {
-            success: false,
-            data: {
-                operation: "openai#get",
-                message: "Method not implemented."
+        try {
+            const openAIFile = await this.openai.files.retrieve(fileID);
+            const localFileName = generateSystemFilename(openAIFile.filename);
+            const remoteFile: RemoteFile = {
+                provider: "openai",
+                type: "remote",
+                id: fileID,
+                name: openAIFile.filename,
+                relativePath: localFileName.name,
+                createdAt: openAIFile.created_at.toString(), // TODO: convert to ISO string
             }
+            const successDTO: GetSourceDataDTO = {
+                success: true,
+                data: remoteFile
+            }
+            return successDTO;
+        } catch (error) {
+            this.logger.error({ error }, `Failed to download file ${fileID} from OpenAI.`);
+            const errorDTO: GetSourceDataDTO = {
+                success: false,
+                data: {
+                    operation: "openai#file-download",
+                    message: `Failed to download file ${fileID} from OpenAI. ${(error as Error).message}`
+                }
+            }
+            return errorDTO;
         }
     }
+
     async upload(file: LocalFile, relativePath: string): Promise<GetSourceDataDTO> {
         this.logger.error("Method not implemented. Tried accessing an unimplemented method 'upload' in OpenAISourceDataRepository.")
         // check if file exists at the path
@@ -145,144 +229,46 @@ export default class OpenAISourceDataRepository implements SourceDataGatewayOutp
             }
         }
     }
+
     async delete(file: RemoteFile): Promise<DeleteSourceDataDTO> {
-        this.logger.error("Method not implemented. Tried accessing an unimplemented method 'delete' in OpenAISourceDataRepository.")
-        return {
-            success: false,
-            data: {
-                operation: "openai#delete",
-                message: "Method not implemented."
+        if(file.provider !== "openai") {
+            this.logger.error(`Cannot delete file from provider ${file.provider}. Only files from OpenAI can be deleted.`);
+            return {
+                success: false,
+                data: {
+                    operation: "openai#delete",
+                    message: `Cannot delete file from provider ${file.provider}. Only files from OpenAI can be deleted.`
+                }
             }
         }
+
+        try {
+            const deletionDTO = await this.openai.files.del(file.id)
+            if (!deletionDTO.deleted) {
+                this.logger.error(`Failed to delete file ${file.id} from OpenAI.`);
+                return {
+                    success: false,
+                    data: {
+                        operation: "openai#delete",
+                        message: `Failed to delete file ${file.id} from OpenAI.`
+                    }
+                }
+            }
+            return {
+                success: true,
+                data: {}
+            }
+        } catch (error) {
+            this.logger.error({ error }, `Failed to delete file ${file.id} from OpenAI.`);
+            return {
+                success: false,
+                data: {
+                    operation: "openai#delete",
+                    message: `Failed to delete file ${file.id} from OpenAI.`
+                }
+            }
+        }
+
+
     }
-
-    // /**
-    //  * The files uploaded by the user to OpenAI are stored in the format {client_id}_{filepath}_{filename}.
-    //  * 
-    //  * @param id 
-    //  * @returns 
-    //  */
-    // async get(file: File): Promise<GetSourceDataDTO> {
-    //     return {
-    //         success: false,
-    //         data: {
-    //             operation: "openai#getFile",
-    //             message: "Method not implemented."
-    //         }
-    //     }
-    //     // try {
-    //     //     // Convert the core file to the OpenAI file name
-    //     //     this.logger.debug(`Retrieving source data with id ${id}.`);
-    //     //     const sourceData = await this.openai.files.retrieve(id);
-    //     //     this.logger.debug({sourceData}, `Retrieved source data with id ${id}.`);
-    //     //     const dto: GetSourceDataDTO = {
-    //     //         success: true,
-    //     //         data: {
-    //     //             provider: "openai",
-    //     //             type: "remote",
-    //     //             path: sourceData.id,
-    //     //             name: sourceData.filename,
-    //     //         }
-    //     //     }
-    //     //     return dto;
-    //     // } catch (error) {
-    //     //     this.logger.error({ error }, `Failed to retrieve source data with id ${id}.`);
-    //     //     const errorDTO: GetSourceDataDTO = {
-    //     //         success: false,
-    //     //         data: {
-    //     //             operation: "openai#files#retrieve",
-    //     //             message: `Failed to retrieve source data with id ${id}.`
-    //     //         }
-    //     //     }
-    //     //     return errorDTO;
-    //     // }
-    // }
-
-    // async list(): Promise<ListSourceDataDTO> {
-    //     try {
-    //         const files = await this.openai.files.list();
-    //         const sourceDataList: RemoteFile[] = files.data.map((sourceData) => {
-    //             return {
-    //                 provider: "openai",
-    //                 type: "remote",
-    //                 path: sourceData.id,
-    //                 name: sourceData.filename,
-    //             }
-    //         });
-    //         const dto: ListSourceDataDTO = {
-    //             success: true,
-    //             data: sourceDataList
-    //         }
-    //         return dto;
-    //     } catch (error) {
-    //         this.logger.error({ error }, `Failed to list source data.`);
-    //         const errorDTO: ListSourceDataDTO = {
-    //             success: false,
-    //             data: {
-    //                 operation: "openai#files#list",
-    //                 message: `Failed to list source data.`
-    //             }
-    //         }
-    //         return errorDTO;
-    //     }
-    // }
-    // async delete(file: RemoteFile): Promise<DeleteSourceDataDTO> {
-    //     return {
-    //         success: false,
-    //         data: {
-    //             operation: "openai#files#del",
-    //             message: "Method not implemented."
-    //         }
-    //     }
-    //     // Get the file from openai
-    //     // const fileDTO = await this.get(id)
-    //     // if (!fileDTO.success) {
-    //     //     this.logger.error(`Failed to get source data with id ${id}. File may not exist.`);
-    //     //     const dto: DeleteSourceDataDTO = {
-    //     //         success: true,
-    //     //         data: {
-    //     //             type: "remote",
-    //     //             provider: "openai",
-    //     //             path: id,
-    //     //             name: id,
-    //     //         }
-    //     //     }
-    //     //     return dto;
-    //     // }
-
-    //     // try {
-    //     //     const res = await this.openai.files.del(id);
-    //     //     if (!res.deleted) {
-    //     //         this.logger.error(`Failed to delete source data with id ${id}.`);
-    //     //         const errorDTO: DeleteSourceDataDTO = {
-    //     //             success: false,
-    //     //             data: {
-    //     //                 operation: "openai#files#del",
-    //     //                 message: `Failed to delete source data with id ${id}.`
-    //     //             }
-    //     //         }
-    //     //         return errorDTO;
-    //     //     }
-    //     //     const dto: DeleteSourceDataDTO = {
-    //     //         success: true,
-    //     //         data: {
-    //     //             provider: "openai",
-    //     //             type: "remote",
-    //     //             path: id,
-    //     //             name: fileDTO.data.name,
-    //     //         }
-    //     //     }
-    //     //     return dto;
-    //     // } catch (error) {
-    //     //     this.logger.error({ error }, `Exception occured while trying to delete source data with id ${id}.`);
-    //     //     const errorDTO: DeleteSourceDataDTO = {
-    //     //         success: false,
-    //     //         data: {
-    //     //             operation: "openai#files#del",
-    //     //             message: `Failed to delete source data with id ${id}.`
-    //     //         }
-    //     //     }
-    //     //     return errorDTO;
-    //     // }
-    // }
 }

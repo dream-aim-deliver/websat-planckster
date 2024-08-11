@@ -22,7 +22,7 @@ export const generateOpenAIFilename = (clientID: string, file: File): string => 
  * @returns An object containing the client_id, path, and name extracted from the OpenAI filename.
  * @throws Error if the OpenAI filename is invalid.
  */
-export const generateLocalFilename = (openAIFilename: string): { client_id: string, relativePath: string, name: string } => {
+export const generateSystemFilename = (openAIFilename: string): { client_id: string, relativePath: string, name: string } => {
     const separator = "<>";
     const parts = openAIFilename.split(separator);
     if (parts.length !== 3) {
