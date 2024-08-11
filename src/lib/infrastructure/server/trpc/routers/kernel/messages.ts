@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { type ListMessagesViewModel_Input } from "@maany_shr/kernel-planckster-sdk-ts";
 import OpenAIGateway from "~/lib/infrastructure/server/gateway/openai-gateway-old";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "../../../config/ioc/server-container";
@@ -9,6 +8,8 @@ import { createTRPCRouter, protectedProcedure } from "../../server";
 import { type TBaseErrorDTOData } from "~/sdk/core/dto";
 import { type Logger } from "pino";
 import { type TKernelSDK } from "../../../config/kernel/kernel-sdk";
+import type ConversationGatewayOutputPort from "~/lib/core/ports/secondary/conversation-gateway-output-port";
+import { type ListMessagesForConversationDTO } from "~/lib/core/dto/conversation-gateway-dto";
 
 
 const getLogger = () => {
@@ -24,55 +25,13 @@ export const messageRouter = createTRPCRouter({
             conversationID: z.number(),
         }),
     )
-    .query(async ({ input }): Promise<
-        {
-            success: true,
-            data: ListMessagesViewModel_Input
-        } | {
-            success: false,
-            data: TBaseErrorDTOData
-        } 
-    > => {
+    .query(async ({ input }): Promise<ListMessagesForConversationDTO> => {
 
-        const logger = getLogger();
-        const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
-        const kpCredentialsDTO = await authGateway.extractKPCredentials();
+        const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.CONVERSATION_GATEWAY);
 
-        if (!kpCredentialsDTO.success) {
-            logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
-            return {
-                success: false,
-                data: {
-                    operation: "messageRouter#list",
-                    message: "Failed to get KP credentials",
-                } as TBaseErrorDTOData
-            };
-        }
+        const dto = await conversationGateway.getConversationMessages(input.conversationID.toString());
 
-        const kernelSDK: TKernelSDK = serverContainer.get(KERNEL.KERNEL_SDK);
-
-        const listMessagesViewModel = await kernelSDK.listMessages({
-            id: input.conversationID,
-            xAuthToken: kpCredentialsDTO.data.xAuthToken, 
-        });
-
-        if(listMessagesViewModel.status) {
-            logger.debug(`Successfully listed messages for conversation with ID ${input.conversationID}. View model code: ${listMessagesViewModel.code}`);
-            return {
-                success: true,
-                data: listMessagesViewModel
-            };
-        }
-
-        logger.error(`Failed to list messages for conversation with ID ${input.conversationID}: ${listMessagesViewModel.errorMessage}`);
-
-        return {
-            success: false,
-            data: {
-                operation: "messageRouter#list",
-                message: `Failed to list messages for conversation with ID ${input.conversationID}`,
-            } as TBaseErrorDTOData
-        };
+        return dto;
 
     }),
 

@@ -1,172 +1,51 @@
-import { inject, injectable } from "inversify";
-import { type CreateConversationDTO, type ListConversationsDTO, type SendMessageToConversationResponseDTO, type ListMessagesForConversationDTO } from "~/lib/core/dto/conversation-gateway-dto";
-import { type TMessage } from "~/lib/core/entity/kernel-models";
-import type ConversationGatewayOutputPort from "~/lib/core/ports/secondary/conversation-gateway-output-port";
-import { type TVanillaAPI } from "../trpc/vanilla-api";
-import { TRPC, UTILS } from "../config/ioc/client-ioc-symbols";
-import { type ILogObj, Logger } from "tslog";
+import { inject, injectable } from 'inversify';
+import { ILogObj, Logger } from 'tslog';
+import { CreateConversationDTO, ListConversationsDTO, SendMessageToConversationResponseDTO, ListMessagesForConversationDTO } from '~/lib/core/dto/conversation-gateway-dto';
+import { TMessage } from '~/lib/core/entity/kernel-models';
+import ConversationGatewayOutputPort from '~/lib/core/ports/secondary/conversation-gateway-output-port';
+import { TRPC, UTILS } from '../config/ioc/client-ioc-symbols';
+import { type TVanillaAPI } from '../trpc/vanilla-api';
+
 
 @injectable()
-export default class BrowserConversationGateway implements ConversationGatewayOutputPort {
+export default class BrowserConversationGateway implements ConversationGatewayOutputPort  {
 
-    private logger: Logger<ILogObj>
-    constructor(
+  private logger: Logger<ILogObj>;
+  constructor(
     @inject(TRPC.VANILLA_CLIENT) private api: TVanillaAPI,
     @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger<ILogObj>
     ) {
-    this.logger = this.loggerFactory("BrowserConversationGateway")
-    }
- 
-
-    async createConversation(researchContextID: string, conversationTitle: string): Promise<CreateConversationDTO> {
-        try {
-
-            const researchContextIDNumber = parseInt(researchContextID);
-
-            const routerDTO = await this.api.kernel.conversation.create.mutate({
-                researchContextID: researchContextIDNumber, 
-                conversationTitle: conversationTitle,
-            });
-
-            if (!routerDTO.success) {
-                this.logger.error(`Failed to create a conversation: ${routerDTO.data.message}`);
-                return {
-                    success: false,
-                    data: {
-                        message: routerDTO.data.message,
-                        operation: routerDTO.data.operation,
-                    }
-                }
-            }
-
-            this.logger.debug(`Successfully created a conversation with ID ${routerDTO.data.conversation_id}`);
-            return {
-                success: true,
-                data: {
-                    id: routerDTO.data.conversation_id,
-                    title: conversationTitle,
-                }
-            }
-
-        } catch (error) {
-            const err = error as Error;
-            this.logger.error(`An error occurred while creating a conversation: ${err.message}`);
-            return {
-                success: false,
-                data: {
-                    message: err.message,
-                    operation: "create-conversation",
-
-                }
-            }
-        }
-
-
+    this.logger = this.loggerFactory("ConversationGateway")
     }
 
-    async listConversations(researchContextID: string): Promise<ListConversationsDTO> {
+  async createConversation(researchContextID: string, conversationTitle: string): Promise<CreateConversationDTO> {
 
-        try {
+    const response = await this.api.kernel.conversation.create.mutate({
+      researchContextID: parseInt(researchContextID),
+      conversationTitle: conversationTitle
+    });
 
-            const researchContextIDNumber = parseInt(researchContextID);
+    return response;
+  }
 
-            const routerDTO = await this.api.kernel.conversation.list.query({
-                researchContextID: researchContextIDNumber,
-            });
+  async listConversations(researchContextID: string): Promise<ListConversationsDTO> {
+    const response = await this.api.kernel.conversation.list.query({
+      researchContextID: parseInt(researchContextID)
+    });
 
-            if (!routerDTO.success) {
-                this.logger.error(`Failed to list conversations: ${routerDTO.data.message}`);
-                return {
-                    success: false,
-                    data: {
-                        message: routerDTO.data.message,
-                        operation: routerDTO.data.operation,
-                    }
-                }
-            }
+    return response;
+  }
 
-            this.logger.debug(`Successfully listed conversations for Research Context with ID ${routerDTO.data.research_context_id}`);
-            
-            const conversations = routerDTO.data.conversations
+  async sendMessage(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
+    throw new Error('Method not implemented.');
+  }
 
-            return {
-                success: true,
-                data: conversations
-            }
+  async getConversationMessages(conversationID: string): Promise<ListMessagesForConversationDTO> {
+    const response = await this.api.kernel.message.list.query({
+      conversationID: parseInt(conversationID)
+    });
 
+    return response;
+  }
 
-        } catch (error) {
-            const err = error as Error;
-            this.logger.error(`An error occurred while listing conversations: ${err.message}`);
-            return {
-                success: false,
-                data: {
-                    message: err.message,
-                    operation: "list-conversations",
-                }
-            }
-        }
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async sendMessage(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
-        throw new Error("Method not implemented.");
-    }
-
-    async getConversationMessages(conversationID: string): Promise<ListMessagesForConversationDTO> {
-
-        try {
-
-            const conversationIDNumber = parseInt(conversationID);
-
-            const routerDTO = await this.api.kernel.message.list.query({
-                conversationID: conversationIDNumber,
-            });
-
-            if (!routerDTO.success) {
-                this.logger.error(`Failed to list messages for conversation: ${routerDTO.data.message}`);
-                return {
-                    success: false,
-                    data: {
-                        message: routerDTO.data.message,
-                        operation: routerDTO.data.operation,
-                    }
-                }
-            }
-
-            this.logger.debug(`Successfully listed messages for conversation with ID ${conversationID}`);
-
-            const kpMessages = routerDTO.data.message_list
-
-            const messages: TMessage[] = kpMessages.map((kpMessage) => {
-                return {
-                    id: kpMessage.id,
-                    content: kpMessage.content,
-                    timestamp: kpMessage.timestamp,
-                    sender: kpMessage.sender,
-                    senderType: kpMessage.sender_type,
-                 }
-            });
-
-            return {
-                success: true,
-                data: messages
-            }
-
-
-        } catch (error) {
-            const err = error as Error;
-            this.logger.error(`An error occurred while listing messages for conversation: ${err.message}`);
-            return {
-                success: false,
-                data: {
-                    message: err.message,
-                    operation: "list-messages-for-conversation",
-                }
-            }
-        }
-
-
-
-    }
 }
