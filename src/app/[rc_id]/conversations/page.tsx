@@ -21,7 +21,7 @@ async function ListConversations({ rc_id }: { rc_id: string }) {
   const api: TServerComponentAPI = serverContainer.get(TRPC.REACT_SERVER_COMPONENTS_API);
   const rc_id_int = parseInt(rc_id);
   const conversations = await api.kernel.conversation.list({
-    id: rc_id_int,
+    researchContextID: rc_id_int,
   });
 
   return (

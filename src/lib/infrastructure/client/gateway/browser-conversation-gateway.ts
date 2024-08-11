@@ -24,8 +24,8 @@ export default class BrowserConversationGateway implements ConversationGatewayOu
             const researchContextIDNumber = parseInt(researchContextID);
 
             const routerDTO = await this.api.kernel.conversation.create.mutate({
-                id: researchContextIDNumber, 
-                title: conversationTitle,
+                researchContextID: researchContextIDNumber, 
+                conversationTitle: conversationTitle,
             });
 
             if (!routerDTO.success) {
@@ -64,9 +64,48 @@ export default class BrowserConversationGateway implements ConversationGatewayOu
 
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async listConversations(researchContextID: string): Promise<ListConversationsDTO> {
-        throw new Error("Method not implemented.");
+
+        try {
+
+            const researchContextIDNumber = parseInt(researchContextID);
+
+            const routerDTO = await this.api.kernel.conversation.list.query({
+                researchContextID: researchContextIDNumber,
+            });
+
+            if (!routerDTO.success) {
+                this.logger.error(`Failed to list conversations: ${routerDTO.data.message}`);
+                return {
+                    success: false,
+                    data: {
+                        message: routerDTO.data.message,
+                        operation: routerDTO.data.operation,
+                    }
+                }
+            }
+
+            this.logger.debug(`Successfully listed conversations for Research Context with ID ${routerDTO.data.research_context_id}`);
+            
+            const conversations = routerDTO.data.conversations
+
+            return {
+                success: true,
+                data: conversations
+            }
+
+
+        } catch (error) {
+            const err = error as Error;
+            this.logger.error(`An error occurred while listing conversations: ${err.message}`);
+            return {
+                success: false,
+                data: {
+                    message: err.message,
+                    operation: "list-conversations",
+                }
+            }
+        }
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

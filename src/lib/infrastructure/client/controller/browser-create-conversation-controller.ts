@@ -27,7 +27,6 @@ export default class BrowserCreateConversationController {
             const conversationGateway = clientContainer.get<BrowserConversationGateway>(GATEWAYS.CONVERSATION_GATEWAY); // would be injected
 
             const createConversationDTO = await conversationGateway.createConversation(researchContextID, title);
-
  
             if (!createConversationDTO.success) {
                 presenter.presentError({
@@ -61,13 +60,7 @@ export default class BrowserCreateConversationController {
                     title: params.title,
                 },
             });
-
-
         }
-
-
-
-
 
     }
 }

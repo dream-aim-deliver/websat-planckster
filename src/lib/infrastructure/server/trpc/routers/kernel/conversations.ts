@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { type NewConversationViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
+import { type NewConversationViewModel, type ListConversationsViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
 import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/server/trpc/server";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import type { TBaseErrorDTOData } from "~/sdk/core/dto";
@@ -19,10 +19,18 @@ export const conversationRouter = createTRPCRouter({
     list: protectedProcedure
     .input(
         z.object({
-            id: z.number(),  // Research context ID
+            researchContextID: z.number(),
         }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input }): Promise<
+        {
+            success: true,
+            data: ListConversationsViewModel
+        } | {
+            success: false,
+            data: TBaseErrorDTOData
+        } 
+    > => {
 
         const logger = getLogger();
         const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
@@ -44,12 +52,12 @@ export const conversationRouter = createTRPCRouter({
         const kernelSDK: TKernelSDK = serverContainer.get(KERNEL.KERNEL_SDK);
 
         const listConversationsViewModel = await kernelSDK.listConversations({
-            id: input.id,
+            id: input.researchContextID,
             xAuthToken: kpCredentialsDTO.data.xAuthToken,
         });
 
         if(listConversationsViewModel.status) {
-            logger.debug(`Successfully listed conversations for Research Context with ID ${input.id}. View model code: ${listConversationsViewModel.code}`);
+            logger.debug(`Successfully listed conversations for Research Context with ID ${input.researchContextID}. View model code: ${listConversationsViewModel.code}`);
             return {
                 success: true,
                 data: listConversationsViewModel,
@@ -63,7 +71,7 @@ export const conversationRouter = createTRPCRouter({
             success: false,
             data: {
                 operation: "conversationRouter#list",
-                message: `Failed to list messages for Research Context with ID ${input.id}`,
+                message: `Failed to list messages for Research Context with ID ${input.researchContextID}`,
             } as TBaseErrorDTOData
         };
 
@@ -72,8 +80,8 @@ export const conversationRouter = createTRPCRouter({
     create: protectedProcedure
         .input(
             z.object({
-                id: z.number(),  // Research context ID
-                title: z.string(),
+                researchContextID: z.number(),
+                conversationTitle: z.string(),
             }),
         )
         .mutation(async ({ input }): Promise<{
@@ -104,13 +112,13 @@ export const conversationRouter = createTRPCRouter({
             const kernelSDK: TKernelSDK = serverContainer.get(KERNEL.KERNEL_SDK);
 
             const newConversationViewModel = await kernelSDK.createConversation({
-                id: input.id,
+                id: input.researchContextID,
                 xAuthToken: kpCredentialsDTO.data.xAuthToken,
-                conversationTitle: input.title,
+                conversationTitle: input.conversationTitle,
             });
 
             if(newConversationViewModel.status) {
-                logger.debug(`Successfully created conversation for Research Context with ID ${input.id}. View model code: ${newConversationViewModel.code}`);
+                logger.debug(`Successfully created conversation for Research Context with ID ${input.researchContextID}. View model code: ${newConversationViewModel.code}`);
                 return {
                     success: true,
                     data: newConversationViewModel
