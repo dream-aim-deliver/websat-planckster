@@ -2,7 +2,6 @@ import { z } from 'zod'
 import { MessageSchema } from '../entity/kernel-models'
 
 export const SendMessageToConversationRequestSchema = z.object({
-    clientID: z.string(),
     researchContextID: z.string(),
     conversationID: z.string(),
     message: MessageSchema,

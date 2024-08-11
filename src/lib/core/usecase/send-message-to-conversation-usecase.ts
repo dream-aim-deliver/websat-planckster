@@ -29,7 +29,7 @@ export default class BrowserSendMessageToConversationUseCase implements SendMess
             return;
         }
 
-        const prepareMessageDTO = await this.agentGateway.prepareMessageContext(request.clientID, request.researchContextID, request.conversationID, request.message)
+        const prepareMessageDTO = await this.agentGateway.prepareMessageContext(request.researchContextID, request.conversationID, request.message)
         if (!prepareMessageDTO.success) {
             this.presenter.presentError(
                 {
