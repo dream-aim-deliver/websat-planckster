@@ -1,5 +1,5 @@
-import { TListMessagesForConversationErrorResponse, TListMessagesForConversationSuccessResponse } from "../../usecase-models/list-messages-for-conversation-usecase-models";
-import { TListMessagesForConversationRequestViewModel } from "../../view-models/list-messages-for-conversation-view-model";
+import { type TListMessagesForConversationErrorResponse, type TListMessagesForConversationSuccessResponse } from "../../usecase-models/list-messages-for-conversation-usecase-models";
+import { type TListMessagesForConversationRequestViewModel } from "../../view-models/list-messages-for-conversation-view-model";
 
 export interface ListMessagesForConversationInputPort {
     presenter: ListMessagesForConversationOutputPort<any>;

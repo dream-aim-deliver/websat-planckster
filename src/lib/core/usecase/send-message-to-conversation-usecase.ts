@@ -1,7 +1,7 @@
-import { SendMessageToConversationInputPort, SendMessageToConversationOutputPort } from "../ports/primary/send-message-to-conversation-primary-ports";
-import AgentGatewayOutputPort from "../ports/secondary/agent-gateway-output-port";
-import ConversationGatewayOutputPort from "../ports/secondary/conversation-gateway-output-port";
-import { TSendMessageToConversationRequest } from "../usecase-models/send-message-to-conversation-usecase-models";
+import { type SendMessageToConversationInputPort, type SendMessageToConversationOutputPort } from "../ports/primary/send-message-to-conversation-primary-ports";
+import type AgentGatewayOutputPort from "../ports/secondary/agent-gateway-output-port";
+import type ConversationGatewayOutputPort from "../ports/secondary/conversation-gateway-output-port";
+import { type TSendMessageToConversationRequest } from "../usecase-models/send-message-to-conversation-usecase-models";
 
 export default class SendMessageToConversationUseCase implements SendMessageToConversationInputPort {
     presenter: SendMessageToConversationOutputPort<any>;

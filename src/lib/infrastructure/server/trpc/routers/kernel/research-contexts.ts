@@ -8,7 +8,7 @@ import { GATEWAYS, KERNEL, UTILS } from "../../../config/ioc/server-ioc-symbols"
 import { createTRPCRouter, protectedProcedure } from "../../server";
 import type { TBaseErrorDTOData } from "~/sdk/core/dto";
 import type { TKernelSDK } from "../../../config/kernel/kernel-sdk";
-import { Logger } from "pino";
+import { type Logger } from "pino";
 
 const getLogger = () => {
   const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);

@@ -1,4 +1,4 @@
-import { TSendMessageToConversationErrorResponse, TSendMessageToConversationProgressResponse, TSendMessageToConversationRequest, TSendMessageToConversationSuccessResponse } from "../../usecase-models/send-message-to-conversation-usecase-models";
+import { type TSendMessageToConversationErrorResponse, type TSendMessageToConversationProgressResponse, type TSendMessageToConversationRequest, type TSendMessageToConversationSuccessResponse } from "../../usecase-models/send-message-to-conversation-usecase-models";
 
 export interface SendMessageToConversationInputPort {
     presenter: SendMessageToConversationOutputPort<any>;

@@ -1,7 +1,7 @@
-import { TSignal } from "~/lib/core/entity/signals";
-import { SendMessageToConversationOutputPort } from "~/lib/core/ports/primary/send-message-to-conversation-primary-ports";
-import { TSendMessageToConversationSuccessResponse, TSendMessageToConversationErrorResponse, TSendMessageToConversationProgressResponse } from "~/lib/core/usecase-models/send-message-to-conversation-usecase-models";
-import { TSendMessageToConversationViewModel } from "~/lib/core/view-models/send-message-to-conversation-view-model";
+import { type TSignal } from "~/lib/core/entity/signals";
+import { type SendMessageToConversationOutputPort } from "~/lib/core/ports/primary/send-message-to-conversation-primary-ports";
+import { type TSendMessageToConversationSuccessResponse, type TSendMessageToConversationErrorResponse, type TSendMessageToConversationProgressResponse } from "~/lib/core/usecase-models/send-message-to-conversation-usecase-models";
+import { type TSendMessageToConversationViewModel } from "~/lib/core/view-models/send-message-to-conversation-view-model";
 
 export default class BrowserSendMessageToConversationPresenter implements SendMessageToConversationOutputPort<TSignal<TSendMessageToConversationViewModel>> {
     response: TSignal<TSendMessageToConversationViewModel>;

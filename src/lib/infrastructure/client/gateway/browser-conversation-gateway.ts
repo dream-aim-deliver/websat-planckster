@@ -1,6 +1,6 @@
-import { CreateConversationDTO, ListConversationsDTO, SendMessageToConversationResponseDTO, ListMessagesForConversationDTO } from "~/lib/core/dto/conversation-gateway-dto";
-import { TMessage } from "~/lib/core/entity/kernel-models";
-import ConversationGatewayOutputPort from "~/lib/core/ports/secondary/conversation-gateway-output-port";
+import { type CreateConversationDTO, type ListConversationsDTO, type SendMessageToConversationResponseDTO, type ListMessagesForConversationDTO } from "~/lib/core/dto/conversation-gateway-dto";
+import { type TMessage } from "~/lib/core/entity/kernel-models";
+import type ConversationGatewayOutputPort from "~/lib/core/ports/secondary/conversation-gateway-output-port";
 
 export default class BrowserConversationGateway implements ConversationGatewayOutputPort {
     createConversation(clientID: string, researchContextID: string): Promise<CreateConversationDTO> {

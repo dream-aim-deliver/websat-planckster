@@ -1,6 +1,6 @@
 import type { TSignal } from "~/lib/core/entity/signals";
-import { CreateConversationOutputPort } from "~/lib/core/ports/primary/create-conversation-primary-ports";
-import { TCreateConversationSuccessResponse, TCreateConversationErrorResponse } from "~/lib/core/usecase-models/create-conversation-usecase-models";
+import { type CreateConversationOutputPort } from "~/lib/core/ports/primary/create-conversation-primary-ports";
+import { type TCreateConversationSuccessResponse, type TCreateConversationErrorResponse } from "~/lib/core/usecase-models/create-conversation-usecase-models";
 import type { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 
 export default class BrowserCreateConversationPresenter implements CreateConversationOutputPort<TSignal<TCreateConversationViewModel>> {

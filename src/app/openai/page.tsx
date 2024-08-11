@@ -29,7 +29,7 @@ export default async function OpenAIServerComponent() {
     const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
     const logger = loggerFactory("OpenAIServerComponent");
     // const listSourceDataDTO = await OpenAISourceDataRepository.list();
-    let files: File[] = []
+    const files: File[] = []
     // if(listSourceDataDTO.success) {
     //     files = listSourceDataDTO.data;
     // } else {

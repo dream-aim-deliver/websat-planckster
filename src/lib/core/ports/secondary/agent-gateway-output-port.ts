@@ -1,6 +1,6 @@
 import type { TCreateAgentDTO, TSendMessageDTO } from "~/lib/core/dto/agent-dto";
-import { TMessage } from "../../entity/kernel-models";
-import { TBaseDTO, TBaseErrorDTOData } from "~/sdk/core/dto";
+import { type TMessage } from "../../entity/kernel-models";
+import { type TBaseDTO, TBaseErrorDTOData } from "~/sdk/core/dto";
 
 export default interface AgentGatewayOutputPort<TPrepareContext extends TBaseDTO<any,any>> {
     createAgent(clientID: string, researchContextID: number): Promise<TCreateAgentDTO>;

@@ -1,4 +1,4 @@
-import { TListSourceDataErrorResponse, TListSourceDataRequest, TListSourceDataSuccessResponse } from "../../usecase-models/list-source-data-view-models";
+import { type TListSourceDataErrorResponse, type TListSourceDataRequest, type TListSourceDataSuccessResponse } from "../../usecase-models/list-source-data-view-models";
 
 export interface ListSourceDataInputPort {
     presenter: ListSourceDataOutputPort<any>;
