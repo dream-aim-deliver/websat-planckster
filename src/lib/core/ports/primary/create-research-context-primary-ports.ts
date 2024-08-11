@@ -8,7 +8,7 @@ export interface CreateResearchContextInputPort {
 
 export interface CreateResearchContextOutputPort<TResponse> {
     response: TResponse;
-    presentProgress(response: TCreateResearchContextProgressResponse): void;
-    presentSuccess(response: TCreateResearchContextSuccessResponse): void;
-    presentError(response: TCreateResearchContextErrorResponse): void;
+    presentProgress(progress: TCreateResearchContextProgressResponse): void;
+    presentSuccess(success: TCreateResearchContextSuccessResponse): void;
+    presentError(error: TCreateResearchContextErrorResponse): void;
 }

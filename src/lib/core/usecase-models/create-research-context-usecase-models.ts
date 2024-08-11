@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { RemoteFileSchema } from "../entity/file";
+import { ResearchContextSchema } from "../entity/kernel-models";
 
 export const CreateResearchContextRequestSchema = z.object({
     title: z.string(),
@@ -10,7 +11,7 @@ export type TCreateResearchContextRequest = z.infer<typeof CreateResearchContext
 
 
 export const CreateResearchContextSuccessResponseSchema = z.object({
-    research_context_id: z.number(),
+    researchContext: ResearchContextSchema,
 });
 export type TCreateResearchContextSuccessResponse = z.infer<typeof CreateResearchContextSuccessResponseSchema>;
 

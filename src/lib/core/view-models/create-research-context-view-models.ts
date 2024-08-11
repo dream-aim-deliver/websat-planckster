@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ResearchContextSchema } from "../entity/kernel-models";
 
 export const CreateResearchContextRequestViewModelSchema = z.object({
     status: z.enum(["request"]),
@@ -8,7 +9,7 @@ export type TCreateResearchContextRequestViewModel = z.infer<typeof CreateResear
 
 export const CreateResearchContextSuccessViewModelSchema = z.object({
     status: z.enum(["success"]),
-    researchContextName: z.string(),
+    researchContext: ResearchContextSchema,
 });
 export type TCreateResearchContextSuccessViewModel = z.infer<typeof CreateResearchContextSuccessViewModelSchema>;
 

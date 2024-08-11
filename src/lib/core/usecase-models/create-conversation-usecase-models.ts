@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ConversationSchema } from "../entity/kernel-models";
 export const CreateConversationRequestSchema = z.object({
     clientID: z.string(),
     researchContextID: z.string(),
@@ -7,7 +8,7 @@ export const CreateConversationRequestSchema = z.object({
 export type TCreateConversationRequest = z.infer<typeof CreateConversationRequestSchema>;
 
 export const CreateConversationSuccessResponseSchema = z.object({
-    conversation_id: z.number(),
+    conversation: ConversationSchema
 });
 export type TCreateConversationSuccessResponse = z.infer<typeof CreateConversationSuccessResponseSchema>;
 

@@ -71,7 +71,7 @@ export default class CreateResearchContextUsecase implements CreateResearchConte
         }
 
         this.presenter.presentSuccess({
-            research_context_id: researchContextID,
+            researchContext: createResearchContextDTO.data,
         })
     }
 }

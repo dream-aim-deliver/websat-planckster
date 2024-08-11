@@ -8,6 +8,6 @@ export interface CreateConversationInputPort {
 
 export interface CreateConversationOutputPort<TResponse> {
     response: TResponse;
-    presentSuccess(response: TCreateConversationSuccessResponse): void;
-    presentError(response: TCreateConversationErrorResponse): void;
+    presentSuccess(success: TCreateConversationSuccessResponse): void;
+    presentError(error: TCreateConversationErrorResponse): void;
 }
