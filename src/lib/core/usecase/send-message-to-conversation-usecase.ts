@@ -3,7 +3,7 @@ import type AgentGatewayOutputPort from "../ports/secondary/agent-gateway-output
 import type ConversationGatewayOutputPort from "../ports/secondary/conversation-gateway-output-port";
 import { type TSendMessageToConversationRequest } from "../usecase-models/send-message-to-conversation-usecase-models";
 
-export default class SendMessageToConversationUseCase implements SendMessageToConversationInputPort {
+export default class BrowserSendMessageToConversationUseCase implements SendMessageToConversationInputPort {
     presenter: SendMessageToConversationOutputPort<any>;
     agentGateway: AgentGatewayOutputPort<any>;
     conversationGateway: ConversationGatewayOutputPort;

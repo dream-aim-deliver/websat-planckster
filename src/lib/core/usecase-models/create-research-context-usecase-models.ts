@@ -5,7 +5,6 @@ export const CreateResearchContextRequestSchema = z.object({
     title: z.string(),
     description: z.string(),
     sourceDataList: z.array(RemoteFileSchema),
-    clientID: z.string(),
 });
 export type TCreateResearchContextRequest = z.infer<typeof CreateResearchContextRequestSchema>;
 

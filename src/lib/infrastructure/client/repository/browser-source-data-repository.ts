@@ -1,7 +1,9 @@
+import { injectable } from "inversify";
 import type { ListSourceDataDTO, GetSourceDataDTO, DeleteSourceDataDTO } from "~/lib/core/dto/source-data-repository-dto";
 import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
 import type SourceDataRepositoryOutputPort from "~/lib/core/ports/secondary/source-data-repository-output-port";
 
+@injectable()
 export default class BrowserSourceDataRepository implements SourceDataRepositoryOutputPort {
     listForResearchContext(clientID: string, researchContextID: string): Promise<ListSourceDataDTO> {
         throw new Error("Method not implemented.");

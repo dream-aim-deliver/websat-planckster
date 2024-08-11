@@ -18,6 +18,9 @@ export default class OpenAISourceDataRepository implements SourceDataRepositoryO
     ) {
         this.logger = loggerFactory("OpenAISourceDataRepository");
     }
+    listForResearchContext(clientID: string, researchContextID: string): Promise<ListSourceDataDTO> {
+        throw new Error("Method not implemented.");
+    }
     list(clientID: string): Promise<ListSourceDataDTO> {
         throw new Error("Method not implemented.");
     }

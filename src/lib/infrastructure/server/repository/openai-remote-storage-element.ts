@@ -19,7 +19,11 @@ export default class OpenAIRemoteStorageElement implements RemoteStorageElementO
     ) {
         this.logger = loggerFactory("OpenAIRemoteStorageElement");
     }
-    
+
+    downloadFile(file: RemoteFile, localPath: string): Promise<DownloadFileDTO> {
+        throw new Error("Method not implemented.");
+    }
+
 
     /**
      * Saves a local file as {clientID}_{file_path}_{file_name} to OpenAI.
@@ -30,85 +34,91 @@ export default class OpenAIRemoteStorageElement implements RemoteStorageElementO
      * The remote file object has the provider as "openai", and the path as the OpenAI file ID.
      */
     async uploadFile(file: LocalFile): Promise<UploadFileDTO> {
-
-        // check if file exists at the path
-        if (!fs.existsSync(file.path)) {
-            const errorDTO: UploadFileDTO = {
-                success: false,
-                data: {
-                    operation: "upload",
-                    message: "File not found."
-                }
-            }
-            return Promise.resolve(errorDTO);
-        }
-
-        // Get client ID of the current user
-        const clientIDDTO = await this.authGateway.extractKPCredentials();
-        if(!clientIDDTO.success) {
-            console.log({clientIDDTO} , `Failed to get KP client ID. This is required to create a unique identified in OpenAI for the user data.`);
-            const errorDTO: UploadFileDTO = {
-                success: false,
-                data: {
-                    operation: "upload",
-                    message: clientIDDTO.data.message
-                }
-            }
-            return Promise.resolve(errorDTO);
-        }
-        const clientID = clientIDDTO.data.clientID;
-
-        const openAIFilename = generateOpenAIFilename(clientID.toString(), file);
-
-        // Copy file to `scratch` directory
-        const localPath = `${serverEnv.SCRATCH_DIR}/${openAIFilename}`;
-        try {
-        this.logger.info(`Copying file ${file.path} to ${localPath}.`);
-        fs.copyFileSync(file.path, localPath);
-        } catch (error) {
-            this.logger.error({ error }, `Failed to copy file ${file.path} to ${localPath}.`);
-            const errorDTO: UploadFileDTO = {
-                success: false,
-                data: {
-                    operation: "upload",
-                    message: `Failed to copy file ${file.path} to ${localPath}.`
-                }
-            }
-            return Promise.resolve(errorDTO);
-        }
-
-
-        const fileStream = fs.createReadStream(localPath);
-        this.logger.info(`Uploading file ${file.path} as ${localPath} to OpenAI.`);
-
-        try {
-            const openAIFile = await this.openai.files.create({
-                file: fileStream,
-                purpose: "assistants"
-            });
-            const remoteFile: RemoteFile = {
-                type: "remote",
-                path: openAIFile.id,
-                provider: "openai",
-                name: file.name
+        return {
+            success: false,
+            data: {
+                operation: "upload",
+                message: "Not implemented."
             }
 
-            const successDTO: UploadFileDTO = {
-                success: true,
-                data: remoteFile
-            }
-            return Promise.resolve(successDTO);
+            // check if file exists at the path
+            // if (!fs.existsSync(file.path)) {
+            //     const errorDTO: UploadFileDTO = {
+            //         success: false,
+            //         data: {
+            //             operation: "upload",
+            //             message: "File not found."
+            //         }
+            //     }
+            //     return Promise.resolve(errorDTO);
+            // }
 
-        } catch (error) {
-            this.logger.error({ error }, `Failed to upload file ${file.path} to OpenAI.`);
-            const errorDTO: UploadFileDTO = {
-                success: false,
-                data: {
-                    operation: "upload",
-                    message: `Failed to upload file ${file.path} to OpenAI.`
-                }
-            }
-            return Promise.resolve(errorDTO);
+            // // Get client ID of the current user
+            // const clientIDDTO = await this.authGateway.extractKPCredentials();
+            // if(!clientIDDTO.success) {
+            //     console.log({clientIDDTO} , `Failed to get KP client ID. This is required to create a unique identified in OpenAI for the user data.`);
+            //     const errorDTO: UploadFileDTO = {
+            //         success: false,
+            //         data: {
+            //             operation: "upload",
+            //             message: clientIDDTO.data.message
+            //         }
+            //     }
+            //     return Promise.resolve(errorDTO);
+            // }
+            // const clientID = clientIDDTO.data.clientID;
+
+            // const openAIFilename = generateOpenAIFilename(clientID.toString(), file);
+
+            // // Copy file to `scratch` directory
+            // const localPath = `${serverEnv.SCRATCH_DIR}/${openAIFilename}`;
+            // try {
+            // this.logger.info(`Copying file ${file.path} to ${localPath}.`);
+            // fs.copyFileSync(file.path, localPath);
+            // } catch (error) {
+            //     this.logger.error({ error }, `Failed to copy file ${file.path} to ${localPath}.`);
+            //     const errorDTO: UploadFileDTO = {
+            //         success: false,
+            //         data: {
+            //             operation: "upload",
+            //             message: `Failed to copy file ${file.path} to ${localPath}.`
+            //         }
+            //     }
+            //     return Promise.resolve(errorDTO);
+            // }
+
+
+            // const fileStream = fs.createReadStream(localPath);
+            // this.logger.info(`Uploading file ${file.path} as ${localPath} to OpenAI.`);
+
+            // try {
+            //     const openAIFile = await this.openai.files.create({
+            //         file: fileStream,
+            //         purpose: "assistants"
+            //     });
+            //     const remoteFile: RemoteFile = {
+            //         type: "remote",
+            //         path: openAIFile.id,
+            //         provider: "openai",
+            //         name: file.name
+            //     }
+
+            //     const successDTO: UploadFileDTO = {
+            //         success: true,
+            //         data: remoteFile
+            //     }
+            //     return Promise.resolve(successDTO);
+
+            // } catch (error) {
+            //     this.logger.error({ error }, `Failed to upload file ${file.path} to OpenAI.`);
+            //     const errorDTO: UploadFileDTO = {
+            //         success: false,
+            //         data: {
+            //             operation: "upload",
+            //             message: `Failed to upload file ${file.path} to OpenAI.`
+            //         }
+            //     }
+            //     return Promise.resolve(errorDTO);
         }
     }
 
@@ -118,79 +128,79 @@ export default class OpenAIRemoteStorageElement implements RemoteStorageElementO
      * @param file A remote file object with provider as "openai", and path as the OpenAI file ID.
      * @returns 
      */
-    async downloadFile(file: RemoteFile): Promise<DownloadFileDTO> {
-        const openAIFileID = file.path;
-        if (!openAIFileID) {
-            const errorDTO: DownloadFileDTO = {
-                success: false,
-                data: {
-                    operation: "download",
-                    message: "File not found."
-                }
-            }
-            return Promise.resolve(errorDTO);
-        }
-        // Get file details from OpenAI
-        let localFileName;
-        try {
-            this.logger.debug(`Getting file details for ${openAIFileID} from OpenAI.`);
-            const openAIFile = await this.openai.files.retrieve(openAIFileID);
-            const openAIFilename = openAIFile.filename;
-            localFileName = generateLocalFilename(openAIFilename).name;
+    // async downloadFile(file: RemoteFile): Promise<DownloadFileDTO> {
+    //     const openAIFileID = file.relativePath;
+    //     if (!openAIFileID) {
+    //         const errorDTO: DownloadFileDTO = {
+    //             success: false,
+    //             data: {
+    //                 operation: "download",
+    //                 message: "File not found."
+    //             }
+    //         }
+    //         return Promise.resolve(errorDTO);
+    //     }
+    //     // Get file details from OpenAI
+    //     let localFileName;
+    //     try {
+    //         this.logger.debug(`Getting file details for ${openAIFileID} from OpenAI.`);
+    //         const openAIFile = await this.openai.files.retrieve(openAIFileID);
+    //         const openAIFilename = openAIFile.filename;
+    //         localFileName = generateLocalFilename(openAIFilename).name;
 
-        } catch (error) {
-            this.logger.error({ error }, `Failed to get file details for ${openAIFileID} from OpenAI.`);
-            const errorDTO: DownloadFileDTO = {
-                success: false,
-                data: {
-                    operation: "download",
-                    message: `Failed to get file details for ${openAIFileID} from OpenAI.`
-                }
-            }
-            return Promise.resolve(errorDTO);
-        }
-        // Try to download the file
-        const localPath = `${serverEnv.SCRATCH_DIR}/${localFileName}`;
-        let fileContentResponse;
-        try {
-            this.logger.info(`Downloading file ${openAIFileID} from OpenAI.`);
-            const content = await this.openai.files.content(openAIFileID)
-            fileContentResponse = content;
-        } catch (error) {
-            this.logger.error({ error }, `Failed to download file ${openAIFileID} from OpenAI.`);
-            const errorDTO: DownloadFileDTO = {
-                success: false,
-                data: {
-                    operation: "download",
-                    message: `Failed to download file ${openAIFileID} from OpenAI.`
-                }
-            }
-            return Promise.resolve(errorDTO);
-        }
+    //     } catch (error) {
+    //         this.logger.error({ error }, `Failed to get file details for ${openAIFileID} from OpenAI.`);
+    //         const errorDTO: DownloadFileDTO = {
+    //             success: false,
+    //             data: {
+    //                 operation: "download",
+    //                 message: `Failed to get file details for ${openAIFileID} from OpenAI.`
+    //             }
+    //         }
+    //         return Promise.resolve(errorDTO);
+    //     }
+    //     // Try to download the file
+    //     const localPath = `${serverEnv.SCRATCH_DIR}/${localFileName}`;
+    //     let fileContentResponse;
+    //     try {
+    //         this.logger.info(`Downloading file ${openAIFileID} from OpenAI.`);
+    //         const content = await this.openai.files.content(openAIFileID)
+    //         fileContentResponse = content;
+    //     } catch (error) {
+    //         this.logger.error({ error }, `Failed to download file ${openAIFileID} from OpenAI.`);
+    //         const errorDTO: DownloadFileDTO = {
+    //             success: false,
+    //             data: {
+    //                 operation: "download",
+    //                 message: `Failed to download file ${openAIFileID} from OpenAI.`
+    //             }
+    //         }
+    //         return Promise.resolve(errorDTO);
+    //     }
 
-        // Write the file to disk
-        try {
-            this.logger.info(`Writing file ${openAIFileID} to ${localPath}.`);
-            const bufferView = new Uint8Array(await fileContentResponse.arrayBuffer());
-            fs.writeFileSync(localPath, bufferView);
-            this.logger.info(`Downloaded file ${openAIFileID} from OpenAI to ${localPath}.`);
-            return {
-                success: false,
-                data: {
-                    operation: "download",
-                    message: "Not implemented."
-                }
-            }
-        } catch (error) {
-            this.logger.error({ error }, `Failed to write file ${openAIFileID} to ${localPath}.`);
-            const errorDTO: DownloadFileDTO = {
-                success: false,
-                data: {
-                    operation: "download",
-                    message: `Failed to write file ${openAIFileID} to ${localPath}.`
-                }
-            }
-            return Promise.resolve(errorDTO);
-        }
-    }
+    //     // Write the file to disk
+    //     try {
+    //         this.logger.info(`Writing file ${openAIFileID} to ${localPath}.`);
+    //         const bufferView = new Uint8Array(await fileContentResponse.arrayBuffer());
+    //         fs.writeFileSync(localPath, bufferView);
+    //         this.logger.info(`Downloaded file ${openAIFileID} from OpenAI to ${localPath}.`);
+    //         return {
+    //             success: false,
+    //             data: {
+    //                 operation: "download",
+    //                 message: "Not implemented."
+    //             }
+    //         }
+    //     } catch (error) {
+    //         this.logger.error({ error }, `Failed to write file ${openAIFileID} to ${localPath}.`);
+    //         const errorDTO: DownloadFileDTO = {
+    //             success: false,
+    //             data: {
+    //                 operation: "download",
+    //                 message: `Failed to write file ${openAIFileID} to ${localPath}.`
+    //             }
+    //         }
+    //         return Promise.resolve(errorDTO);
+    //     }
+    // }
 }

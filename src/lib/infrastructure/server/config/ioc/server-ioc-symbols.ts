@@ -16,7 +16,6 @@ export const UTILS = {
 
 export const OPENAI = {
     OPENAI_CLIENT: Symbol.for('OPENAI_CLIENT'),
-    OPENAI_REMOTE_STORAGE_ELEMENT: Symbol.for('OPENAI_FILE_REPOSITORY'),
     OPENAI_SOURCE_DATA_REPOSITORY: Symbol.for('OPENAI_SOURCE_DATA_REPOSITORY'),
 }
 
@@ -27,6 +26,8 @@ export const KERNEL = {
 export const GATEWAYS = {
     AUTH_GATEWAY: Symbol.for('AUTH_GATEWAY'),
     AGENT_GATEWAY: Symbol.for('AGENT_GATEWAY'),
+    RESEARCH_CONTEXT_GATEWAY: Symbol.for('RESEARCH_CONTEXT_GATEWAY'),
+    VECTOR_STORE_GATEWAY: Symbol.for('VECTOR_STORE_GATEWAY'),
 }
 
 export const REPOSITORY = {

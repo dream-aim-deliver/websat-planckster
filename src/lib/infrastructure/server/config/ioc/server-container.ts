@@ -16,8 +16,9 @@ import type { Logger } from "pino";
 import rootLogger from "../log/pino-server-config";
 import OpenAISourceDataRepository from "../../repository/openai-source-data-repository";
 import KernelSourceDataRepository from "../../repository/kernel-source-data-repository";
-import ResearchContextRepository from "../../repository/research-context-repository";
 import ListResearchContextsController from "../../controller/list-research-contexts-controller";
+import ResearchContextGateway from "../../gateway/research-context-gateway";
+import OpenAIVectorStoreGateway from "../../gateway/openai-vector-store-gateway";
 
 const serverContainer = new Container();
 
@@ -41,7 +42,6 @@ serverContainer.bind<interfaces.Factory<Logger>>(UTILS.LOGGER_FACTORY).toFactory
 
 /** OPENAI */
 serverContainer.bind(OPENAI.OPENAI_CLIENT).toConstantValue(OpenAIClient);
-serverContainer.bind(OPENAI.OPENAI_REMOTE_STORAGE_ELEMENT).to(OpenAIRemoteStorageElement)
 serverContainer.bind(OPENAI.OPENAI_SOURCE_DATA_REPOSITORY).to(OpenAISourceDataRepository);
 
 /** KERNEL */
@@ -49,11 +49,12 @@ serverContainer.bind(KERNEL.KERNEL_SDK).toConstantValue(KernelSDK);
 
 /** GATEWAYS */
 serverContainer.bind(GATEWAYS.AGENT_GATEWAY).to(OpenAIAgentGateway);
+serverContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(OpenAIVectorStoreGateway);
+serverContainer.bind(GATEWAYS.RESEARCH_CONTEXT_GATEWAY).to(ResearchContextGateway);
 
 /** REPOSITORY */
 serverContainer.bind(REPOSITORY.KERNEL_FILE_REPOSITORY).to(KernelFileRepository);
 serverContainer.bind(REPOSITORY.KERNEL_SOURCE_DATA_REPOSITORY).to(KernelSourceDataRepository);
-serverContainer.bind(REPOSITORY.RESEARCH_CONTEXT_REPOSITORY).to(ResearchContextRepository);
 export default serverContainer;
 
 /** CONTROLLERS */
