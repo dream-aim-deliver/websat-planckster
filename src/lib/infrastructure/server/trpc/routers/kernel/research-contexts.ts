@@ -3,11 +3,11 @@ import { z } from "zod";
 import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
 import type { NewResearchContextViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import serverContainer from "../../config/ioc/server-container";
-import { GATEWAYS, KERNEL, UTILS } from "../../config/ioc/server-ioc-symbols";
-import { createTRPCRouter, protectedProcedure } from "../server";
+import serverContainer from "../../../config/ioc/server-container";
+import { GATEWAYS, KERNEL, UTILS } from "../../../config/ioc/server-ioc-symbols";
+import { createTRPCRouter, protectedProcedure } from "../../server";
 import type { TBaseErrorDTOData } from "~/sdk/core/dto";
-import type { TKernelSDK } from "../../config/kernel/kernel-sdk";
+import type { TKernelSDK } from "../../../config/kernel/kernel-sdk";
 import { Logger } from "pino";
 
 const getLogger = () => {

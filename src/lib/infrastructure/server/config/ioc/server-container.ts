@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
 import { Container, type interfaces } from "inversify";
-import { CONSTANTS, GATEWAYS, KERNEL, OPENAI, TRPC, REPOSITORY, UTILS } from "./server-ioc-symbols";
+import { CONSTANTS, GATEWAYS, KERNEL, OPENAI, TRPC, REPOSITORY, UTILS, CONTROLLERS } from "./server-ioc-symbols";
 import { authOptions } from "~/lib/infrastructure/server/config/auth/next-auth-config";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import NextAuthGateway from "~/lib/infrastructure/server/gateway/next-auth-gateway";
@@ -15,6 +15,9 @@ import KernelFileRepository from "../../repository/kernel-remote-storage-element
 import type { Logger } from "pino";
 import rootLogger from "../log/pino-server-config";
 import OpenAISourceDataRepository from "../../repository/openai-source-data-repository";
+import KernelSourceDataRepository from "../../repository/kernel-source-data-repository";
+import ResearchContextRepository from "../../repository/research-context-repository";
+import ListResearchContextsController from "../../controller/list-research-contexts-controller";
 
 const serverContainer = new Container();
 
@@ -49,6 +52,9 @@ serverContainer.bind(GATEWAYS.AGENT_GATEWAY).to(OpenAIAgentGateway);
 
 /** REPOSITORY */
 serverContainer.bind(REPOSITORY.KERNEL_FILE_REPOSITORY).to(KernelFileRepository);
-
+serverContainer.bind(REPOSITORY.KERNEL_SOURCE_DATA_REPOSITORY).to(KernelSourceDataRepository);
+serverContainer.bind(REPOSITORY.RESEARCH_CONTEXT_REPOSITORY).to(ResearchContextRepository);
 export default serverContainer;
 
+/** CONTROLLERS */
+serverContainer.bind(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER).to(ListResearchContextsController)

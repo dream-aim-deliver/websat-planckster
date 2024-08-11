@@ -1,8 +1,7 @@
-import type { CreateVectorStoreDTO, GetVectorStoreDTO, DeleteVectorStoreDTO, UpdateVectorStoreDTO } from "../../dto/vector-store-dto";
+import type { TCreateVectorStoreDTO, TDeleteVectorStoreDTO, TGetVectorStoreDTO } from "../../dto/vector-store-dto";
 
 export default interface VectorStoreOutputPort {
-    createVectorStore(research_context_id: number, fileIDs: string[]): Promise<CreateVectorStoreDTO>;
-    getVectorStore(research_context_id: number): Promise<GetVectorStoreDTO>;
-    deleteVectorStore(research_context_id: number): Promise<DeleteVectorStoreDTO>;
-    updateVectorStore(research_context_id: number): Promise<UpdateVectorStoreDTO>;
+    createVectorStore(research_context_id: number, fileIDs: string[]): Promise<TCreateVectorStoreDTO>;
+    getVectorStore(research_context_id: number): Promise<TGetVectorStoreDTO>;
+    deleteVectorStore(research_context_id: number): Promise<TDeleteVectorStoreDTO>;
 }

@@ -35,7 +35,7 @@ export const DummyUploadComponent = () => {
       setSelectedFile(file);
     }
   };
-
+  
   const handleFileUpload = () => {
     if (selectedFile) {
       const fileUploadingController = clientContainer.get<BrowserFileUploadController>(CONTROLLERS.KERNEL_FILE_UPLOAD_CONTROLLER);

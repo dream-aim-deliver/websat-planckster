@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 import { ClientService as sdk, type SourceData } from "@maany_shr/kernel-planckster-sdk-ts";
-import { createTRPCRouter, protectedProcedure } from "../server";
-import serverContainer from "../../config/ioc/server-container";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import { GATEWAYS, KERNEL } from "../../config/ioc/server-ioc-symbols";
 import type { TBaseErrorDTOData } from "~/sdk/core/dto";
-import type { TKernelSDK } from "../../config/kernel/kernel-sdk";
+import serverContainer from "../../../config/ioc/server-container";
+import { GATEWAYS, KERNEL } from "../../../config/ioc/server-ioc-symbols";
+import { TKernelSDK } from "../../../config/kernel/kernel-sdk";
+import { createTRPCRouter, protectedProcedure } from "../../server";
 
 export const sourceDataRouter = createTRPCRouter({
 

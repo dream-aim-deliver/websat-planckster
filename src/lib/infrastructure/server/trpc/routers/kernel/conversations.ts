@@ -2,12 +2,12 @@ import { z } from "zod";
 
 import { ClientService as sdk, type NewConversationViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
 import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/server/trpc/server";
-import serverContainer from "../../config/ioc/server-container";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import { GATEWAYS, KERNEL, UTILS } from "../../config/ioc/server-ioc-symbols";
 import type { TBaseErrorDTOData } from "~/sdk/core/dto";
-import type { TKernelSDK } from "../../config/kernel/kernel-sdk";
-import { Logger } from "pino";
+import type { Logger } from "pino";
+import serverContainer from "../../../config/ioc/server-container";
+import { UTILS, GATEWAYS, KERNEL } from "../../../config/ioc/server-ioc-symbols";
+import { TKernelSDK } from "../../../config/kernel/kernel-sdk";
 
 const getLogger = () => {
   const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);

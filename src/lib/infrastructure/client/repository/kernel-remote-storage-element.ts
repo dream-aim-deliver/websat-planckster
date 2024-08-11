@@ -239,7 +239,7 @@ export default class KernelRemoteStorageElement implements RemoteStorageElementO
       const remoteFile: RemoteFile = {
         type: "remote",
         provider: "kernel#s3",
-        path: relativePath,
+        relativePath: relativePath,
         name: fileName,
       };
 
@@ -272,7 +272,7 @@ export default class KernelRemoteStorageElement implements RemoteStorageElementO
   ): Promise<DownloadFileDTO> {
     try {
       // 1. Get signed URL for download
-      const signedUrlDTO = await this.__getDownloadSignedUrl("s3", file.path);
+      const signedUrlDTO = await this.__getDownloadSignedUrl("s3", file.relativePath);
 
       if (!signedUrlDTO.success) {
         return {
@@ -305,7 +305,7 @@ export default class KernelRemoteStorageElement implements RemoteStorageElementO
       // 4. Return local file object
       const localFile: LocalFile = {
         type: "local",
-        path: localPath,
+        relativePath: localPath,
         name: file.name,
       };
 

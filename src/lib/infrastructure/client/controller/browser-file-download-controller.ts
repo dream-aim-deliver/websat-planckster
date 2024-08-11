@@ -25,13 +25,11 @@ export default class BrowserFileDownloadController {
 
         try {
             const { relativePaths } = controllerParameters;
-
-
             // Craft the remote file objects
-            const remoteFiles: RemoteFile[] = relativePaths.map((relativePath) => {
+            const remoteFiles: { type: string; relativePath: string; provider: string; name: string; }[] = relativePaths.map((relativePath) => {
                 return {
                     type: "remote",
-                    path: relativePath,
+                    relativePath: relativePath,
                     provider: "kernel#s3",
                     name: path.basename(relativePath),
                 };
@@ -64,24 +62,24 @@ export default class BrowserFileDownloadController {
             for (const file of remoteFiles) {
                 progress += 100 / amountOfFiles;
                 
-                const fileBaseName = path.basename(file.path);
+                const fileBaseName = path.basename(file.relativePath);
 
                 const dto = await kernelFileRepository.downloadFile(file, fileBaseName);
 
                 if (!dto.success) {
                     presenter.presentProgress({
-                        message: `An error occurred while downloading file '${file.path}': ${dto.data.message}`,
+                        message: `An error occurred while downloading file '${file.relativePath}': ${dto.data.message}`,
                         progress: progress,
                     });
 
                     // TODO: might be better to do proper logging here
-                    console.log(`An error occurred while downloading file '${file.path}': ${dto.data.message}`);
+                    console.log(`An error occurred while downloading file '${file.relativePath}': ${dto.data.message}`);
                     
                     unsuccessfullFileNames.push(file.path);
 
                 } else {
                     presenter.presentProgress({
-                        message: `File ${file.path} downloaded successfully`,
+                        message: `File ${file.relativePath} downloaded successfully`,
                         progress: progress,
                     });
                 }
