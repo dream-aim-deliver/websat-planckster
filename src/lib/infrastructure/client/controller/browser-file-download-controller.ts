@@ -1,18 +1,31 @@
+import { z } from "zod";
 import { injectable } from "inversify";
 import clientContainer from "../config/ioc/client-container";
 import { TSignal } from "~/lib/core/entity/signals";
 import { TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 import BrowserFileDownloadPresenter from "../presenter/browser-file-download-presenter";
-import type KernelFileClientRepository from "../repository/kernel-remote-storage-element";
-import { REPOSITORY } from "../config/ioc/client-ioc-symbols";
+import { GATEWAYS } from "../config/ioc/client-ioc-symbols";
 import { RemoteFile } from "~/lib/core/entity/file";
 import path from "path";
+import BrowserSourceDataGateway from "../gateway/browser-source-data-gateway";
 
 
+/**
+ * Represents the basic information of a source data object.
+ * This information is displayed to the user and can be retrieved from the front.
+ */
+export const SourceDataBasicInformationSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    relativePath: z.string(),
+    createdAt: z.string(),
+});
+
+export type TSourceDataBasicInformation = z.infer<typeof SourceDataBasicInformationSchema>;
 
 
 export interface TBrowserFileDownloadControllerParameters {
-    relativePaths: string[];
+    sourceDataBasicInformationList: TSourceDataBasicInformation[];
     response: TSignal<TFileDownloadViewModel>;
 }
 
@@ -24,14 +37,16 @@ export default class BrowserFileDownloadController {
     ): Promise<void> {
 
         try {
-            const { relativePaths } = controllerParameters;
+            const { sourceDataBasicInformationList } = controllerParameters;
             // Craft the remote file objects
-            const remoteFiles: { type: string; relativePath: string; provider: string; name: string; }[] = relativePaths.map((relativePath) => {
+            const remoteFiles: RemoteFile[] = sourceDataBasicInformationList.map((sourceDataBasicInformation) => {
                 return {
                     type: "remote",
-                    relativePath: relativePath,
+                    id: sourceDataBasicInformation.id,
+                    name: sourceDataBasicInformation.name,
+                    relativePath: sourceDataBasicInformation.relativePath,
+                    createdAt: sourceDataBasicInformation.createdAt,
                     provider: "kernel#s3",
-                    name: path.basename(relativePath),
                 };
             }
             );
@@ -46,9 +61,10 @@ export default class BrowserFileDownloadController {
                 controllerParameters.response,
             );
 
-            const kernelFileRepository = clientContainer.get<KernelFileClientRepository>(
-                REPOSITORY.KERNEL_FILE_REPOSITORY
+            const sourceDataGateway = clientContainer.get<BrowserSourceDataGateway>(
+                GATEWAYS.SOURCE_DATA_GATEWAY
             ); // would be injected
+
 
             let progress = 0;
             const unsuccessfullFileNames: string[] = [];
@@ -64,7 +80,7 @@ export default class BrowserFileDownloadController {
                 
                 const fileBaseName = path.basename(file.relativePath);
 
-                const dto = await kernelFileRepository.downloadFile(file, fileBaseName);
+                const dto = await sourceDataGateway.download(file, fileBaseName);
 
                 if (!dto.success) {
                     presenter.presentProgress({
@@ -75,7 +91,7 @@ export default class BrowserFileDownloadController {
                     // TODO: might be better to do proper logging here
                     console.log(`An error occurred while downloading file '${file.relativePath}': ${dto.data.message}`);
                     
-                    unsuccessfullFileNames.push(file.path);
+                    unsuccessfullFileNames.push(file.relativePath);
 
                 } else {
                     presenter.presentProgress({

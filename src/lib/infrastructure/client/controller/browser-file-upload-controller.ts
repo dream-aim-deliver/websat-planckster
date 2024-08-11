@@ -1,12 +1,13 @@
 import { injectable } from "inversify";
 import clientContainer from "../config/ioc/client-container";
-import { REPOSITORY, TRPC } from "../config/ioc/client-ioc-symbols";
+import { GATEWAYS, REPOSITORY, TRPC } from "../config/ioc/client-ioc-symbols";
 import BrowserFileUploadPresenter from "../presenter/browser-file-upload-presenter";
 import type KernelFileClientRepository from "../repository/kernel-remote-storage-element";
 import { TFileUploadingViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import { TSignal } from "~/lib/core/entity/signals";
 import { LocalFile, RemoteFile } from "~/lib/core/entity/file";
 import { TVanillaAPI } from "../trpc/vanilla-api";
+import BrowserSourceDataGateway from "../gateway/browser-source-data-gateway";
 
 export interface TBrowserFileUploadControllerParameters {
   file: File;
@@ -15,7 +16,6 @@ export interface TBrowserFileUploadControllerParameters {
 
 @injectable()
 export default class BrowserFileUploadController {
-  // TODO: this should create the source data too, not just upload the file
 
   async execute(
     controllerParameters: TBrowserFileUploadControllerParameters,
@@ -34,14 +34,17 @@ export default class BrowserFileUploadController {
     const presenter = new BrowserFileUploadPresenter(
       controllerParameters.response,
     );
-    const kernelFileRepository =  clientContainer.get<KernelFileClientRepository>(REPOSITORY.KERNEL_FILE_REPOSITORY); // would be injected
+
+    const sourceDataGateway = clientContainer.get<BrowserSourceDataGateway>(GATEWAYS.SOURCE_DATA_GATEWAY); // would be injected
+    //const kernelFileRepository =  clientContainer.get<KernelFileClientRepository>(REPOSITORY.KERNEL_FILE_REPOSITORY); // would be injected
+
     const api = clientContainer.get<TVanillaAPI>(TRPC.VANILLA_CLIENT);
 
     presenter.presentProgress({
       message: `Uploading file ${file.name} to the storage server...`,
       progress: 0,
     });
-    const dto = await kernelFileRepository.uploadFile(localFile);
+    const dto = await sourceDataGateway.upload(localFile);
 
     if (!dto.success) {
       presenter.presentError({

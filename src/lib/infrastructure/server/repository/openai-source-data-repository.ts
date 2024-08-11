@@ -1,6 +1,6 @@
 import { inject, injectable } from "inversify";
 import { GetSourceDataDTO, ListSourceDataDTO, DeleteSourceDataDTO } from "~/lib/core/dto/source-data-repository-dto";
-import SourceDataRepositoryOutputPort from "~/lib/core/ports/secondary/source-data-repository-output-port";
+import SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import { OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
 import OpenAI from "openai";
 import { File, LocalFile } from "~/lib/core/entity/file";
@@ -9,7 +9,7 @@ import { RemoteFile } from "~/lib/core/entity/file";
 import { generateOpenAIFilename } from "../config/openai/openai-utils";
 
 @injectable()
-export default class OpenAISourceDataRepository implements SourceDataRepositoryOutputPort {
+export default class OpenAISourceDataRepository implements SourceDataGatewayOutputPort {
     private logger: Logger;
     constructor(
         @inject(OPENAI.OPENAI_CLIENT) private openai: OpenAI,
