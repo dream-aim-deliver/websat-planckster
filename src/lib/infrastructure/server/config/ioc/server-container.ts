@@ -10,12 +10,10 @@ import { api } from "~/lib/infrastructure/server/trpc/server-api";
 import OpenAIAgentGateway from "../../gateway/openai-agent-gateway";
 import OpenAIClient from "../openai/openai-client";
 import { KernelSDK } from "../kernel/kernel-sdk";
-import OpenAIRemoteStorageElement from "../../repository/openai-remote-storage-element";
-import KernelFileRepository from "../../repository/kernel-remote-storage-element";
 import type { Logger } from "pino";
 import rootLogger from "../log/pino-server-config";
-import OpenAISourceDataRepository from "../../repository/openai-source-data-repository";
-import KernelSourceDataRepository from "../../repository/kernel-source-data-repository";
+import OpenAISourceDataGateway from "../../gateway/openai-source-data-gateway";
+import KernelSourceDataGateway from "../../gateway/kernel-source-data-gateway";
 import ListResearchContextsController from "../../controller/list-research-contexts-controller";
 import ResearchContextGateway from "../../gateway/research-context-gateway";
 import OpenAIVectorStoreGateway from "../../gateway/openai-vector-store-gateway";
@@ -42,20 +40,22 @@ serverContainer.bind<interfaces.Factory<Logger>>(UTILS.LOGGER_FACTORY).toFactory
 
 /** OPENAI */
 serverContainer.bind(OPENAI.OPENAI_CLIENT).toConstantValue(OpenAIClient);
-serverContainer.bind(OPENAI.OPENAI_SOURCE_DATA_REPOSITORY).to(OpenAISourceDataRepository);
+serverContainer.bind(OPENAI.OPENAI_SOURCE_DATA_GATEWAY).to(OpenAISourceDataGateway);
 
 /** KERNEL */
 serverContainer.bind(KERNEL.KERNEL_SDK).toConstantValue(KernelSDK);
 
 /** GATEWAYS */
 serverContainer.bind(GATEWAYS.AGENT_GATEWAY).to(OpenAIAgentGateway);
-serverContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(OpenAIVectorStoreGateway);
+serverContainer.bind(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY).to(KernelSourceDataGateway);
 serverContainer.bind(GATEWAYS.RESEARCH_CONTEXT_GATEWAY).to(ResearchContextGateway);
+serverContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(OpenAIVectorStoreGateway);
 
 /** REPOSITORY */
-serverContainer.bind(REPOSITORY.KERNEL_FILE_REPOSITORY).to(KernelFileRepository);
-serverContainer.bind(REPOSITORY.KERNEL_SOURCE_DATA_REPOSITORY).to(KernelSourceDataRepository);
-export default serverContainer;
+
 
 /** CONTROLLERS */
 serverContainer.bind(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER).to(ListResearchContextsController)
+
+
+export default serverContainer;

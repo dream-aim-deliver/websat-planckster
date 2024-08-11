@@ -15,7 +15,7 @@ import { error } from "console";
 
 // TODO: only need list and download methods
 @injectable()
-export default class KernelSourceDataRepository implements SourceDataGatewayOutputPort {
+export default class KernelSourceDataGateway implements SourceDataGatewayOutputPort {
     private logger: Logger;
     constructor(
         @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger,
@@ -26,23 +26,125 @@ export default class KernelSourceDataRepository implements SourceDataGatewayOutp
     }
 
     async list(): Promise<ListSourceDataDTO> {
-        return {
-            success: false,
-            data: {
-                operation: "kernel#source-data#list",
-                message: "Method not implemented."
+        const kpCredentialsDTO = await this.authGateway.extractKPCredentials()
+        if (!kpCredentialsDTO.success) {
+            this.logger.error(kpCredentialsDTO, `Failed to extract KP credentials from the session.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#list",
+                    message: kpCredentialsDTO.data.message
+                }
             }
         }
+
+        let kernelListSourceDataViewModel
+        try {
+            kernelListSourceDataViewModel = await this.kernelSDK.listSourceData({
+                id: kpCredentialsDTO.data.clientID,
+                xAuthToken: kpCredentialsDTO.data.xAuthToken,
+            })
+        } catch (error) {
+            this.logger.error(error, `Failed to get source data list.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#list",
+                    message: `Failed to get source data list. Error: ${error}`
+                }
+            }
+        }
+
+        if (!kernelListSourceDataViewModel.status) {
+            this.logger.error(kernelListSourceDataViewModel, `Failed to get source data list.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#list",
+                    message: `Failed to get source data list. Error: ${kernelListSourceDataViewModel.errorMessage}`
+                }
+            }
+        }
+
+        const sourceDataList = kernelListSourceDataViewModel.source_data_list
+        const remoteFiles: RemoteFile[] = sourceDataList.map((sourceData) => {
+            return {
+                id: sourceData.id.toString(),
+                type: "remote",
+                provider: "kernel#s3",
+                relativePath: sourceData.relative_path,
+                name: sourceData.name,
+                createdAt: sourceData.created_at,
+            }
+        })
+
+        return {
+            success: true,
+            data: remoteFiles
+        }
     }
+
     async listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO> {
-        return {
-            success: false,
-            data: {
-                operation: "kernel#lsource-data#listForResearchContext",
-                message: "Method not implemented."
+        const kpCredentialsDTO = await this.authGateway.extractKPCredentials()
+        if (!kpCredentialsDTO.success) {
+            this.logger.error(kpCredentialsDTO, `Failed to extract KP credentials from the session.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#list",
+                    message: kpCredentialsDTO.data.message
+                }
             }
         }
+        
+        let kernelListSourceDataViewModel 
+
+        try{
+            kernelListSourceDataViewModel = await this.kernelSDK.listSourceDataForResearchContext({
+                id: parseInt(researchContextID),
+                xAuthToken: kpCredentialsDTO.data.xAuthToken,
+            })
+        }catch(error){
+            this.logger.error(error, `Failed to get source data list for research context ${researchContextID}.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#list",
+                    message: `Failed to get source data list for research context ${researchContextID}. Error: ${error}`
+                }
+            }
+        }
+
+        if(!kernelListSourceDataViewModel.status){
+            this.logger.error(kernelListSourceDataViewModel, `Failed to get source data list for research context ${researchContextID}.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#list",
+                    message: `Failed to get source data list for research context ${researchContextID}. Error: ${kernelListSourceDataViewModel.errorMessage}`
+                }
+            }
+        }
+
+        const sourceDataList = kernelListSourceDataViewModel.source_data_list
+        const remoteFiles: RemoteFile[] = sourceDataList.map((sourceData) => {
+            return {
+                id: sourceData.id.toString(),
+                type: "remote",
+                provider: "kernel#s3",
+                relativePath: sourceData.relative_path,
+                name: sourceData.name,
+                createdAt: sourceData.created_at,
+            }
+        })
+
+        return {
+            success: true,
+            data: remoteFiles
+        }
+
     }
+    
     async get(fileID: string): Promise<GetSourceDataDTO> {
         return {
             success: false,
@@ -139,17 +241,17 @@ export default class KernelSourceDataRepository implements SourceDataGatewayOutp
         }
 
         const signedUrl = clientDataForDownloadDTO.signed_url;
-        
+
         const finished = promisify(stream.finished);
         const fileStream = fs.createWriteStream(localFilePath);
         let errorData: TBaseErrorDTOData | undefined;
 
-        const response = await axios.get(signedUrl,{
+        const response = await axios.get(signedUrl, {
             responseType: 'stream',
         })
-        
+
         response.data.pipe(fileStream);
-        
+
         try {
             await finished(fileStream)
         } catch (error) {
@@ -159,8 +261,8 @@ export default class KernelSourceDataRepository implements SourceDataGatewayOutp
                 message: `Failed to write file to local path ${localFilePath}.`
             }
         }
-        
-        if(errorData) {
+
+        if (errorData) {
             return {
                 success: false,
                 data: errorData
@@ -176,7 +278,7 @@ export default class KernelSourceDataRepository implements SourceDataGatewayOutp
         }
     }
 
-    
+
     async delete(file: RemoteFile): Promise<DeleteSourceDataDTO> {
         return {
             success: false,

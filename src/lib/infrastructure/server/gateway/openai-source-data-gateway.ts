@@ -10,7 +10,7 @@ import { generateSystemFilename, generateOpenAIFilename } from "../config/openai
 import fs from "fs";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 @injectable()
-export default class OpenAISourceDataRepository implements SourceDataGatewayOutputPort {
+export default class OpenAISourceDataGateway implements SourceDataGatewayOutputPort {
     private logger: Logger;
     constructor(
         @inject(OPENAI.OPENAI_CLIENT) private openai: OpenAI,

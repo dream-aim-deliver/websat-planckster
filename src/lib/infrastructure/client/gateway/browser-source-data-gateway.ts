@@ -259,7 +259,7 @@ export default class BrowserSourceDataGateway implements SourceDataGatewayOutput
      * Uploads a file to the remote storage managed by Kernel and registers the file as a source data.
      *
      * @param file - The file to be uploaded.
-     * @returns A promise that resolves to an UploadFileDTO object containing the result of the upload operation.
+     * @returns A promise that resolves to an UploadSourceDataDTO object containing the result of the upload operation.
      */
     async upload(file: LocalFile, relativePath: string): Promise<UploadSourceDataDTO> {
         try {

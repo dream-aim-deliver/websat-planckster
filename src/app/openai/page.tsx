@@ -5,7 +5,6 @@ import type {  File } from "~/lib/core/entity/file";
 import type { Logger } from "pino";
 import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import fs from "fs";
-import type RemoteStorageElementOutputPort from "~/lib/core/ports/secondary/remote-storage-element-output-port";
 
 const uploadFile = async (file: File) => {
     // const OpenAIRSE = serverContainer.get<RemoteStorageElementOutputPort>(OPENAI.OPENAI_REMOTE_STORAGE_ELEMENT);
@@ -25,7 +24,7 @@ const uploadFile = async (file: File) => {
     // await OpenAIRSE.uploadFile(localFile)
 }
 export default async function OpenAIServerComponent() {
-    const OpenAISourceDataRepository = serverContainer.get<SourceDataGatewayOutputPort>(OPENAI.OPENAI_SOURCE_DATA_REPOSITORY);
+    const OpenAISourceDataRepository = serverContainer.get<SourceDataGatewayOutputPort>(OPENAI.OPENAI_SOURCE_DATA_GATEWAY);
     const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
     const logger = loggerFactory("OpenAIServerComponent");
     // const listSourceDataDTO = await OpenAISourceDataRepository.list();

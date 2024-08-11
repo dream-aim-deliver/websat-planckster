@@ -7,8 +7,8 @@ export const loadAuthMocks = () => {
     authGateway.extractKPCredentials = jest.fn().mockResolvedValue({
         success: true,
         data: {
-            clientID: 123,
-            xAuthToken: "test-token",
+            clientID: 1,
+            xAuthToken: "test123",
         }
     });
     authGateway.getSession = jest.fn().mockResolvedValue({
@@ -20,7 +20,7 @@ export const loadAuthMocks = () => {
                 email: "test@test-user",
                 image: "test-image",
                 kp: {
-                    client_id: 123,
+                    client_id: 1,
                     auth_token: "test123",
                 },
                 role: "USER"

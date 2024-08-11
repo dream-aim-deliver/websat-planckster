@@ -1,4 +1,4 @@
-import { LocalFile } from "~/lib/core/entity/file";
+import { LocalFile, RemoteFile } from "~/lib/core/entity/file";
 import FileRepositoryOutputPort from "~/lib/core/ports/secondary/file-repository-output-port";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container"
 import { GATEWAYS, REPOSITORY } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
@@ -8,6 +8,7 @@ import AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-outpu
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { loadAuthMocks } from "../mocks/auth";
+import SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 
 const KP_UPLOAD_CREDENTIALS_ENDPOINT = http.get(`http://10.10.10.10/client/123/upload-credentials?protocol=s3&relative_path=test.txt`, () => {
     return HttpResponse.json({
@@ -106,4 +107,18 @@ describe("Kernel File Repository", () => {
         // expect(uploadFileDTO.success).toBe(true);
 
     });
+    it("should download a file from Kernel", async () => {
+        // const KernelSourceDataRepository = serverContainer.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY)
+        // const remoteFile: RemoteFile = {
+        //     type: "remote",
+        //     relativePath: "user-uploads/data.json",
+        //     name: "data.json",
+        //     id: "1",
+        //     provider: "kernel#s3",
+        //     createdAt: "",
+        // }
+        // const downloadFileDTO = await KernelSourceDataRepository.download(remoteFile, "data.json")
+        // expect(downloadFileDTO.success).toBe(true);
+
+    }, 10000);
 });
