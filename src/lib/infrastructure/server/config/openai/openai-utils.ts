@@ -8,8 +8,9 @@ import type { File } from "~/lib/core/entity/file";
  * @returns The generated OpenAI filename.
  */
 export const generateOpenAIFilename = (clientID: string, file: File): string => {
-    const openaiFileName = `${clientID}_${file.path}_${file.name}`;
-    return openaiFileName;
+    throw new Error("Not implemented");
+    //const openaiFileName = `${clientID}_${file.path}_${file.name}`;
+    //return openaiFileName;
 }
 
 

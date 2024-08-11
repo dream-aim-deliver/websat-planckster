@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
 import { Container, type interfaces } from "inversify";
-import { CONTROLLERS, GATEWAYS, REPOSITORY, TRPC, USECASE_FACTORY, UTILS } from "./client-ioc-symbols";
+import { CONTROLLERS, GATEWAYS, TRPC, USECASE_FACTORY, UTILS } from "./client-ioc-symbols";
 import { api } from "~/lib/infrastructure/client/trpc/react-api";
 import { api as vanilla } from "~/lib/infrastructure/client/trpc/vanilla-api";
-import KernelFileClientRepository from "../../repository/kernel-remote-storage-element";
 import BrowserFileUploadController from "../../controller/browser-file-upload-controller";
 import config from "./log/tslog-browser-config";
 import { Logger } from "tslog";
@@ -53,7 +52,6 @@ clientContainer.bind(TRPC.REACT_CLIENT_COMPONENTS_API).toConstantValue(api);
 clientContainer.bind(TRPC.VANILLA_CLIENT).toConstantValue(vanilla);
 
 /** REPOSITORY */
-clientContainer.bind(REPOSITORY.BROWSER_RESEARCH_CONTEXT_REPOSITORY).to(BrowserResearchContextRepository).inSingletonScope();
 
 
 /** GATEWAYS */
@@ -77,6 +75,7 @@ clientContainer.bind(CONTROLLERS.SEND_MESSAGE_TO_CONVERSATION_CONTROLLER).to(Bro
 
 
 /** USECASE FACTORY */
+/* eslint-disable  */
 clientContainer
     .bind<interfaces.Factory<CreateResearchContextInputPort>>(USECASE_FACTORY.CREATE_RESEARCH_CONTEXT)
     .toFactory<CreateResearchContextInputPort, [TSignal<TCreateResearchContextViewModel>]>((context: interfaces.Context) =>
@@ -101,4 +100,7 @@ clientContainer
             return usecase;
         }
     );
+
+/* eslint-enable  */
+
 export default clientContainer;

@@ -1,13 +1,13 @@
 import { injectable } from "inversify";
 import clientContainer from "../config/ioc/client-container";
-import { GATEWAYS, REPOSITORY, TRPC } from "../config/ioc/client-ioc-symbols";
+import { GATEWAYS, TRPC } from "../config/ioc/client-ioc-symbols";
 import BrowserFileUploadPresenter from "../presenter/browser-file-upload-presenter";
-import type KernelFileClientRepository from "../repository/kernel-remote-storage-element";
 import { TFileUploadingViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import { TSignal } from "~/lib/core/entity/signals";
 import { LocalFile, RemoteFile } from "~/lib/core/entity/file";
 import { TVanillaAPI } from "../trpc/vanilla-api";
 import BrowserSourceDataGateway from "../gateway/browser-source-data-gateway";
+import { relative } from "path";
 
 export interface TBrowserFileUploadControllerParameters {
   file: File;
@@ -25,7 +25,7 @@ export default class BrowserFileUploadController {
     const localFile: LocalFile = {
       type: "local",
       raw: file,
-      path: file.name,
+      relativePath: file.name,
       name: file.name,
     };
     /************************************************************/
@@ -36,7 +36,6 @@ export default class BrowserFileUploadController {
     );
 
     const sourceDataGateway = clientContainer.get<BrowserSourceDataGateway>(GATEWAYS.SOURCE_DATA_GATEWAY); // would be injected
-    //const kernelFileRepository =  clientContainer.get<KernelFileClientRepository>(REPOSITORY.KERNEL_FILE_REPOSITORY); // would be injected
 
     const api = clientContainer.get<TVanillaAPI>(TRPC.VANILLA_CLIENT);
 
@@ -44,37 +43,26 @@ export default class BrowserFileUploadController {
       message: `Uploading file ${file.name} to the storage server...`,
       progress: 0,
     });
-    const dto = await sourceDataGateway.upload(localFile);
+
+
+    const relativePath = `user-uploads/${fileName}`;
+
+    const dto = await sourceDataGateway.upload(localFile, relativePath);
 
     if (!dto.success) {
       presenter.presentError({
-        message: `An error occurred: ${dto.data.message}`,
+        message: `An error occurred while uploading file ${file.name}: ${dto.data.message}`,
       });
       return;
-    } else {
-      presenter.presentProgress({
-        message: `File ${file.name} uploaded successfully to ${dto.data.provider}`,
-        progress: 50,
-      });
     }
 
-    // register the file in the source data
     const remoteFile: RemoteFile = dto.data;
-    const CreateSourceDataDTO = await api.kernel.sourceData.create.mutate({
-      relativePath: remoteFile.path,
-      sourceDataName: fileName,
-      protocol: "s3",
+
+    presenter.presentSuccess({
+      message: `File ${file.name} uploaded successfully to ${remoteFile.provider}`,
+      fileName: remoteFile.name,
     });
-    if (CreateSourceDataDTO.success) {
-      const data = CreateSourceDataDTO.data;
-      presenter.presentSuccess({
-        message: `Source data created successfully at ${data.protocol}://${data.relative_path}/${fileName}`,
-        fileName: `${remoteFile.path}`,
-      });
-      return;
-    }
-    presenter.presentError({
-      message: `An error occurred: ${CreateSourceDataDTO.data.message}`,
-    });
+
   }
+
 }

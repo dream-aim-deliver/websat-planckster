@@ -20,16 +20,15 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
         @inject(OPENAI.OPENAI_CLIENT) private openai: OpenAI,
     ) {
     }
-    createAgent(clientID: string, researchContextID: number): Promise<TCreateAgentDTO> {
+    createAgent(researchContextID: number): Promise<TCreateAgentDTO> {
         throw new Error("Method not implemented.");
     }
-    prepareMessageContext(clientID: string, researchContextID: string, conversationID: string, message: TMessage): Promise<{ success: true; data: { threadID: string; }; } | { success: false; data: { message: string; operation: string; }; }> {
+    prepareMessageContext(researchContextID: string, conversationID: string, message: TMessage): Promise<{ data: { threadID: string; }; success: true; } | { data: { message: string; operation: string; }; success: false; }> {
         throw new Error("Method not implemented.");
     }
     sendMessage(context: { threadID: string; } | { message: string; operation: string; }, message: TMessage): Promise<TSendMessageDTO> {
         throw new Error("Method not implemented.");
     }
-
 
 
 }

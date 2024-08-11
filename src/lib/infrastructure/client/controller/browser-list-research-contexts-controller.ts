@@ -9,6 +9,6 @@ export interface TBrowserListResearchContextsControllerParameters {
 @injectable()
 export default class BrowserListResearchContextsController {
     async execute(params: TBrowserListResearchContextsControllerParameters): Promise<void> {
-        
+        throw new Error("Method not implemented.");
     }
 }

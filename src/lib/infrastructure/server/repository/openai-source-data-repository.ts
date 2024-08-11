@@ -1,5 +1,5 @@
 import { inject, injectable } from "inversify";
-import { GetSourceDataDTO, ListSourceDataDTO, DeleteSourceDataDTO } from "~/lib/core/dto/source-data-repository-dto";
+import { GetSourceDataDTO, ListSourceDataDTO, DeleteSourceDataDTO } from "~/lib/core/dto/source-data-gateway-dto";
 import SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import { OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
 import OpenAI from "openai";

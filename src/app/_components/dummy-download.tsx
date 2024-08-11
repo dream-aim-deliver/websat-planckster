@@ -8,12 +8,13 @@ import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-downloa
 
 import type { TSignal } from "~/lib/core/entity/signals";
 import { CONTROLLERS, SIGNAL_FACTORY } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
+import {type TSourceDataBasicInformation} from "~/lib/infrastructure/client/controller/browser-file-download-controller";
 import type BrowserFileDownloadController from "~/lib/infrastructure/client/controller/browser-file-download-controller";
 
 
 export const DummyDownloadComponent = () => {
 
-    const [selectedRelativePaths, setSelectedRelativePaths] = useState<string[]>(['', '', '']);
+    const [selectedSourceData, setSelectedSourceData] = useState<TSourceDataBasicInformation[]>([]);
 
 
     const [DownloadViewModel, setDownloadViewModel] =
@@ -29,28 +30,52 @@ export const DummyDownloadComponent = () => {
     const S_KERNEL_FILE_DOWNLOAD_VIEW_MODEL = signalFactory(setDownloadViewModel);
 
     const handleFileDownload = async () => {
-        const strippedPaths = selectedRelativePaths.map(path => path.trim());
-        const nonEmptyPaths = strippedPaths.filter(path => path.length > 0);
-        if (nonEmptyPaths.length > 0) {
-            const fileDownloadController = clientContainer.get<BrowserFileDownloadController>(CONTROLLERS.KERNEL_FILE_DOWNLOAD_CONTROLLER);
+
+        const nonEmptySourceData = selectedSourceData.filter(sd => sd.id.length > 0);
+
+        if (nonEmptySourceData.length > 0) {
+            const browserFileDownloadController = clientContainer.get<BrowserFileDownloadController>(CONTROLLERS.KERNEL_FILE_DOWNLOAD_CONTROLLER)
 
             try {
-                await fileDownloadController.execute({
-                    relativePaths: nonEmptyPaths,
+                await browserFileDownloadController.execute({
+                    sourceDataBasicInformationList: nonEmptySourceData,
                     response: S_KERNEL_FILE_DOWNLOAD_VIEW_MODEL,
-                });
+                })
+                console.log(S_KERNEL_FILE_DOWNLOAD_VIEW_MODEL.value)
+                ;
             } catch (error) {
                 console.error("File download failed:", error);
             }
 
-
         } else {
             console.error("No files selected");
         }
+        
     };
 
+    const handleSourceDataChange = (index: number, field: string, value: string) => {
+        setSelectedSourceData(prevState => {
+            const newState = [...prevState];
+            if (!newState[index]) {
+                newState[index] = { id: '', name: '', relativePath: '', createdAt: '' };
+            }
+            const currentItem = newState[index] ?? { id: '', name: '', relativePath: '', createdAt: '' };
+            newState[index] = { 
+                id: currentItem.id ?? '', 
+                name: currentItem.name ?? '', 
+                relativePath: currentItem.relativePath ?? '', 
+                createdAt: currentItem.createdAt ?? '', 
+                [field]: value 
+            };
 
+            // Filter out entries with any undefined fields
+            const filteredState = newState.filter(
+                item => item.id && item.name && item.relativePath && item.createdAt
+            );
 
+            return filteredState as { id: string; name: string; relativePath: string; createdAt: string }[];
+        });
+    };
 
     return (
         <div
@@ -58,48 +83,12 @@ export const DummyDownloadComponent = () => {
           className="gap-md flex flex-col gap-4"
         >
 
-            <div 
-                id="relativePaths-inputter"
-                className="flex flex-col gap-2 p-2 border-8 border-purple-100"
-            >
-                <input
-                    id="relativePath-1"            
-                    type="text"
-                    className="border-4"
-                    placeholder="Enter relative path..."
-                    onChange={(event) => {
-                        const newPaths = [...selectedRelativePaths];
-                        newPaths[0] = event.target.value;
-                        setSelectedRelativePaths(newPaths);
-                    }}
-                />
-                <input
-                    id="relativePath-2"            
-                    type="text"
-                    className="border-4"
-                    placeholder="Enter relative path..."
-                    onChange={(event) => {
-                        const newPaths = [...selectedRelativePaths];
-                        newPaths[1] = event.target.value;
-                        setSelectedRelativePaths(newPaths);
-                    }}
-                />
-                <input
-                    id="relativePath-3"            
-                    type="text"
-                    className="border-4"
-                    placeholder="Enter relative path..."
-                    onChange={(event) => {
-                        const newPaths = [...selectedRelativePaths];
-                        newPaths[2] = event.target.value;
-                        setSelectedRelativePaths(newPaths);
-                    }}
-                />
+            {[0, 1, 2].map(index => (
+                <SourceDataInput key={index} index={index} onChange={handleSourceDataChange} />
+            ))}
 
-            </div>
-        
             {
-                selectedRelativePaths && (
+                selectedSourceData && (
                     <div
                         id="kp-download-button"
                         className="flex flex-col gap-4 p-4"
@@ -112,7 +101,13 @@ export const DummyDownloadComponent = () => {
                         >
                             Download Source Data
                         </button>
-                        <div>Files selected: {selectedRelativePaths.join(", ")}</div>
+                        <div>
+                        {selectedSourceData.length > 0 ? (
+                            <div>Files selected: {selectedSourceData.map(sd => sd.relativePath).join(', ')}</div>
+                        ) : (
+                            <div>No files selected</div>
+                        )}
+                        </div>
                         <div>Status: {DownloadViewModel.status}</div>
                         <div>Message: {DownloadViewModel.message}</div>
                     </div>
@@ -123,3 +118,50 @@ export const DummyDownloadComponent = () => {
     );
 
 };
+
+interface SourceDataInputProps {
+    index: number;
+    onChange: (index: number, field: string, value: string) => void;
+}
+
+const SourceDataInput: React.FC<SourceDataInputProps> = ({ index, onChange }) => {
+    const handleChange = (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        onChange(index, field, event.target.value);
+    };
+
+    return (
+        <div className="flex flex-col gap-2 p-2 border-8 border-purple-100">
+            <h3 className="font-bold">Source Data {index + 1}</h3>
+            <input
+                id={`sd-id-${index}`}
+                type="text"
+                className="border-4"
+                placeholder="Enter source data id..."
+                onChange={handleChange('id')}
+            />
+            <input
+                id={`sd-name-${index}`}
+                type="text"
+                className="border-4"
+                placeholder="Enter source data name..."
+                onChange={handleChange('name')}
+            />
+            <input
+                id={`sd-relativePath-${index}`}
+                type="text"
+                className="border-4"
+                placeholder="Enter source data relative path..."
+                onChange={handleChange('relativePath')}
+            />
+            <input
+                id={`sd-createdAt-${index}`}
+                type="text"
+                className="border-4"
+                placeholder="Enter source data created at..."
+                onChange={handleChange('createdAt')}
+            />
+        </div>
+    );
+};
+
+export default SourceDataInput;

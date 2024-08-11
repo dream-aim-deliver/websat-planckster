@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { TCreateAgentDTO, TSendMessageDTO } from "~/lib/core/dto/agent-dto";
 import { type TMessage } from "../../entity/kernel-models";
-import { type TBaseDTO, TBaseErrorDTOData } from "~/sdk/core/dto";
+import { type TBaseDTO } from "~/sdk/core/dto";
 
 export default interface AgentGatewayOutputPort<TPrepareContext extends TBaseDTO<any,any>> {
     createAgent(researchContextID: number): Promise<TCreateAgentDTO>;

@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { type SendMessageToConversationInputPort, type SendMessageToConversationOutputPort } from "../ports/primary/send-message-to-conversation-primary-ports";
 import type AgentGatewayOutputPort from "../ports/secondary/agent-gateway-output-port";
 import type ConversationGatewayOutputPort from "../ports/secondary/conversation-gateway-output-port";

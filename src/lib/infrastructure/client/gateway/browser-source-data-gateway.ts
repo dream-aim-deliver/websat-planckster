@@ -255,79 +255,105 @@ export default class BrowserSourceDataGateway implements SourceDataGatewayOutput
 
     }
 
-  /**
-   * Uploads a file to the remote storage managed by Kernel.
-   *
-   * @param file - The file to be uploaded.
-   * @returns A promise that resolves to an UploadFileDTO object containing the result of the upload operation.
-   */
+    /**
+     * Uploads a file to the remote storage managed by Kernel and registers the file as a source data.
+     *
+     * @param file - The file to be uploaded.
+     * @returns A promise that resolves to an UploadFileDTO object containing the result of the upload operation.
+     */
     async upload(file: LocalFile, relativePath: string): Promise<UploadSourceDataDTO> {
-   try {
-      // check if LocalFile contains the raw file
-      if (!file.raw) {
-        return {
-          success: false,
-          data: {
-            operation: "kp#upload",
-            message: `LocalFile does not contain the raw file.`,
-          },
-        };
-      }
+        try {
+            // check if LocalFile contains the raw file
+            if (!file.raw) {
+                this.logger.error(`LocalFile does not contain the raw file.`);
+                return {
+                    success: false,
+                    data: {
+                    operation: "kp#upload",
+                    message: `LocalFile does not contain the raw file.`,
+                    },
+                };
+            }
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const rawFile: File = file.raw;
-      const fileName = rawFile.name;
-      // 1. Craft relative path and get signed URL
-      const relativePath = `user-uploads/${fileName}`;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            const rawFile: File = file.raw;
+            const fileName = rawFile.name;
 
-      const signedUrlDTO = await this.__getUploadSignedUrl("s3", relativePath);
+            // 1. Get signed URL
+            const signedUrlDTO = await this.__getUploadSignedUrl("s3", relativePath);
 
-      if (!signedUrlDTO.success) {
-        return {
-          success: false,
-          data: {
-            operation: "kp#upload",
-            message: `Failed to get signed URL for upload: ${signedUrlDTO.data.message}`,
-          },
-        };
-      }
+            if (!signedUrlDTO.success) {
+                this.logger.error(`Failed to get signed URL for upload: ${signedUrlDTO.data.message}`);
+                return {
+                    success: false,
+                    data: {
+                    operation: "kp#upload",
+                    message: `Failed to get signed URL for upload: ${signedUrlDTO.data.message}`,
+                    },
+                };
+            }
 
-      const signedUrl = signedUrlDTO.data.url;
+            const signedUrl = signedUrlDTO.data.url;
 
-      // 2. Upload file to signed URL with axios
-      const axiosResponse = await axios.put(signedUrl, rawFile);
+            // 2. Upload file to signed URL with axios
+            const axiosResponse = await axios.put(signedUrl, rawFile);
 
-      if (axiosResponse.status !== 200) {
-        return {
-          success: false,
-          data: {
-            operation: "kp#upload",
-            message: `Failed to upload file to signed URL. Status code: ${axiosResponse.status}. Message: ${axiosResponse.statusText}`,
-          },
-        };
-      }
+            if (axiosResponse.status !== 200) {
+                this.logger.error(`Failed to upload file to signed URL. Status code: ${axiosResponse.status}. Message: ${axiosResponse.statusText}`);
+                return {
+                    success: false,
+                    data: {
+                    operation: "kp#upload",
+                    message: `Failed to upload file to signed URL. Status code: ${axiosResponse.status}. Message: ${axiosResponse.statusText}`,
+                    },
+                };
+            }
 
-      const remoteFile: RemoteFile = {
-        type: "remote",
-        provider: "kernel#s3",
-        relativePath: relativePath,
-        name: fileName,
-      };
+            // 3. Register the new source data
+            const createSourceDataDTO = await this.api.kernel.sourceData.create.mutate({
+            relativePath: relativePath,
+            sourceDataName: fileName,
+            protocol: "s3",
+            });
 
-      return {
-        success: true,
-        data: remoteFile,
-      };
-    } catch (error: unknown) {
-      const err = error as Error;
-      return {
-        success: false,
-        data: {
-          operation: "kp#upload",
-          message: `An error occurred: ${err.message}`,
-        },
-      };
-    }
+            if (!createSourceDataDTO.success) {
+                this.logger.error(`Failed to register the new source data after correct upload: ${createSourceDataDTO.data.message}`);
+                return {
+                success: false,
+                data: {
+                    operation: "kp#upload",
+                    message: `Failed to register the new source data after correct upload: ${createSourceDataDTO.data.message}`,
+                },
+                };
+            }
+
+            // 4. Return a remote file object
+            const newSourceData = createSourceDataDTO.data;
+
+            const remoteFile: RemoteFile = {
+                id: newSourceData.id.toString(),
+                type: "remote",
+                name: newSourceData.name,
+                relativePath: newSourceData.relative_path,
+                provider: "kernel#s3",
+                createdAt: newSourceData.created_at,
+            };
+
+            return {
+                success: true,
+                data: remoteFile,
+            };
+        } catch (error: unknown) {
+            const err = error as Error;
+            this.logger.error(`An error occurred while uploading file: ${err.message}`);
+            return {
+                success: false,
+                data: {
+                    operation: "kp#upload",
+                    message: `An error occurred while uploading file: ${err.message}`,
+                },
+            };
+        }
 
     }
 
