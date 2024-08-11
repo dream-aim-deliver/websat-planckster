@@ -5,7 +5,7 @@ import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-
 import type { TBaseErrorDTOData } from "~/sdk/core/dto";
 import serverContainer from "../../../config/ioc/server-container";
 import { GATEWAYS, KERNEL } from "../../../config/ioc/server-ioc-symbols";
-import { TKernelSDK } from "../../../config/kernel/kernel-sdk";
+import { type TKernelSDK } from "../../../config/kernel/kernel-sdk";
 import { createTRPCRouter, protectedProcedure } from "../../server";
 
 export const sourceDataRouter = createTRPCRouter({

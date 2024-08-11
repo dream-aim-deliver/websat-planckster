@@ -12,8 +12,8 @@ import { serverFileRouter } from "./routers/server/server-file-router";
 import { createResearchContextsRouter } from "./routers/research-contexts/create-research-contexts-router";
 import serverContainer from "../config/ioc/server-container";
 import { CONTROLLERS } from "../config/ioc/server-ioc-symbols";
-import ListResearchContextsController from "../controller/list-research-contexts-controller";
-import { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
+import type ListResearchContextsController from "../controller/list-research-contexts-controller";
+import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 import { z } from "zod";
 
 /**

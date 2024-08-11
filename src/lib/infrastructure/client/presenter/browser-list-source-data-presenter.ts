@@ -1,7 +1,7 @@
-import { TSignal } from "~/lib/core/entity/signals";
-import { ListSourceDataOutputPort } from "~/lib/core/ports/primary/list-source-data-primary-ports";
-import { TListSourceDataSuccessResponse, TListSourceDataErrorResponse } from "~/lib/core/usecase-models/list-source-data-view-models";
-import { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
+import { type TSignal } from "~/lib/core/entity/signals";
+import { type ListSourceDataOutputPort } from "~/lib/core/ports/primary/list-source-data-primary-ports";
+import { type TListSourceDataSuccessResponse, type TListSourceDataErrorResponse } from "~/lib/core/usecase-models/list-source-data-view-models";
+import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 
 export default class BrowserListSourceDataPresenter implements ListSourceDataOutputPort<TSignal<TListSourceDataViewModel>> {
     response: TSignal<TListSourceDataViewModel>;

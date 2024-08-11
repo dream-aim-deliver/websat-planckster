@@ -1,4 +1,4 @@
-import { TListConversationsErrorResponse, TListConversationsRequest, TListConversationsSuccessResponse } from "../../usecase-models/list-conversations-usecase-models";
+import { type TListConversationsErrorResponse, type TListConversationsRequest, type TListConversationsSuccessResponse } from "../../usecase-models/list-conversations-usecase-models";
 
 export interface ListConversationsInputPort {
     presenter: ListConversationsOutputPort<any>;

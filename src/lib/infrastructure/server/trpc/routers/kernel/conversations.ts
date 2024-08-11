@@ -7,7 +7,7 @@ import type { TBaseErrorDTOData } from "~/sdk/core/dto";
 import type { Logger } from "pino";
 import serverContainer from "../../../config/ioc/server-container";
 import { UTILS, GATEWAYS, KERNEL } from "../../../config/ioc/server-ioc-symbols";
-import { TKernelSDK } from "../../../config/kernel/kernel-sdk";
+import { type TKernelSDK } from "../../../config/kernel/kernel-sdk";
 
 const getLogger = () => {
   const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);

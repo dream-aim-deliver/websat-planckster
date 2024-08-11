@@ -1,4 +1,4 @@
-import { TListResearchContextsRequest, TListResearchContextsSuccessResponse, TListResearchContextsErrorResponse } from "../../usecase-models/list-research-contexts-usecase-models";
+import { type TListResearchContextsRequest, type TListResearchContextsSuccessResponse, type TListResearchContextsErrorResponse } from "../../usecase-models/list-research-contexts-usecase-models";
 
 export interface ListResearchContextsPrimaryPorts {
     execute(request: TListResearchContextsRequest): Promise<void>;

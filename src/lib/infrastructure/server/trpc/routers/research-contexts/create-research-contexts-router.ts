@@ -1,4 +1,4 @@
-import { Logger } from "pino";
+import { type Logger } from "pino";
 import serverContainer from "../../../config/ioc/server-container";
 import { UTILS } from "../../../config/ioc/server-ioc-symbols";
 import { createTRPCRouter, protectedProcedure } from "../../server";

@@ -1,7 +1,7 @@
-import { TSignal } from "~/lib/core/entity/signals";
-import { ListConversationsOutputPort } from "~/lib/core/ports/primary/list-conversations-primary-ports";
-import { TListConversationsSuccessResponse, TListConversationsErrorResponse } from "~/lib/core/usecase-models/list-conversations-usecase-models";
-import { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
+import { type TSignal } from "~/lib/core/entity/signals";
+import { type ListConversationsOutputPort } from "~/lib/core/ports/primary/list-conversations-primary-ports";
+import { type TListConversationsSuccessResponse, type TListConversationsErrorResponse } from "~/lib/core/usecase-models/list-conversations-usecase-models";
+import { type TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 
 export default class BrowserListConversationsPresenter implements ListConversationsOutputPort<TSignal<TListConversationsViewModel>> {
     response: TSignal<TListConversationsViewModel>;
