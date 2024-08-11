@@ -17,7 +17,7 @@ import KernelSourceDataGateway from "../../gateway/kernel-source-data-gateway";
 import ListResearchContextsController from "../../controller/list-research-contexts-controller";
 import ResearchContextGateway from "../../gateway/research-context-gateway";
 import OpenAIVectorStoreGateway from "../../gateway/openai-vector-store-gateway";
-import ConversationGateway from "../../gateway/conversation-gateway";
+import KernelConversationGateway from "../../gateway/kernel-conversation-gateway";
 
 const serverContainer = new Container();
 
@@ -51,7 +51,7 @@ serverContainer.bind(GATEWAYS.AGENT_GATEWAY).to(OpenAIAgentGateway);
 serverContainer.bind(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY).to(KernelSourceDataGateway);
 serverContainer.bind(GATEWAYS.RESEARCH_CONTEXT_GATEWAY).to(ResearchContextGateway);
 serverContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(OpenAIVectorStoreGateway);
-serverContainer.bind(GATEWAYS.CONVERSATION_GATEWAY).to(ConversationGateway);
+serverContainer.bind(GATEWAYS.KERNEL_CONVERSATION_GATEWAY).to(KernelConversationGateway);
 
 /** REPOSITORY */
 

@@ -20,7 +20,7 @@ export const conversationRouter = createTRPCRouter({
     )
     .query(async ({ input }): Promise<ListConversationsDTO> => {
 
-        const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.CONVERSATION_GATEWAY);
+        const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
 
         const dto = await conversationGateway.listConversations(input.researchContextID.toString());
 
@@ -41,7 +41,7 @@ export const conversationRouter = createTRPCRouter({
         )
         .mutation(async ({ input }): Promise<CreateConversationDTO> => {
 
-            const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.CONVERSATION_GATEWAY);
+            const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
 
             const dto = await conversationGateway.createConversation(input.researchContextID.toString(), input.conversationTitle);
 

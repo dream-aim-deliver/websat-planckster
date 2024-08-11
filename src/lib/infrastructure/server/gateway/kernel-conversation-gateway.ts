@@ -2,14 +2,14 @@ import { inject, injectable } from "inversify";
 import { type CreateConversationDTO, type ListConversationsDTO, type SendMessageToConversationResponseDTO, type ListMessagesForConversationDTO } from "~/lib/core/dto/conversation-gateway-dto";
 import { type TMessage } from "~/lib/core/entity/kernel-models";
 import type ConversationGatewayOutputPort from "~/lib/core/ports/secondary/conversation-gateway-output-port";
-import { GATEWAYS, KERNEL, UTILS } from "../../server/config/ioc/server-ioc-symbols";
+import { GATEWAYS, KERNEL, UTILS } from "../config/ioc/server-ioc-symbols";
 import { Logger } from "pino";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import { type TKernelSDK } from "../config/kernel/kernel-sdk";
 import { TBaseErrorDTOData } from "~/sdk/core/dto";
 
 @injectable()
-export default class ConversationGateway implements ConversationGatewayOutputPort {
+export default class KernelConversationGateway implements ConversationGatewayOutputPort {
 
     private logger: Logger
     constructor(
@@ -32,7 +32,7 @@ export default class ConversationGateway implements ConversationGatewayOutputPor
                 return {
                     success: false,
                     data: {
-                        operation: "create-conversation",
+                        operation: "kernel#conversation#create",
                         message: "Failed to get KP credentials",
                     } as TBaseErrorDTOData
                 };
@@ -64,7 +64,7 @@ export default class ConversationGateway implements ConversationGatewayOutputPor
                 success: false,
                 data: {
                     message: `Failed to create conversation for Research Context with ID ${researchContextID}`,
-                    operation: "create-conversation",
+                    operation: "kernel#conversation#create",
                 }
             }
 
@@ -75,7 +75,7 @@ export default class ConversationGateway implements ConversationGatewayOutputPor
                 success: false,
                 data: {
                     message: err.message,
-                    operation: "create-conversation",
+                    operation: "kernel#conversation#create",
 
                 }
             }
@@ -96,7 +96,7 @@ export default class ConversationGateway implements ConversationGatewayOutputPor
                 return {
                     success: false,
                     data: {
-                        operation: "list-conversations",
+                        operation: "kernel#conversation#list",
                         message: "Failed to get KP credentials",
                     } as TBaseErrorDTOData
                 };
@@ -125,7 +125,7 @@ export default class ConversationGateway implements ConversationGatewayOutputPor
             return {
                 success: false,
                 data: {
-                    operation: "list-conversations",
+                    operation: "kernel#conversation#list",
                     message: `Failed to list messages for Research Context with ID ${researchContextID}`,
                 } as TBaseErrorDTOData
             };
@@ -137,7 +137,7 @@ export default class ConversationGateway implements ConversationGatewayOutputPor
                 success: false,
                 data: {
                     message: err.message,
-                    operation: "list-conversations",
+                    operation: "kernel#conversation#list",
                 }
             }
         }
@@ -159,7 +159,7 @@ export default class ConversationGateway implements ConversationGatewayOutputPor
                 return {
                     success: false,
                     data: {
-                        operation: "get-conversation-messages",
+                        operation: "kernel#conversation#get-messages",
                         message: "Failed to get KP credentials",
                     } as TBaseErrorDTOData
                 };
@@ -199,7 +199,7 @@ export default class ConversationGateway implements ConversationGatewayOutputPor
             return {
                 success: false,
                 data: {
-                    operation: "get-conversation-messages",
+                    operation: "kernel#conversation#get-messages",
                     message: `Failed to list messages for conversation with ID ${conversationID}`,
                 } as TBaseErrorDTOData
             };
@@ -212,7 +212,7 @@ export default class ConversationGateway implements ConversationGatewayOutputPor
                 success: false,
                 data: {
                     message: err.message,
-                    operation: "get-conversation-messages",
+                    operation: "kernel#conversation#get-messages",
                 }
             }
         }

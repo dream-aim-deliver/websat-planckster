@@ -27,7 +27,7 @@ export const messageRouter = createTRPCRouter({
     )
     .query(async ({ input }): Promise<ListMessagesForConversationDTO> => {
 
-        const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.CONVERSATION_GATEWAY);
+        const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
 
         const dto = await conversationGateway.getConversationMessages(input.conversationID.toString());
 
