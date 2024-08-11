@@ -51,7 +51,6 @@ export const messageRouter = createTRPCRouter({
 
         const kernelSDK: TKernelSDK = serverContainer.get(KERNEL.KERNEL_SDK);
 
-
         const listMessagesViewModel = await kernelSDK.listMessages({
             id: input.conversationID,
             xAuthToken: kpCredentialsDTO.data.xAuthToken, 
