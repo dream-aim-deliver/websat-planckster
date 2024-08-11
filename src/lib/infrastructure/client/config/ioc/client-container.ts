@@ -6,7 +6,7 @@ import { api } from "~/lib/infrastructure/client/trpc/react-api";
 import { api as vanilla } from "~/lib/infrastructure/client/trpc/vanilla-api";
 import BrowserFileUploadController from "../../controller/browser-file-upload-controller";
 import config from "./log/tslog-browser-config";
-import { ILogObj, Logger } from "tslog";
+import { type ILogObj, Logger } from "tslog";
 import BrowserFileDownloadController from "../../controller/browser-file-download-controller";
 import BrowserSourceDataGateway from "../../gateway/browser-source-data-gateway";
 import CreateResearchContextBrowserController from "../../controller/browser-create-research-context-controller";

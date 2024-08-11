@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ClientService as sdk, type NewConversationViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
+import { type NewConversationViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
 import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/server/trpc/server";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import type { TBaseErrorDTOData } from "~/sdk/core/dto";
@@ -29,9 +29,8 @@ export const conversationRouter = createTRPCRouter({
         const kpCredentialsDTO = await authGateway.extractKPCredentials();
 
         if (!kpCredentialsDTO.success) {
-            // console.log(
-            logger.info(
-                `Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`
+            logger.error(
+                `Failed to get KP credentials: ${kpCredentialsDTO.data.message}`
             );
             return {
                 success: false,
@@ -50,16 +49,15 @@ export const conversationRouter = createTRPCRouter({
         });
 
         if(listConversationsViewModel.status) {
-            const conversations = listConversationsViewModel.conversations
+            logger.debug(`Successfully listed conversations for Research Context with ID ${input.id}. View model code: ${listConversationsViewModel.code}`);
             return {
                 success: true,
-                data: conversations,
+                data: listConversationsViewModel,
             };
         }
 
-        // console.log(
-        logger.info(
-            `Failed to get signed URL for upload. Dumping view model: ${listConversationsViewModel.errorMessage}`
+        logger.error(
+            `Failed to get signed URL for upload: ${listConversationsViewModel.errorMessage}`
         );
         return {
             success: false,
@@ -67,7 +65,7 @@ export const conversationRouter = createTRPCRouter({
                 operation: "conversationRouter#list",
                 message: `Failed to list messages for Research Context with ID ${input.id}`,
             } as TBaseErrorDTOData
-        }; // TODO: clean this, return a proper error DTO or a view model probably
+        };
 
     }),
 
@@ -91,6 +89,9 @@ export const conversationRouter = createTRPCRouter({
             const kpCredentialsDTO = await authGateway.extractKPCredentials();
 
             if (!kpCredentialsDTO.success) {
+                logger.error(
+                    `Failed to get KP credentials: ${kpCredentialsDTO.data.message}`
+                );
                 return {
                     success: false,
                     data: {
@@ -109,12 +110,14 @@ export const conversationRouter = createTRPCRouter({
             });
 
             if(newConversationViewModel.status) {
+                logger.debug(`Successfully created conversation for Research Context with ID ${input.id}. View model code: ${newConversationViewModel.code}`);
                 return {
                     success: true,
                     data: newConversationViewModel
                 };
             }
 
+            logger.error(`Failed to create conversation: ${newConversationViewModel.errorMessage}`);
             return {
                 success: false,
                 data: {
