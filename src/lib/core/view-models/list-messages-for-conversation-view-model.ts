@@ -4,7 +4,7 @@ import { MessageSchema } from '../entity/kernel-models'
 
 export const ListMessagesForConversationRequestViewModelSchema = z.object({
     status: z.enum(['request']),
-    conversationId: z.string(),
+    conversationID: z.string(),
 })
 export type TListMessagesForConversationRequestViewModel = z.infer<typeof ListMessagesForConversationRequestViewModelSchema>
 

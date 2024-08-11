@@ -3,7 +3,6 @@ import { MessageSchema } from "../entity/kernel-models";
 
 export const ListMessagesForConversationRequestSchema = z.object({
     clientID: z.string(),
-    researchContextID: z.string(),
     conversationID: z.string(),
 });
 

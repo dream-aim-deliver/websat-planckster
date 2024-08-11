@@ -113,8 +113,60 @@ export default class BrowserConversationGateway implements ConversationGatewayOu
         throw new Error("Method not implemented.");
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async getConversationMessages(conversationID: string): Promise<ListMessagesForConversationDTO> {
-        throw new Error("Method not implemented.");
+
+        try {
+
+            const conversationIDNumber = parseInt(conversationID);
+
+            const routerDTO = await this.api.kernel.message.list.query({
+                conversationID: conversationIDNumber,
+            });
+
+            if (!routerDTO.success) {
+                this.logger.error(`Failed to list messages for conversation: ${routerDTO.data.message}`);
+                return {
+                    success: false,
+                    data: {
+                        message: routerDTO.data.message,
+                        operation: routerDTO.data.operation,
+                    }
+                }
+            }
+
+            this.logger.debug(`Successfully listed messages for conversation with ID ${conversationID}`);
+
+            const kpMessages = routerDTO.data.message_list
+
+            const messages: TMessage[] = kpMessages.map((kpMessage) => {
+                return {
+                    id: kpMessage.id,
+                    content: kpMessage.content,
+                    timestamp: kpMessage.timestamp,
+                    sender: kpMessage.sender,
+                    senderType: kpMessage.sender_type,
+                 }
+            });
+
+            return {
+                success: true,
+                data: messages
+            }
+
+
+        } catch (error) {
+            const err = error as Error;
+            this.logger.error(`An error occurred while listing messages for conversation: ${err.message}`);
+            return {
+                success: false,
+                data: {
+                    message: err.message,
+                    operation: "list-messages-for-conversation",
+                }
+            }
+        }
+
+
+
     }
 }

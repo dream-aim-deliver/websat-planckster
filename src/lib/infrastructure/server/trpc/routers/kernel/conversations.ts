@@ -65,7 +65,7 @@ export const conversationRouter = createTRPCRouter({
         }
 
         logger.error(
-            `Failed to get signed URL for upload: ${listConversationsViewModel.errorMessage}`
+            `Failed to list conversations for Research Context with ID ${input.researchContextID}: ${listConversationsViewModel.errorMessage}`
         );
         return {
             success: false,
@@ -125,12 +125,12 @@ export const conversationRouter = createTRPCRouter({
                 };
             }
 
-            logger.error(`Failed to create conversation: ${newConversationViewModel.errorMessage}`);
+            logger.error(`Failed to create conversation for Research Context with ID ${input.researchContextID}: ${newConversationViewModel.errorMessage}`);
             return {
                 success: false,
                 data: {
                     operation: "conversationRouter#create",
-                    message: newConversationViewModel.errorMessage,
+                    message: `Failed to create conversation for Research Context with ID ${input.researchContextID}`,
                 } as TBaseErrorDTOData
             };
         }),
