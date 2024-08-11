@@ -8,6 +8,6 @@ export interface ListResearchContextsPrimaryPorts {
 
 export interface ListResearchContextsOutputPort<TResponse> {
     response: TResponse;
-    presentSuccess(response: TListResearchContextsSuccessResponse): void;
-    presentError(response: TListResearchContextsErrorResponse): void;
+    presentSuccess(success: TListResearchContextsSuccessResponse): void;
+    presentError(error: TListResearchContextsErrorResponse): void;
 }

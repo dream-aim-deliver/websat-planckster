@@ -8,6 +8,6 @@ export interface ListSourceDataInputPort {
 
 export interface ListSourceDataOutputPort<TResponse> {
     response: TResponse;
-    presentSuccess(response: TListSourceDataSuccessResponse): void;
-    presentError(response: TListSourceDataErrorResponse): void;
+    presentSuccess(success: TListSourceDataSuccessResponse): void;
+    presentError(error: TListSourceDataErrorResponse): void;
 }

@@ -8,6 +8,6 @@ export interface ListConversationsInputPort {
 
 export interface ListConversationsOutputPort<TResponse> {
     response: TResponse;
-    presentSuccess(response: TListConversationsSuccessResponse): void;
-    presentError(response: TListConversationsErrorResponse): void;
+    presentSuccess(success: TListConversationsSuccessResponse): void;
+    presentError(error: TListConversationsErrorResponse): void;
 }

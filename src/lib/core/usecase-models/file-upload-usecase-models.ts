@@ -16,6 +16,7 @@ export type TFileUploadSuccessResponse = z.infer<typeof FileUploadSuccessRespons
 
 export const FileUploadErrorResponseSchema = z.object({
     message: z.string(),
+    context: z.any().optional(),
 });
 
 export type TFileUploadErrorResponse = z.infer<typeof FileUploadErrorResponseSchema>;

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MessageSchema } from "../entity/kernel-models";
 
 export const ListMessagesForConversationRequestSchema = z.object({
     clientID: z.string(),
@@ -9,12 +10,7 @@ export const ListMessagesForConversationRequestSchema = z.object({
 export type TListMessagesForConversationRequest = z.infer<typeof ListMessagesForConversationRequestSchema>;
 
 export const ListMessagesForConversationSuccessResponseSchema = z.object({
-    messages: z.array(z.object({
-        message_id: z.number(),
-        conversation_id: z.number(),
-        message: z.string(),
-        created_at: z.string(),
-    })),
+    messages: z.array(MessageSchema),
 });
 
 export type TListMessagesForConversationSuccessResponse = z.infer<typeof ListMessagesForConversationSuccessResponseSchema>;

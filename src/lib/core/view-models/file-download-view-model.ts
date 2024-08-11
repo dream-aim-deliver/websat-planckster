@@ -23,6 +23,7 @@ export const FileDownloadProgressViewModelSchema = z.object({
 export const FileDownloadErrorResponseViewModelSchema = z.object({
     status: z.enum(["error"]),
     message: z.string(),
+    context: z.any().optional(),
 });
 
 export const FileDownloadViewModelSchema = z.discriminatedUnion("status", [

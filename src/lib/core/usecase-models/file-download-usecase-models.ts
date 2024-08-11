@@ -22,6 +22,7 @@ export type TFileDownloadPartialResponse = z.infer<typeof FileDownloadPartialRes
 
 export const FileDownloadErrorResponseSchema = z.object({
     message: z.string(),
+    context: z.any().optional(),
 });
 
 export type TFileDownloadErrorResponse = z.infer<typeof FileDownloadErrorResponseSchema>;

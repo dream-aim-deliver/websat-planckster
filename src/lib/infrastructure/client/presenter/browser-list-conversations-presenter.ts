@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type TSignal } from "~/lib/core/entity/signals";
 import { type ListConversationsOutputPort } from "~/lib/core/ports/primary/list-conversations-primary-ports";
 import { type TListConversationsSuccessResponse, type TListConversationsErrorResponse } from "~/lib/core/usecase-models/list-conversations-usecase-models";
@@ -8,10 +9,18 @@ export default class BrowserListConversationsPresenter implements ListConversati
     constructor(response: TSignal<TListConversationsViewModel>) {
         this.response = response;
     }
-    presentSuccess(response: TListConversationsSuccessResponse): void {
-        throw new Error("Method not implemented.");
+    presentSuccess(success: TListConversationsSuccessResponse): void {
+        this.response.update({
+            status: "success",
+            conversations: success.conversations
+        });
     }
-    presentError(response: TListConversationsErrorResponse): void {
-        throw new Error("Method not implemented.");
+
+    presentError(error: TListConversationsErrorResponse): void {
+        this.response.update({
+            status: "error",
+            message: error.message,
+            context: error.context
+        });
     }
 }

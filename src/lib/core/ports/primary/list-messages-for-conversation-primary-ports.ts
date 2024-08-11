@@ -9,6 +9,6 @@ export interface ListMessagesForConversationInputPort {
 
 export interface ListMessagesForConversationOutputPort<TResponse> {
     response: TResponse;
-    presentSuccess(response: TListMessagesForConversationSuccessResponse): void;
-    presentError(response: TListMessagesForConversationErrorResponse): void;
+    presentSuccess(success: TListMessagesForConversationSuccessResponse): void;
+    presentError(error: TListMessagesForConversationErrorResponse): void;
 }

@@ -8,7 +8,7 @@ export interface SendMessageToConversationInputPort {
 
 export interface SendMessageToConversationOutputPort<TResponse> {
     response: TResponse;
-    presentProgress(response: TSendMessageToConversationProgressResponse): void;
-    presentSuccess(response: TSendMessageToConversationSuccessResponse): void;
-    presentError(response: TSendMessageToConversationErrorResponse): void;
+    presentProgress(progress: TSendMessageToConversationProgressResponse): void;
+    presentSuccess(success: TSendMessageToConversationSuccessResponse): void;
+    presentError(error: TSendMessageToConversationErrorResponse): void;
 }

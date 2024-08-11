@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type TSignal } from "../../../core/entity/signals";
 import { type FileDownloadOutputPort } from "~/lib/core/ports/primary/file-download-primary-ports";
 import { type TFileDownloadPartialResponse, type TFileDownloadErrorResponse, type TFileDownloadProgressResponse, type TFileDownloadSuccessResponse } from "~/lib/core/usecase-models/file-download-usecase-models";
@@ -21,7 +22,8 @@ export default class BrowserFileDownloadPresenter implements FileDownloadOutputP
     presentError(error: TFileDownloadErrorResponse): void {
         this.response.update({
             status: "error",
-            message: error.message
+            message: error.message,
+            context: error.context,
         })
     }
 

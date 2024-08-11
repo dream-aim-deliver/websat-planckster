@@ -6,7 +6,7 @@ import { api } from "~/lib/infrastructure/client/trpc/react-api";
 import { api as vanilla } from "~/lib/infrastructure/client/trpc/vanilla-api";
 import BrowserFileUploadController from "../../controller/browser-file-upload-controller";
 import config from "./log/tslog-browser-config";
-import { Logger } from "tslog";
+import { ILogObj, Logger } from "tslog";
 import BrowserFileDownloadController from "../../controller/browser-file-download-controller";
 import BrowserSourceDataGateway from "../../gateway/browser-source-data-gateway";
 import CreateResearchContextBrowserController from "../../controller/browser-create-research-context-controller";
@@ -93,7 +93,8 @@ clientContainer
     .bind<interfaces.Factory<SendMessageToConversationInputPort>>(USECASE_FACTORY.SEND_MESSAGE_TO_CONVERSATION)
     .toFactory<SendMessageToConversationInputPort, [TSignal<TSendMessageToConversationViewModel>]>((context: interfaces.Context) =>
         (response: TSignal<TSendMessageToConversationViewModel>) => {
-            const presenter = new BrowserSendMessageToConversationPresenter(response);
+            const loggerFactory = context.container.get<(module: string) => Logger<ILogObj>>(UTILS.LOGGER_FACTORY);
+            const presenter = new BrowserSendMessageToConversationPresenter(response, loggerFactory);
             const agentGateway = context.container.get<AgentGatewayOutputPort<any>>(GATEWAYS.AGENT_GATEWAY);
             const conversationGateway = context.container.get<ConversationGatewayOutputPort>(GATEWAYS.CONVERSATION_GATEWAY);
             const usecase = new BrowserSendMessageToConversationUseCase(presenter, agentGateway, conversationGateway);

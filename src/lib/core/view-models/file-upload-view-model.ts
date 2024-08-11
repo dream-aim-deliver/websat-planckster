@@ -19,6 +19,7 @@ export const FileUploadingProgressViewModelSchema = z.object({
 export const FileUploadingErrorResponseViewModelSchema = z.object({
     status: z.enum(["error"]),
     message: z.string(),
+    context: z.any().optional(),
 });
 
 export const FileUploadingViewModelSchema = z.discriminatedUnion("status", [

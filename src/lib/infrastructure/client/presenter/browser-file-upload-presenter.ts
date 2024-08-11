@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type TSignal } from "../../../core/entity/signals";
 import { type FileUploadOutputPort } from "../../../core/ports/primary/file-upload-primary-ports";
-import { type TFileUploadProgressResponse } from "../../../core/usecase-models/file-upload-usecase-models";
+import { type TFileUploadErrorResponse, type TFileUploadSuccessResponse, type TFileUploadProgressResponse } from "../../../core/usecase-models/file-upload-usecase-models";
 import { type TFileUploadingViewModel } from "../../../core/view-models/file-upload-view-model";
 
 export default class BrowserFileUploadPresenter implements FileUploadOutputPort<TSignal<TFileUploadingViewModel>>{
@@ -17,14 +18,15 @@ export default class BrowserFileUploadPresenter implements FileUploadOutputPort<
         });
     }
 
-    presentError(error: { message: string }): void {
+    presentError(error: TFileUploadErrorResponse): void {
         this.response.update({
             status: "error",
-            message: error.message
+            message: error.message,
+            context: error.context
         })
     }
 
-    presentSuccess(success: { message: string; fileName: string }): void {
+    presentSuccess(success: TFileUploadSuccessResponse): void {
         this.response.update({
             status: "success",
             message: success.message,
