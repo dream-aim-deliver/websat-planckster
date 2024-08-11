@@ -18,23 +18,66 @@ export default class OpenAISourceDataRepository implements SourceDataGatewayOutp
     ) {
         this.logger = loggerFactory("OpenAISourceDataRepository");
     }
-    listForResearchContext(clientID: string, researchContextID: string): Promise<ListSourceDataDTO> {
-        throw new Error("Method not implemented.");
+    async listForResearchContext(clientID: string, researchContextID: string): Promise<ListSourceDataDTO> {
+        this.logger.error("Method not implemented. Tried accessing an unimplemented method 'listForResearchContext' in OpenAISourceDataRepository.")
+        return {
+            success: false,
+            data: {
+                operation: "openai#listForResearchContext",
+                message: "Method not implemented."
+            }
+        }
     }
-    list(clientID: string): Promise<ListSourceDataDTO> {
-        throw new Error("Method not implemented.");
+    async list(clientID: string): Promise<ListSourceDataDTO> {
+        this.logger.error("Method not implemented. Tried accessing an unimplemented method 'list' in OpenAISourceDataRepository.")
+        return {
+            success: false,
+            data: {
+                operation: "openai#list",
+                message: "Method not implemented."
+            }
+        }
     }
-    get(clientID: string, fileID: string): Promise<GetSourceDataDTO> {
-        throw new Error("Method not implemented.");
+
+    async get(clientID: string, fileID: string): Promise<GetSourceDataDTO> {
+        this.logger.error("Method not implemented. Tried accessing an unimplemented method 'get' in OpenAISourceDataRepository.")
+        return {
+            success: false,
+            data: {
+                operation: "openai#get",
+                message: "Method not implemented."
+            }
+        }
     }
-    upload(file: LocalFile, relativePath: string): Promise<GetSourceDataDTO> {
-        throw new Error("Method not implemented.");
+    async upload(file: LocalFile, relativePath: string): Promise<GetSourceDataDTO> {
+        this.logger.error("Method not implemented. Tried accessing an unimplemented method 'upload' in OpenAISourceDataRepository.")
+        return {
+            success: false,
+            data: {
+                operation: "openai#upload",
+                message: "Method not implemented."
+            }
+        }
     }
-    download(file: RemoteFile, localPath?: string): Promise<GetSourceDataDTO> {
-        throw new Error("Method not implemented.");
+    async download(file: RemoteFile, localPath?: string): Promise<GetSourceDataDTO> {
+        this.logger.error("Method not implemented. Tried accessing an unimplemented method 'download' in OpenAISourceDataRepository.")
+        return {
+            success: false,
+            data: {
+                operation: "openai#download",
+                message: "Method not implemented."
+            }
+        }
     }
-    delete(file: RemoteFile): Promise<DeleteSourceDataDTO> {
-        throw new Error("Method not implemented.");
+    async delete(file: RemoteFile): Promise<DeleteSourceDataDTO> {
+        this.logger.error("Method not implemented. Tried accessing an unimplemented method 'delete' in OpenAISourceDataRepository.")
+        return {
+            success: false,
+            data: {
+                operation: "openai#delete",
+                message: "Method not implemented."
+            }
+        }
     }
 
     // /**
