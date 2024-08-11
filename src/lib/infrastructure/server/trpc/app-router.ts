@@ -73,7 +73,9 @@ export const appRouter = createTRPCRouter({
           return { status: "request" }
         }),
     },
-    list: protectedProcedure.query(async () => { }),
+    list: protectedProcedure.query(async () => {
+      return { status: "request" }
+     }),
     sendMessage: protectedProcedure.mutation(async ({ input }) => {
       // call a server controller and usecase to send a message, try to fix any errors
       return { status: "request" }

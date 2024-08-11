@@ -1,6 +1,6 @@
 import { TListResearchContextDTO, TGetResearchContextDTO, TCreateResearchContextDTO } from "~/lib/core/dto/research-context-gateway-dto";
 import ResearchContextGatewayOutputPort from "~/lib/core/ports/secondary/research-context-gateway-output-port";
-import { File, RemoteFile } from "~/lib/core/entity/file";
+import { RemoteFile } from "~/lib/core/entity/file";
 import { injectable } from "inversify";
 
 @injectable()

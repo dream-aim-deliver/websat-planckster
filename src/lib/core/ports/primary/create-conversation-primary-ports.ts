@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { type TCreateConversationErrorResponse, type TCreateConversationRequest, type TCreateConversationSuccessResponse } from "../../usecase-models/create-conversation-usecase-models";
 
 export interface CreateConversationInputPort {

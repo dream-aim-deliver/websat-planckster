@@ -11,6 +11,12 @@ export const TRPC = {
 export const UTILS = {
     LOGGER_FACTORY: Symbol("LOGGER_FACTORY"),
 }
+
+export const USECASE_FACTORY ={
+    CREATE_RESEARCH_CONTEXT: Symbol("CREATE_RESEARCH_CONTEXT"),
+    SEND_MESSAGE_TO_CONVERSATION: Symbol("SEND_MESSAGE_TO_CONVERSATION"),
+}
+
 export const REPOSITORY = {
 }
 
