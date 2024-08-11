@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
 import { Container, type interfaces } from "inversify";
-import { CONTROLLERS, REPOSITORY, TRPC, UTILS } from "./client-ioc-symbols";
+import { CONTROLLERS, GATEWAYS, REPOSITORY, TRPC, UTILS } from "./client-ioc-symbols";
 import { api } from "~/lib/infrastructure/client/trpc/react-api";
 import { api as vanilla } from "~/lib/infrastructure/client/trpc/vanilla-api";
 import KernelFileClientRepository from "../../repository/kernel-remote-storage-element";
@@ -18,6 +18,8 @@ import BrowserListMessagesForConversationController from "../../controller/brows
 import BrowserListResearchContextsController from "../../controller/browser-list-research-contexts-controller";
 import BrowserListSourceDataController from "../../controller/browser-list-source-data-controller";
 import BrowserSendMessageToConversationController from "../../controller/browser-send-message-to-conversation-controller";
+import BrowserAgentGateway from "../../gateway/browser-agent-gateway";
+import BrowserConversationGateway from "../../gateway/browser-conversation-gateway";
 
 const clientContainer = new Container();
 
@@ -40,6 +42,11 @@ clientContainer.bind(TRPC.VANILLA_CLIENT).toConstantValue(vanilla);
 clientContainer.bind(REPOSITORY.KERNEL_FILE_REPOSITORY).to(KernelFileClientRepository).inSingletonScope();
 clientContainer.bind(REPOSITORY.BROWSER_SOURCE_DATA_REPOSITORY).to(BrowserSourceDataRepository).inSingletonScope();
 clientContainer.bind(REPOSITORY.BROWSER_RESEARCH_CONTEXT_REPOSITORY).to(BrowserResearchContextRepository).inSingletonScope();
+
+
+/** GATEWAYS */
+clientContainer.bind(GATEWAYS.AGENT_GATEWAY).to(BrowserAgentGateway).inSingletonScope();
+clientContainer.bind(GATEWAYS.CONVERSATION_GATEWAY).to(BrowserConversationGateway).inSingletonScope();
 
 /** CONTROLLER */
 clientContainer.bind(CONTROLLERS.KERNEL_FILE_UPLOAD_CONTROLLER).to(BrowserFileUploadController);

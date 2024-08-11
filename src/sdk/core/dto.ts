@@ -25,7 +25,7 @@ export const DTOSchemaFactory = <TSuccessData, TErrorData>(
     ]);
 };
 
-export type BaseDTO<TSuccessData, TErrorData> = z.infer<
+export type TBaseDTO<TSuccessData, TErrorData> = z.infer<
     ReturnType<typeof DTOSchemaFactory<TSuccessData, TErrorData>>
 >;
 

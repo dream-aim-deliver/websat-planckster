@@ -1,29 +1,35 @@
 import { inject, injectable } from "inversify";
+import { z } from "zod";
 import OpenAI from "openai";
-import type { CreateAgentDTO } from "~/lib/core/dto/agent-dto";
+import type { TCreateAgentDTO, TSendMessageDTO } from "~/lib/core/dto/agent-dto";
 import type AgentGatewayOutputPort from "~/lib/core/ports/secondary/agent-gateway-output-port";
 import env from "~/lib/infrastructure/server/config/env";
-import { TRPC } from "../config/ioc/server-ioc-symbols";
+import { OPENAI, TRPC } from "../config/ioc/server-ioc-symbols";
 import type { TServerComponentAPI } from "../trpc/server-api";
+import { BaseErrorDTOSchema, DTOSchemaFactory } from "~/sdk/core/dto";
+import { TMessage } from "~/lib/core/entity/kernel-models";
 
+export const OpenAIMessageContext = DTOSchemaFactory(z.object({
+    threadID: z.string(),
+}), BaseErrorDTOSchema);
 
+export type TOpenAIMessageContext = z.infer<typeof OpenAIMessageContext>;
 @injectable()
-export default class OpenAIAgentGateway implements AgentGatewayOutputPort {
-    private openai: OpenAI
+export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenAIMessageContext> {
     constructor(
-        @inject(TRPC.REACT_SERVER_COMPONENTS_API) private api: TServerComponentAPI , 
+        @inject(OPENAI.OPENAI_CLIENT) private openai: OpenAI,
     ) {
-        this.openai = new OpenAI({
-            apiKey: env.OPENAI_API_KEY! as string,
-        });
-    }        
-
-
-    /**
-     * 
-     * @param research_context_id The research context id to bind the agent to.
-     */
-    createAgent(research_context_id: number): Promise<CreateAgentDTO> {
+    }
+    createAgent(clientID: string, researchContextID: number): Promise<TCreateAgentDTO> {
         throw new Error("Method not implemented.");
     }
+    prepareMessageContext(clientID: string, researchContextID: string, conversationID: string, message: TMessage): Promise<{ success: true; data: { threadID: string; }; } | { success: false; data: { message: string; operation: string; }; }> {
+        throw new Error("Method not implemented.");
+    }
+    sendMessage(context: { threadID: string; } | { message: string; operation: string; }, message: TMessage): Promise<TSendMessageDTO> {
+        throw new Error("Method not implemented.");
+    }
+
+
+
 }

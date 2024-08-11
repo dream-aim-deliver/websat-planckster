@@ -5,7 +5,7 @@ export const SendMessageToConversationRequestSchema = z.object({
     clientID: z.string(),
     researchContextID: z.string(),
     conversationID: z.string(),
-    message: z.string(),
+    message: MessageSchema,
 })
 
 export type TSendMessageToConversationRequest = z.infer<typeof SendMessageToConversationRequestSchema>
@@ -26,5 +26,6 @@ export type TSendMessageToConversationErrorResponse = z.infer<typeof SendMessage
 export const SendMessageToConversationProgressResponseSchema = z.object({
     message: MessageSchema,
     progress: z.string(),
+    context: z.any(),
 })
 export type TSendMessageToConversationProgressResponse = z.infer<typeof SendMessageToConversationProgressResponseSchema>
