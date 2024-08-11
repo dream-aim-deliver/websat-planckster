@@ -25,7 +25,7 @@ export default class KernelSourceDataRepository implements SourceDataGatewayOutp
         this.logger = loggerFactory("KernelSourceDataRepository");
     }
 
-    async list(clientID: string): Promise<ListSourceDataDTO> {
+    async list(): Promise<ListSourceDataDTO> {
         return {
             success: false,
             data: {
@@ -34,7 +34,7 @@ export default class KernelSourceDataRepository implements SourceDataGatewayOutp
             }
         }
     }
-    async listForResearchContext(clientID: string, researchContextID: string): Promise<ListSourceDataDTO> {
+    async listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO> {
         return {
             success: false,
             data: {
@@ -43,7 +43,7 @@ export default class KernelSourceDataRepository implements SourceDataGatewayOutp
             }
         }
     }
-    async get(clientID: string, fileID: string): Promise<GetSourceDataDTO> {
+    async get(fileID: string): Promise<GetSourceDataDTO> {
         return {
             success: false,
             data: {

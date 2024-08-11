@@ -5,9 +5,9 @@ import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
  * This interface defines the methods for retrieving, listing, and deleting source data.
  */
 export default interface SourceDataGatewayOutputPort {
-    list(clientID: string): Promise<ListSourceDataDTO>;
-    listForResearchContext(clientID: string, researchContextID: string): Promise<ListSourceDataDTO>;
-    get(clientID: string, fileID: string): Promise<GetSourceDataDTO>;
+    list(): Promise<ListSourceDataDTO>;
+    listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO>;
+    get(fileID: string): Promise<GetSourceDataDTO>;
     upload(file: LocalFile, relativePath: string): Promise<UploadSourceDataDTO>;
     download(file: RemoteFile, localPath?: string): Promise<DownloadSourceDataDTO>;
     delete(file: RemoteFile): Promise<DeleteSourceDataDTO>;

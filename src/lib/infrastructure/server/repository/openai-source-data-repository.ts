@@ -1,24 +1,26 @@
 import { inject, injectable } from "inversify";
 import { GetSourceDataDTO, ListSourceDataDTO, DeleteSourceDataDTO } from "~/lib/core/dto/source-data-gateway-dto";
 import SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
-import { OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
+import { GATEWAYS, OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
 import OpenAI from "openai";
 import { File, LocalFile } from "~/lib/core/entity/file";
 import { Logger } from "pino";
 import { RemoteFile } from "~/lib/core/entity/file";
 import { generateOpenAIFilename } from "../config/openai/openai-utils";
-
+import fs from "fs";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 @injectable()
 export default class OpenAISourceDataRepository implements SourceDataGatewayOutputPort {
     private logger: Logger;
     constructor(
         @inject(OPENAI.OPENAI_CLIENT) private openai: OpenAI,
-        @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger
+        @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger,
+        @inject(GATEWAYS.AUTH_GATEWAY) private authGateway: AuthGatewayOutputPort,
 
     ) {
         this.logger = loggerFactory("OpenAISourceDataRepository");
     }
-    async listForResearchContext(clientID: string, researchContextID: string): Promise<ListSourceDataDTO> {
+    async listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO> {
         this.logger.error("Method not implemented. Tried accessing an unimplemented method 'listForResearchContext' in OpenAISourceDataRepository.")
         return {
             success: false,
@@ -28,7 +30,7 @@ export default class OpenAISourceDataRepository implements SourceDataGatewayOutp
             }
         }
     }
-    async list(clientID: string): Promise<ListSourceDataDTO> {
+    async list(): Promise<ListSourceDataDTO> {
         this.logger.error("Method not implemented. Tried accessing an unimplemented method 'list' in OpenAISourceDataRepository.")
         return {
             success: false,
@@ -39,7 +41,7 @@ export default class OpenAISourceDataRepository implements SourceDataGatewayOutp
         }
     }
 
-    async get(clientID: string, fileID: string): Promise<GetSourceDataDTO> {
+    async get(fileID: string): Promise<GetSourceDataDTO> {
         this.logger.error("Method not implemented. Tried accessing an unimplemented method 'get' in OpenAISourceDataRepository.")
         return {
             success: false,
@@ -51,14 +53,88 @@ export default class OpenAISourceDataRepository implements SourceDataGatewayOutp
     }
     async upload(file: LocalFile, relativePath: string): Promise<GetSourceDataDTO> {
         this.logger.error("Method not implemented. Tried accessing an unimplemented method 'upload' in OpenAISourceDataRepository.")
-        return {
-            success: false,
-            data: {
-                operation: "openai#upload",
-                message: "Method not implemented."
+        // check if file exists at the path
+        if (!fs.existsSync(file.relativePath)) {
+            const errorDTO: GetSourceDataDTO = {
+                success: false,
+                data: {
+                    operation: "openai#file-upload",
+                    message: "File not found on the local filesystem. Nothing to upload."
+                }
             }
+            return errorDTO;
         }
+
+        // Get client ID of the current user
+        const clientIDDTO = await this.authGateway.extractKPCredentials();
+        if (!clientIDDTO.success) {
+            this.logger.error({ clientIDDTO }, `Failed to get KP client ID. This is required to create a unique identified in OpenAI for the user data.`);
+            const errorDTO: GetSourceDataDTO = {
+                success: false,
+                data: {
+                    operation: "openai#file-upload",
+                    message: clientIDDTO.data.message
+                }
+            }
+            return errorDTO;
+        }
+        const clientID = clientIDDTO.data.clientID;
+
+        const openAIFilename = generateOpenAIFilename(clientID.toString(), file);
+
+        // copy file to `scratch` directory
+        const localPath = `${process.env.SCRATCH_DIR}/${openAIFilename}`;
+        try {
+            this.logger.info(`Copying file ${file.relativePath} to ${localPath}.`);
+            fs.copyFileSync(file.relativePath, localPath);
+        } catch (error) {
+            this.logger.error({ error }, `Failed to copy file ${file.relativePath} to ${localPath}.`);
+            const errorDTO: GetSourceDataDTO = {
+                success: false,
+                data: {
+                    operation: "openai#file-upload",
+                    message: `Failed to copy file ${file.relativePath} to ${localPath}.`
+                }
+            }
+            return errorDTO;
+        }
+
+        const fileStream = fs.createReadStream(file.relativePath);
+        this.logger.info(`Uploading file ${file.relativePath} as ${openAIFilename} to OpenAI.`);
+
+        try {
+            const openAIFile = await this.openai.files.create({
+                file: fileStream,
+                purpose: "assistants",
+            });
+            const remoteFile: RemoteFile = {
+                provider: "openai",
+                type: "remote",
+                id: openAIFile.id,
+                name: file.name,
+                relativePath: openAIFilename,
+                createdAt: new Date().toISOString(),
+            }
+
+            const successDTO: GetSourceDataDTO = {
+                success: true,
+                data: remoteFile
+            }
+            return successDTO;
+        } catch (error) {
+            this.logger.error({ error }, `Failed to upload file ${file.relativePath} as ${openAIFilename} to OpenAI.`);
+            const errorDTO: GetSourceDataDTO = {
+                success: false,
+                data: {
+                    operation: "openai#file-upload",
+                    message: `Failed to upload file ${file.relativePath} as ${openAIFilename} to OpenAI.`
+                }
+            }
+            return errorDTO;
+        }
+
     }
+
     async download(file: RemoteFile, localPath?: string): Promise<GetSourceDataDTO> {
         this.logger.error("Method not implemented. Tried accessing an unimplemented method 'download' in OpenAISourceDataRepository.")
         return {

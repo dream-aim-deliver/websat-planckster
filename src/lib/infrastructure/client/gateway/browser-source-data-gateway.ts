@@ -358,15 +358,15 @@ export default class BrowserSourceDataGateway implements SourceDataGatewayOutput
     }
 
 
-    async listForResearchContext(clientID: string, researchContextID: string): Promise<ListSourceDataDTO> {
+    async listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO> {
         throw new Error("Method not implemented.");
     }
 
-    async list(clientID: string, researchContextID?: string): Promise<ListSourceDataDTO> {
+    async list(researchContextID?: string): Promise<ListSourceDataDTO> {
         throw new Error("Method not implemented.");
     }
 
-    async get(clientID: string, fileID: string): Promise<GetSourceDataDTO> {
+    async get(fileID: string): Promise<GetSourceDataDTO> {
         throw new Error("Method not implemented.");
     }
 
