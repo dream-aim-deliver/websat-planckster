@@ -1,16 +1,16 @@
 import { redirect } from "next/navigation";
-import { ListResearchContextsPage } from "./_components/list-research-contexts";
-import type { ResearchContext } from "@maany_shr/kernel-planckster-sdk-ts";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import {
+  CONTROLLERS,
   GATEWAYS,
-  TRPC,
 } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
-import type { TServerComponentAPI } from "~/lib/infrastructure/server/trpc/server-api";
-import env from "~/lib/infrastructure/server/config/env";
+import type ListSourceDataController from "~/lib/infrastructure/server/controller/list-source-data-controller";
+import type { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
+import { TSignal } from "~/lib/core/entity/signals";
+import { ListSourcesForClientPage } from "./_components/list-sources";
 
-export default async function ListResearchContexts() {
+export default async function ListSourcesServerPage() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(
     GATEWAYS.AUTH_GATEWAY,
   );
@@ -18,24 +18,23 @@ export default async function ListResearchContexts() {
   if (!sessionDTO.success) {
     redirect("/auth/login");
   }
-  const kpCredentialsDTO = await authGateway.extractKPCredentials();
-  const api: TServerComponentAPI = serverContainer.get(
-    TRPC.REACT_SERVER_COMPONENTS_API,
+  const viewModel =  new TSignal<TListSourceDataViewModel>(
+    "ListSourceDataViewModel",
+    "List of source data",
+    {
+      status: "request",
+    },
   );
-  const isConnected = await api.kernel.healthCheck.ping({});
-  const isAuthorizedKPUser = kpCredentialsDTO.success;
-  // let researchContexts: ResearchContext[] = [];
+  const listSourceDataController = serverContainer.get<ListSourceDataController>(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER)
+  
+  await listSourceDataController.execute({
+    response: viewModel,
+  });
 
-  // if (isConnected && isAuthorizedKPUser) {
-  //   researchContexts = await api.kernel.researchContext.list();
-  // }
 
   return (
-    <div>
-      {/*<ListResearchContextsPage
-        researchContexts={researchContexts}
-        kernelPlancksterHost={env.KP_HOST! as string}
-      />*/}
+    <div className="flex flex-col items-center just-between h-full">
+      <ListSourcesForClientPage initialData={viewModel.value} />
     </div>
   );
 }
