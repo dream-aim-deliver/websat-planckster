@@ -6,7 +6,7 @@ import type { AppRouter } from '~/lib/infrastructure/server/trpc/app-router';
 const client = createTRPCClient<AppRouter>({
   links: [
     httpBatchLink({
-        url: 'http://localhost:3000/api/trpc',
+        url: 'https://websat-planckster.vercel.app//api/trpc',
 
         // You can pass any HTTP headers you wish here
         // async headers() {
