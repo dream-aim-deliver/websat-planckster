@@ -1,49 +1,35 @@
 import { z } from "zod";
 
-import { ClientService as sdk, type SourceData } from "@maany_shr/kernel-planckster-sdk-ts";
+import { type SourceData } from "@maany_shr/kernel-planckster-sdk-ts";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import type { TBaseErrorDTOData } from "~/sdk/core/dto";
 import serverContainer from "../../../config/ioc/server-container";
-import { GATEWAYS, KERNEL } from "../../../config/ioc/server-ioc-symbols";
+import { GATEWAYS, KERNEL, UTILS } from "../../../config/ioc/server-ioc-symbols";
 import { type TKernelSDK } from "../../../config/kernel/kernel-sdk";
 import { createTRPCRouter, protectedProcedure } from "../../server";
+import { type ListSourceDataDTO } from "~/lib/core/dto/source-data-gateway-dto";
+import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
+import { type Logger } from "pino";
+
+
+const getLogger = () => {
+  const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
+  const logger = loggerFactory("conversationRouter");
+  return logger;
+}
+
+
 
 export const sourceDataRouter = createTRPCRouter({
 
   listForClient: protectedProcedure
-    .query(async () => {
+    .query(async (): Promise<ListSourceDataDTO> => {
 
-      const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
-      const kpCredentialsDTO = await authGateway.extractKPCredentials();
+      const sourceDataGateway = serverContainer.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
 
-      if (!kpCredentialsDTO.success) {
-        console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
-        return {
-          success: false,
-          data: {
-            operation: "sourceDataRouter#listForClient",
-            message: "Failed to get KP credentials",
-          } as TBaseErrorDTOData
-        };
-      }
+      const dto = await sourceDataGateway.list();
 
-      const viewModel = await sdk.listSourceData({
-        id: kpCredentialsDTO.data.clientID,
-        xAuthToken: kpCredentialsDTO.data.xAuthToken,
-      });
-      if (viewModel.status) {
-        const sources = viewModel.source_data_list
-        return {
-          success: true, data: sources,
-        };
-      }
-      console.error(`Failed to get source data for client. Dumping view model: ${viewModel.errorMessage}`);
-      return {
-        success: false, data: {
-          operation: "sourceDataRouter#listForClient",
-          message: "Failed to get source data for client",
-        } as TBaseErrorDTOData
-      };
+      return dto;
 
     }),
 
@@ -54,11 +40,23 @@ export const sourceDataRouter = createTRPCRouter({
         relativePath: z.string(), // TODO: validate that's a path that KP likes
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input }): Promise<
+      {
+        success: true,
+        data: string
+      } | {
+        success: false,
+        data: TBaseErrorDTOData
+      }
+    > => {
+
+      const logger = getLogger();
+
       const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+
       const kpCredentialsDTO = await authGateway.extractKPCredentials();
       if (!kpCredentialsDTO.success) {
-        console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
+        logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
         return {
           success: false,
           data: {
@@ -67,7 +65,8 @@ export const sourceDataRouter = createTRPCRouter({
           } as TBaseErrorDTOData
         };
       }
-      const kernelSDK: TKernelSDK =serverContainer.get(KERNEL.KERNEL_SDK);
+
+      const kernelSDK: TKernelSDK = serverContainer.get(KERNEL.KERNEL_SDK);
 
       const signedUrlViewModel = await kernelSDK.getClientDataForUpload({
         id: kpCredentialsDTO.data.clientID,
@@ -77,13 +76,15 @@ export const sourceDataRouter = createTRPCRouter({
       })
 
       if (signedUrlViewModel.status) {
+        logger.debug(`Successfully got signed URL for upload`);
         const signedUrl = signedUrlViewModel.signed_url
         return {
           success: true,
           data: signedUrl,
         };
       }
-      console.error(`Failed to get signed URL for upload. Dumping view model: ${signedUrlViewModel.errorMessage}`);
+
+      logger.error(`Failed to get signed URL for upload: ${signedUrlViewModel.errorMessage}`);
       return {
         success: false,
         data: {
@@ -110,11 +111,13 @@ export const sourceDataRouter = createTRPCRouter({
       data: TBaseErrorDTOData
     }> => {
 
+      const logger = getLogger();
+
       const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
       const kpCredentialsDTO = await authGateway.extractKPCredentials();
 
       if (!kpCredentialsDTO.success) {
-        console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
+        logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
         return {
           success: false,
           data: {
@@ -124,7 +127,9 @@ export const sourceDataRouter = createTRPCRouter({
         }
       }
 
-      const registerSourceDataViewModel = await sdk.registerSourceData({
+      const kernelSDK: TKernelSDK = serverContainer.get(KERNEL.KERNEL_SDK);
+
+      const registerSourceDataViewModel = await kernelSDK.registerSourceData({
         id: kpCredentialsDTO.data.clientID,
         sourceDataName: input.sourceDataName,
         sourceDataProtocol: input.protocol,
@@ -133,11 +138,15 @@ export const sourceDataRouter = createTRPCRouter({
       })
 
       if (registerSourceDataViewModel.status && registerSourceDataViewModel.source_data) {
+        logger.debug(`Successfully created source data`);
         return {
           success: true,
           data: registerSourceDataViewModel.source_data,
         };
       }
+
+      logger.error(`Failed to create source data: ${registerSourceDataViewModel.errorMessage}`);
+
       return {
         success: false,
         data: {
@@ -154,13 +163,23 @@ export const sourceDataRouter = createTRPCRouter({
         relativePath: z.string(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input }): Promise<
+      {
+        success: true,
+        data: string
+      } | {
+        success: false,
+        data: TBaseErrorDTOData
+      }
+    > => {
+
+      const logger = getLogger();
 
       const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
       const kpCredentialsDTO = await authGateway.extractKPCredentials();
 
       if (!kpCredentialsDTO.success) {
-        console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
+        logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
         return {
           success: false,
           data: {
@@ -180,6 +199,7 @@ export const sourceDataRouter = createTRPCRouter({
       })
 
       if (signedUrlViewModel.status) {
+        logger.debug(`Successfully got signed URL for download`);
         const signedUrl = signedUrlViewModel.signed_url
         return {
           success: true,
@@ -187,7 +207,7 @@ export const sourceDataRouter = createTRPCRouter({
         };
       }
 
-      console.error(`Failed to get signed URL for download. Dumping view model: ${signedUrlViewModel.errorMessage}`);
+      logger.error(`Failed to get signed URL for download. Dumping view model: ${signedUrlViewModel.errorMessage}`);
 
       return {
         success: false,
@@ -205,25 +225,13 @@ export const sourceDataRouter = createTRPCRouter({
         researchContextId: z.number(),
       }),
     )
-    .query(async ({ input }) => {
+    .query(async ({ input }): Promise<ListSourceDataDTO> => {
 
-      const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
-      const kpCredentialsDTO = await authGateway.extractKPCredentials();
+      const sourceDataGateway = serverContainer.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
 
-      if (!kpCredentialsDTO.success) {
-        console.error(`Failed to get KP credentials. Dumping DTO: ${kpCredentialsDTO.data.message}`);
-        return [];
-      }
+      const dto = await sourceDataGateway.listForResearchContext(input.researchContextId.toString());
 
-      const viewModel = await sdk.listSourceDataForResearchContext({
-        id: input.researchContextId,
-        xAuthToken: kpCredentialsDTO.data.xAuthToken,
-      });
-      if (viewModel.status) {
-        const sources = viewModel.source_data_list
-        return sources;
-      }
-      console.error(`Failed to get source data for research context. Dumping view model: ${viewModel.errorMessage}`);
-      return [];
+      return dto;
+
     }),
 });

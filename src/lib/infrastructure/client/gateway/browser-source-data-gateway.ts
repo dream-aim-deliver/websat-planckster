@@ -359,11 +359,32 @@ export default class BrowserSourceDataGateway implements SourceDataGatewayOutput
 
 
     async listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO> {
-        throw new Error("Method not implemented.");
+        try {
+            const researchContextIDNumber = parseInt(researchContextID);
+
+            const response = await this.api.kernel.sourceData.listForResearchContext.query({
+                researchContextId: researchContextIDNumber
+            })
+
+            return response;
+
+        } catch (error) {
+            const err = error as Error;
+            this.logger.error(`An error occurred while listing source data for research context: ${err.message}`);
+            return {
+                success: false,
+                data: {
+                    operation: "browser#source-data#list-for-research-context",
+                    message: `An error occurred while listing source data for research context: ${err.message}`,
+                },
+            };
+
+        }
     }
 
-    async list(researchContextID?: string): Promise<ListSourceDataDTO> {
-        throw new Error("Method not implemented.");
+    async list(): Promise<ListSourceDataDTO> {
+        const response = await this.api.kernel.sourceData.listForClient.query()
+        return response;
     }
 
     async get(fileID: string): Promise<GetSourceDataDTO> {

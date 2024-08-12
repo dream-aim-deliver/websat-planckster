@@ -19,21 +19,50 @@ export default class BrowserConversationGateway implements ConversationGatewayOu
     }
 
   async createConversation(researchContextID: string, conversationTitle: string): Promise<CreateConversationDTO> {
+    try {
+      const researchContextIDNumber = parseInt(researchContextID);
 
-    const response = await this.api.kernel.conversation.create.mutate({
-      researchContextID: parseInt(researchContextID),
-      conversationTitle: conversationTitle
-    });
+      const response = await this.api.kernel.conversation.create.mutate({
+        researchContextID: researchContextIDNumber,
+        conversationTitle: conversationTitle
+      });
 
-    return response;
+      return response;
+
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`Error creating conversation: ${err.message}`);
+      return {
+        success: false,
+        data: {
+          operation: "browser#conversation#create",
+          message: err.message
+        }
+      }
+    }
   }
 
   async listConversations(researchContextID: string): Promise<ListConversationsDTO> {
-    const response = await this.api.kernel.conversation.list.query({
-      researchContextID: parseInt(researchContextID)
-    });
+    try {
+      const researchContextIDNumber = parseInt(researchContextID);
+      const response = await this.api.kernel.conversation.list.query({
+        researchContextID: researchContextIDNumber
+      });
 
-    return response;
+      return response;
+
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`Error listing conversations: ${err.message}`);
+      return {
+        success: false,
+        data: {
+          operation: "browser#conversation#list",
+          message: err.message
+        }
+      }
+    }
+
   }
 
   async sendMessage(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
@@ -41,11 +70,25 @@ export default class BrowserConversationGateway implements ConversationGatewayOu
   }
 
   async getConversationMessages(conversationID: string): Promise<ListMessagesForConversationDTO> {
-    const response = await this.api.kernel.message.list.query({
-      conversationID: parseInt(conversationID)
-    });
+    try {
+      const conversationIDNumber = parseInt(conversationID);
+      const response = await this.api.kernel.message.list.query({
+        conversationID: conversationIDNumber
+      });
 
-    return response;
+      return response;
+
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`Error getting conversation messages: ${err.message}`);
+      return {
+        success: false,
+        data: {
+          operation: "browser#conversation#get-conversation-messages",
+          message: err.message
+        }
+      }
+    }
   }
 
 }

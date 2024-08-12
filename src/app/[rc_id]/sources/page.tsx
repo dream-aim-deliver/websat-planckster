@@ -21,18 +21,24 @@ async function ListSourceData({ rc_id }: { rc_id: string }) {
   const api: TServerComponentAPI = serverContainer.get(TRPC.REACT_SERVER_COMPONENTS_API);
   const rc_id_int = parseInt(rc_id);
   
-  const sourceData = await api.kernel.sourceData.listForResearchContext(
+  const sourceDataDTO = await api.kernel.sourceData.listForResearchContext(
     {
         researchContextId: rc_id_int,
     }
   )
+
+  if (!sourceDataDTO.success) {
+    return <div>Error: {sourceDataDTO.data.message}</div>;
+  }
+
+  const sourceData = sourceDataDTO.data
 
   // Return a simple HTML unordered list
   return (
    <ul>
     {sourceData.map((data, index) => (
       <li key={index}>
-        {data.relative_path}
+        {data.relativePath}
       </li>
     ))}
   </ul>   
