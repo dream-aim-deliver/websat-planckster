@@ -82,3 +82,39 @@ export const getClientIDAndResearchContextIDFromVectorStoreName = (vector_store_
         research_context_id: parseInt(researchContextID),
     }
 }
+
+
+/**
+ * Generates an agent name based on the client ID and research context ID.
+ * The format is: client_{client_id}_research_context_{research_context_id}.
+ * @param client_id 
+ * @param research_context_id 
+ * @returns 
+ */
+export const generateAgentName = (client_id: number, research_context_id: number): string => {
+    return `client_${client_id}_research_context_${research_context_id}`;
+}
+
+/**
+ * Extracts the client ID and research context ID from an agent name.
+ * The format for agent names is: client_{client_id}_research_context_{research_context_id}.
+ * @param agent_name - The agent name.
+ * @returns { client_id, research_context_id } - An object containing the client_id and research_context_id extracted from the agent name.
+ * @throws Error if the agent name is invalid.
+ */
+export const getClientIDAndResearchContextIDFromAgentName = (agent_name: string): { client_id: number, research_context_id: number } => {
+    const regex = /client_(\d+)_research_context_(\d+)/;
+    const match = agent_name.match(regex);
+    if (!match) {
+        throw new Error(`Failed to extract client_id and research_context_id from agent_name: ${agent_name}`);
+    }
+    const clientID = match[1];
+    const researchContextID = match[2];
+    if(!clientID || !researchContextID) {
+        throw new Error(`Failed to extract client_id and research_context_id from agent_name: ${agent_name}`);
+    }
+    return {
+        client_id: parseInt(clientID),
+        research_context_id: parseInt(researchContextID),
+    }
+}
