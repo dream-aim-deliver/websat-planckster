@@ -181,10 +181,12 @@ export default class KernelConversationGateway implements ConversationGatewayOut
                 const messages: TMessage[] = kpMessages.map((kpMessage) => {
                     return {
                         id: kpMessage.id,
+                        type: kpMessage.type,  // TODO: backport to kernel planckster
                         content: kpMessage.content,
                         timestamp: kpMessage.timestamp,
                         sender: kpMessage.sender,
                         senderType: kpMessage.sender_type,
+                        trace: kpMessage.trace,  // TODO: backport to kernel planckster
                     }
                 });
 
