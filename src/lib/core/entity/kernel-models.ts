@@ -19,18 +19,30 @@ export const BaseMessageSchema = z.object({
     content: z.string(),
     timestamp: z.string(),
     sender: z.string(),
+    type: z.enum(["text", "image"]),  // TODO: backport to kernel planckster
+    trace: z.string(),  // TODO: backport to kernel planckster
 });
 
-export const UserMessageSchema = z.object({
+export const UserMessageSchema = BaseMessageSchema.merge(z.object({
     senderType: z.literal("user"),
-});
+}));
 
-export const AgentMessageSchema = z.object({
+export const AgentMessageSchema = BaseMessageSchema.merge(z.object({
     senderType: z.literal("agent"),
-});
+}));
 
 export const MessageSchema = z.discriminatedUnion("senderType", [
     UserMessageSchema,
     AgentMessageSchema
 ]);
 export type TMessage = z.infer<typeof MessageSchema>;
+
+export const TextMessageSchema = BaseMessageSchema.extend({
+    type: z.literal("text"),
+});
+export type TTextMessage = z.infer<typeof TextMessageSchema>;
+
+export const ImageMessageSchema = BaseMessageSchema.extend({
+    type: z.literal("image"),
+});
+export type TImageMessage = z.infer<typeof ImageMessageSchema>;

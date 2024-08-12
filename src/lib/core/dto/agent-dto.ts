@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import { z } from "zod";
 import { DTOSchemaFactory, BaseErrorDTOSchema } from "@/sdk/core/dto";
 import { AgentSchema } from "../entity/dadbod/agent";
 import { MessageSchema } from "../entity/kernel-models";
@@ -18,8 +18,16 @@ export const CreateAgentDTOSchema = DTOSchemaFactory(
 
 export type TCreateAgentDTO = z.infer<typeof CreateAgentDTOSchema>;
 
+const SendMessageDTOMessageSchema = z.array(
+    z.object({
+        content: z.string(),
+        type: z.enum(["text", "image"]),
+        trace: z.string(),
+    })
+);
+
 export const SendMessageDTO = DTOSchemaFactory(
-    MessageSchema,
+    SendMessageDTOMessageSchema,
     BaseErrorDTOSchema,
 );
 
