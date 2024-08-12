@@ -18,6 +18,10 @@ import ListResearchContextsController from "../../controller/list-research-conte
 import ResearchContextGateway from "../../gateway/research-context-gateway";
 import OpenAIVectorStoreGateway from "../../gateway/openai-vector-store-gateway";
 import KernelConversationGateway from "../../gateway/kernel-conversation-gateway";
+import CreateConversationController from "../../controller/create-conversation-controller";
+import ListConversationsController from "../../controller/list-conversations-controller";
+import ListMessagesForConversationController from "../../controller/list-messages-for-conversation-controller";
+import ListSourceDataController from "../../controller/list-source-data-controller";
 
 const serverContainer = new Container();
 
@@ -57,7 +61,12 @@ serverContainer.bind(GATEWAYS.KERNEL_CONVERSATION_GATEWAY).to(KernelConversation
 
 
 /** CONTROLLERS */
+serverContainer.bind(CONTROLLERS.CREATE_CONVERSATION_CONTROLLER).to(CreateConversationController)
+serverContainer.bind(CONTROLLERS.LIST_CONVERSATIONS_CONTROLLER).to(ListConversationsController)
+serverContainer.bind(CONTROLLERS.LIST_MESSAGES_CONTROLLER).to(ListMessagesForConversationController)
 serverContainer.bind(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER).to(ListResearchContextsController)
+serverContainer.bind(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER).to(ListSourceDataController)
+
 
 
 export default serverContainer;

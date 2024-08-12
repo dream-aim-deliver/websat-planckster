@@ -1,19 +1,19 @@
 import { injectable } from "inversify";
 import { TSignal } from "~/lib/core/entity/signals";
 import { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
-import BrowserListConversationsPresenter from "../presenter/browser-list-conversations-presenter";
-import clientContainer from "../config/ioc/client-container";
-import BrowserConversationGateway from "../gateway/browser-conversation-gateway";
-import { GATEWAYS } from "../config/ioc/client-ioc-symbols";
+import ListConversationsPresenter from "../presenter/list-conversations-presenter";
+import serverContainer from "../config/ioc/server-container";
+import KernelConversationGateway from "../gateway/kernel-conversation-gateway";
+import { GATEWAYS } from "../config/ioc/server-ioc-symbols";
 
-export interface BrowserListConversationsControllerParameters {
+export interface TListConversationsControllerParameters {
     response: TSignal<TListConversationsViewModel>;
     researchContextID: string;
 }
 
 @injectable()
-export default class BrowserListConversationsController {
-    async execute(params: BrowserListConversationsControllerParameters): Promise<void> {
+export default class ListConversationsController {
+    async execute(params: TListConversationsControllerParameters): Promise<void> {
         try {
 
             const { researchContextID } = params;
@@ -22,9 +22,9 @@ export default class BrowserListConversationsController {
              * TODO: move to USECASE
              */
 
-            const presenter = new BrowserListConversationsPresenter(params.response);  // will be injected
+            const presenter = new ListConversationsPresenter(params.response);  // will be injected
 
-            const conversationGateway = clientContainer.get<BrowserConversationGateway>(GATEWAYS.CONVERSATION_GATEWAY);  // would be injected
+            const conversationGateway = serverContainer.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);  // will be injected
 
             const listConversationsDTO = await conversationGateway.listConversations(researchContextID);
 
@@ -51,7 +51,7 @@ export default class BrowserListConversationsController {
         } catch (error) {
 
             const err = error as Error;
-            const presenter = new BrowserListConversationsPresenter(params.response);
+            const presenter = new ListConversationsPresenter(params.response);
             presenter.presentError({
                 message: err.message,
                 operation: "list-conversations",
@@ -59,6 +59,7 @@ export default class BrowserListConversationsController {
                     researchContextId: params.researchContextID,
                 },
             });
+
         }
 
     }
