@@ -103,17 +103,33 @@ export function ListSourcesForClientPage(props: ListSourceDataPageProps) {
     if( sourceData.status === "request") {
         return <div>Loading...</div>
     }
+    const sourceDataRowData = sourceData.sourceData.map((sourceData) => {
+        return {
+            ...sourceData,
+            provider: "kernel#s3" as const,
+            type: "remote" as const,
+            id: sourceData.id,
+            
+        }
+    })
     return (
         <div className="flex flex-col items-center justify-between gap-4">
             {/* <UIKitComponent sourceData={sourceData} isLoading={isLoading} onDownload={onDownload}/> */}
             <div className="text-2xl font-bold">List of source data</div>
             <SourceDataAGGrid 
-                rowData={sourceData.sourceData}
+                rowData={sourceDataRowData}
                 isLoading={isLoading}
                 download= {{
                     isDownloading: isDownloading,
                     progress: fileDownloadProgress,
-                    onDownload: onDownload,
+                    onDownload: () => {
+                        const selectedRowsAsRemoteFiles = sourceDataRowData.map((sourceDataRow) => {
+                            return {
+                                ...sourceDataRow,
+                            }
+                        })
+                        onDownload(selectedRowsAsRemoteFiles)
+                    },
                 }}
             />
         </div>
