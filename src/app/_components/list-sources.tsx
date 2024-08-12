@@ -170,6 +170,7 @@ const UIKitComponent = (props: UIKitComponentProps) => {
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">relative path</th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">created at</th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">provider</th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">download</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200 bg-white">
@@ -180,6 +181,16 @@ const UIKitComponent = (props: UIKitComponentProps) => {
               <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{row.relativePath}</td>
               <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{row.createdAt}</td>
               <td className="whitespace-nowrap px-6 py-4 text-sm text-gray-900">{row.provider}</td>
+              <td>
+                <button
+                  onClick={() => {
+                    props.onDownload([row]);
+                  }}
+                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Download
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
