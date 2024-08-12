@@ -32,6 +32,8 @@ export default class CreateResearchContextUsecase implements CreateResearchConte
             return;
         }
         const researchContextID = createResearchContextDTO.data.id
+        const researchContextName = createResearchContextDTO.data.title
+        const researchContextDescription = createResearchContextDTO.data.description
 
         this.presenter.presentProgress({
             status: "research-context-created-in-backend",
@@ -40,7 +42,7 @@ export default class CreateResearchContextUsecase implements CreateResearchConte
         })
 
         const createVectorStoreDTO = await this.vectorStore.createVectorStore(researchContextID, request.sourceDataList);
-
+        
         if (!createVectorStoreDTO.success) {
             this.presenter.presentError(
                 {
@@ -51,14 +53,14 @@ export default class CreateResearchContextUsecase implements CreateResearchConte
             )
             return;
         }
-
+        const vectorStoreID = createVectorStoreDTO.data.id;
         this.presenter.presentProgress({
             status: "vector-store-created",
             message: "Vector store created. Registering agents...",
             context: createVectorStoreDTO
         })
 
-        const createAgentDTO = await this.agentGateway.createAgent(researchContextID);
+        const createAgentDTO = await this.agentGateway.createAgent(researchContextID, researchContextName, researchContextDescription, vectorStoreID);
         if (!createAgentDTO.success) {
             this.presenter.presentError(
                 {
