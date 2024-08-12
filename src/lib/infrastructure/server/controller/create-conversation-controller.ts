@@ -1,5 +1,4 @@
 import { injectable } from "inversify";
-import { TSignal } from "~/lib/core/entity/signals";
 import { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import CreateConversationPresenter from "../presenter/create-conversation-presenter";
 import serverContainer from "../config/ioc/server-container";
@@ -8,7 +7,7 @@ import { GATEWAYS } from "../config/ioc/server-ioc-symbols";
 
 
 export interface TCreateConversationControllerParameters {
-    response: TSignal<TCreateConversationViewModel>;
+    response: TCreateConversationViewModel;
     researchContextID: string;
     title: string;
 }

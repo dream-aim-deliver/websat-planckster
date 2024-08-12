@@ -1,5 +1,4 @@
 import { injectable } from "inversify";
-import { TSignal } from "~/lib/core/entity/signals";
 import { TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
 import ListMessagesForConversationPresenter from "../presenter/list-messages-for-conversation-presenter";
 import KernelConversationGateway from "../gateway/kernel-conversation-gateway";
@@ -8,7 +7,7 @@ import { GATEWAYS } from "../config/ioc/server-ioc-symbols";
 
 export interface TListMessagesForConversationControllerParameters {
     conversationID: string;
-    response: TSignal<TListMessagesForConversationViewModel>;
+    response: TListMessagesForConversationViewModel;
 
 }
 

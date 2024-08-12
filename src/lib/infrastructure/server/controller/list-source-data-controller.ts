@@ -1,5 +1,4 @@
 import { injectable } from "inversify";
-import { TSignal } from "~/lib/core/entity/signals";
 import { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import serverContainer from "../config/ioc/server-container";
 import KernelSourceDataGateway from "../gateway/kernel-source-data-gateway";
@@ -8,7 +7,7 @@ import ListSourceDataPresenter from "../presenter/list-source-data-presenter";
 
 export interface TListSourceDataControllerParameters {
     researchContextID?: string;
-    response: TSignal<TListSourceDataViewModel>;
+    response: TListSourceDataViewModel;
 }
 
 @injectable()
@@ -89,9 +88,5 @@ export default class ListSourceDataController {
                 },
             });
         }
-
-
-
-
     }
 }

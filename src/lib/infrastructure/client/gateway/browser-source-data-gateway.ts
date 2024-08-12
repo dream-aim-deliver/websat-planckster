@@ -383,7 +383,7 @@ export default class BrowserSourceDataGateway implements SourceDataGatewayOutput
     }
 
     async list(): Promise<ListSourceDataDTO> {
-        const response = await this.api.kernel.sourceData.listForClient.query()
+        const response = await this.api.kernel.sourceData.list.query()
         return response;
     }
 

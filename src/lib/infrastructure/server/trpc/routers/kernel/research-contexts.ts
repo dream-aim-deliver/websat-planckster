@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { ClientService as sdk } from "@maany_shr/kernel-planckster-sdk-ts";
 import type { NewResearchContextViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "../../../config/ioc/server-container";

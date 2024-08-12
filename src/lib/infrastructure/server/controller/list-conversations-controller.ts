@@ -1,5 +1,4 @@
 import { injectable } from "inversify";
-import { TSignal } from "~/lib/core/entity/signals";
 import { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 import ListConversationsPresenter from "../presenter/list-conversations-presenter";
 import serverContainer from "../config/ioc/server-container";
@@ -7,7 +6,7 @@ import KernelConversationGateway from "../gateway/kernel-conversation-gateway";
 import { GATEWAYS } from "../config/ioc/server-ioc-symbols";
 
 export interface TListConversationsControllerParameters {
-    response: TSignal<TListConversationsViewModel>;
+    response: TListConversationsViewModel;
     researchContextID: string;
 }
 

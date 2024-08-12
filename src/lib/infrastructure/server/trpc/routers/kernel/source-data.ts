@@ -4,12 +4,12 @@ import { type SourceData } from "@maany_shr/kernel-planckster-sdk-ts";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import type { TBaseErrorDTOData } from "~/sdk/core/dto";
 import serverContainer from "../../../config/ioc/server-container";
-import { GATEWAYS, KERNEL, UTILS } from "../../../config/ioc/server-ioc-symbols";
+import { CONTROLLERS, GATEWAYS, KERNEL, UTILS } from "../../../config/ioc/server-ioc-symbols";
 import { type TKernelSDK } from "../../../config/kernel/kernel-sdk";
 import { createTRPCRouter, protectedProcedure } from "../../server";
-import { type ListSourceDataDTO } from "~/lib/core/dto/source-data-gateway-dto";
-import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import { type Logger } from "pino";
+import type { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
+import type ListSourceDataController from "../../../controller/list-source-data-controller";
 
 
 const getLogger = () => {
@@ -18,21 +18,25 @@ const getLogger = () => {
   return logger;
 }
 
-
-
 export const sourceDataRouter = createTRPCRouter({
 
-  listForClient: protectedProcedure
-    .query(async (): Promise<ListSourceDataDTO> => {
-
-      const sourceDataGateway = serverContainer.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
-
-      const dto = await sourceDataGateway.list();
-
-      return dto;
-
+  list: protectedProcedure
+    .input(z.object({
+      researchContextID: z.number().optional(),
+    }))
+    .query(async ({ input }): Promise<TListSourceDataViewModel> => {
+      const viewModel: TListSourceDataViewModel = {
+        status: "request",
+      }
+      const listSourceDataController = serverContainer.get<ListSourceDataController>(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER);
+      await listSourceDataController.execute({
+        response: viewModel,
+        researchContextID: input.researchContextID?.toString(),
+      });
+      return viewModel;
     }),
 
+  // TODO: this is a gateway-to-gateway router function, so it pipes a DTO
   getUploadSignedUrl: protectedProcedure
     .input(
       z.object({
@@ -95,6 +99,7 @@ export const sourceDataRouter = createTRPCRouter({
 
     }),
 
+  // TODO: this is a gateway-to-gateway router function, so it pipes a DTO
   create: protectedProcedure
     .input(
       z.object({
@@ -156,6 +161,7 @@ export const sourceDataRouter = createTRPCRouter({
       }
     }),
 
+  // TODO: this is a gateway-to-gateway router function, so it pipes a DTO
   getDownloadSignedUrl: protectedProcedure
     .input(
       z.object({
@@ -216,22 +222,6 @@ export const sourceDataRouter = createTRPCRouter({
           message: `Failed to get signed URL for download: ${signedUrlViewModel.errorMessage}`,
         } as TBaseErrorDTOData
       };
-
-    }),
-
-  listForResearchContext: protectedProcedure
-    .input(
-      z.object({
-        researchContextId: z.number(),
-      }),
-    )
-    .query(async ({ input }): Promise<ListSourceDataDTO> => {
-
-      const sourceDataGateway = serverContainer.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
-
-      const dto = await sourceDataGateway.listForResearchContext(input.researchContextId.toString());
-
-      return dto;
 
     }),
 });

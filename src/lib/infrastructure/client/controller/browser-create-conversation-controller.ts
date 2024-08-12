@@ -1,4 +1,4 @@
-import { injectable } from "inversify";
+import { inject, injectable } from "inversify";
 import { TSignal } from "~/lib/core/entity/signals";
 import { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import BrowserCreateConversationPresenter from "../presenter/browser-create-conversation-presenter";

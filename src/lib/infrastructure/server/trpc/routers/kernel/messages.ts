@@ -1,15 +1,11 @@
 import { z } from "zod";
 
-import OpenAIGateway from "~/lib/infrastructure/server/gateway/openai-gateway-old";
-import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "../../../config/ioc/server-container";
-import { GATEWAYS, KERNEL, UTILS } from "../../../config/ioc/server-ioc-symbols";
+import { CONTROLLERS, UTILS } from "../../../config/ioc/server-ioc-symbols";
 import { createTRPCRouter, protectedProcedure } from "../../server";
-import { type TBaseErrorDTOData } from "~/sdk/core/dto";
 import { type Logger } from "pino";
-import { type TKernelSDK } from "../../../config/kernel/kernel-sdk";
-import type ConversationGatewayOutputPort from "~/lib/core/ports/secondary/conversation-gateway-output-port";
-import { type ListMessagesForConversationDTO } from "~/lib/core/dto/conversation-gateway-dto";
+import type { TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
+import type ListMessagesForConversationController from "../../../controller/list-messages-for-conversation-controller";
 
 
 const getLogger = () => {
@@ -25,14 +21,21 @@ export const messageRouter = createTRPCRouter({
             conversationID: z.number(),
         }),
     )
-    .query(async ({ input }): Promise<ListMessagesForConversationDTO> => {
+    .query(async ({ input }): Promise<TListMessagesForConversationViewModel> => {
+        const logger = getLogger();
+        logger.info({ input }, "Listing messages for conversation");
+        const viewModel: TListMessagesForConversationViewModel = {
+            status: "request",
+            conversationID: input.conversationID.toString(),
+        }
 
-        const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
-
-        const dto = await conversationGateway.getConversationMessages(input.conversationID.toString());
-
-        return dto;
-
+        const listMessagesForConversationController = serverContainer.get<ListMessagesForConversationController>(CONTROLLERS.LIST_MESSAGES_CONTROLLER);
+        await listMessagesForConversationController.execute({
+            response: viewModel,
+            conversationID: input.conversationID.toString(),
+        });
+        logger.info({ viewModel }, "Listed messages for conversation");
+        return viewModel;
     }),
 
     // create: protectedProcedure

@@ -291,4 +291,104 @@ export default class KernelSourceDataGateway implements SourceDataGatewayOutputP
         }
     }
 
+    async getDownloadSignedUrl(protocol: string, relativePath: string): Promise<{ data: string; success: true; } | { data: TBaseErrorDTOData; success: false; }> {
+        const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
+        if (!kpCredentialsDTO.success) {
+            this.logger.error(kpCredentialsDTO, `Failed to extract KP credentials from the session.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#getDownloadSignedUrl",
+                    message: kpCredentialsDTO.data.message
+                }
+            }
+        }
+
+        let signedUrlViewModel
+        try {
+            signedUrlViewModel = await this.kernelSDK.getClientDataForDownload({
+                id: kpCredentialsDTO.data.clientID,
+                protocol: protocol,
+                relativePath: relativePath,
+                xAuthToken: kpCredentialsDTO.data.xAuthToken,
+            })
+        } catch (error) {
+            const err = error as Error
+            this.logger.error(error, `Failed to get signed URL for download.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#getDownloadSignedUrl",
+                    message: `Failed to get signed URL for download. Error: ${err.message}`
+                }
+            }
+        }
+
+        if (!signedUrlViewModel.status) {
+            this.logger.error(signedUrlViewModel, `Failed to get signed URL for download.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#getDownloadSignedUrl",
+                    message: `Failed to get signed URL for download. Error: ${signedUrlViewModel.errorMessage}`
+                }
+            }
+        }
+
+        return {
+            success: true,
+            data: signedUrlViewModel.signed_url
+        }
+    }
+
+    async getUploadSignedUrl(protocol: string, relativePath: string): Promise<{ data: string; success: true; } | { data: TBaseErrorDTOData; success: false; }> {
+        const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
+        if (!kpCredentialsDTO.success) {
+            this.logger.error(kpCredentialsDTO, `Failed to extract KP credentials from the session.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#getUploadSignedUrl",
+                    message: kpCredentialsDTO.data.message
+                }
+            }
+        }
+
+        let signedUrlViewModel
+        try {
+            signedUrlViewModel = await this.kernelSDK.getClientDataForUpload({
+                id: kpCredentialsDTO.data.clientID,
+                protocol: protocol,
+                relativePath: relativePath,
+                xAuthToken: kpCredentialsDTO.data.xAuthToken,
+            })
+        } catch (error) {
+            const err = error as Error
+            this.logger.error(error, `Failed to get signed URL for upload.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#getUploadSignedUrl",
+                    message: `Failed to get signed URL for upload. Error: ${err.message}`
+                }
+            }
+        }
+
+        if (!signedUrlViewModel.status) {
+            this.logger.error(signedUrlViewModel, `Failed to get signed URL for upload.`)
+            return {
+                success: false,
+                data: {
+                    operation: "kernel#source-data#getUploadSignedUrl",
+                    message: `Failed to get signed URL for upload. Error: ${signedUrlViewModel.errorMessage}`
+                }
+            }
+        }
+
+        return {
+            success: true,
+            data: signedUrlViewModel.signed_url
+        }
+    }
+
 }
