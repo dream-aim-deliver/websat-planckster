@@ -6,7 +6,7 @@ import { EmbeddingsSchema, VectorStoreSchema } from "../entity/dadbod/vector-sto
 export const CreateVectorStoreDTOSchema = DTOSchemaFactory(z.object({
     provider: z.string(),
     id: z.string(),
-    embeddings : z.array(EmbeddingsSchema),
+    embeddings : z.array(EmbeddingsSchema).optional(),
 }), BaseErrorDTOSchema);
 export type TCreateVectorStoreDTO = z.infer<typeof CreateVectorStoreDTOSchema>;
 
