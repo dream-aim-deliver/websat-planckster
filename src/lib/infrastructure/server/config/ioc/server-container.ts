@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
 import { Container, type interfaces } from "inversify";
-import { CONSTANTS, GATEWAYS, KERNEL, OPENAI, TRPC, REPOSITORY, UTILS, CONTROLLERS } from "./server-ioc-symbols";
+import { CONSTANTS, GATEWAYS, KERNEL, OPENAI, TRPC, REPOSITORY, UTILS, CONTROLLERS, USECASE_FACTORY } from "./server-ioc-symbols";
 import { authOptions } from "~/lib/infrastructure/server/config/auth/next-auth-config";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import NextAuthGateway from "~/lib/infrastructure/server/gateway/next-auth-gateway";
@@ -22,6 +22,8 @@ import CreateConversationController from "../../controller/create-conversation-c
 import ListConversationsController from "../../controller/list-conversations-controller";
 import ListMessagesForConversationController from "../../controller/list-messages-for-conversation-controller";
 import ListSourceDataController from "../../controller/list-source-data-controller";
+import { type CreateConversationInputPort } from "~/lib/core/ports/primary/create-conversation-primary-ports";
+import CreateConversationUsecase from "~/lib/core/usecase/create-conversation-usecase";
 
 const serverContainer = new Container();
 
@@ -36,12 +38,10 @@ serverContainer.bind(CONSTANTS.NEXT_AUTH_OPTIONS).toConstantValue(authOptions);
 serverContainer.bind<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY).to(NextAuthGateway).inSingletonScope();
 
 /** Aspect: Logging */
-serverContainer.bind<interfaces.Factory<Logger>>(UTILS.LOGGER_FACTORY).toFactory<Logger, [string]>((context: interfaces.Context) =>
-    (module: string) => {
-        const logger = rootLogger.child({ module: module });
-        return logger;
-    }
-);
+serverContainer.bind<interfaces.Factory<Logger>>(UTILS.LOGGER_FACTORY).toFactory<Logger, [string]>((context: interfaces.Context) => (module: string) => {
+  const logger = rootLogger.child({ module: module });
+  return logger;
+});
 
 /** OPENAI */
 serverContainer.bind(OPENAI.OPENAI_CLIENT).toConstantValue(OpenAIClient);
@@ -59,14 +59,18 @@ serverContainer.bind(GATEWAYS.KERNEL_CONVERSATION_GATEWAY).to(KernelConversation
 
 /** REPOSITORY */
 
-
 /** CONTROLLERS */
-serverContainer.bind(CONTROLLERS.CREATE_CONVERSATION_CONTROLLER).to(CreateConversationController)
-serverContainer.bind(CONTROLLERS.LIST_CONVERSATIONS_CONTROLLER).to(ListConversationsController)
-serverContainer.bind(CONTROLLERS.LIST_MESSAGES_CONTROLLER).to(ListMessagesForConversationController)
-serverContainer.bind(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER).to(ListResearchContextsController)
-serverContainer.bind(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER).to(ListSourceDataController)
+serverContainer.bind(CONTROLLERS.CREATE_CONVERSATION_CONTROLLER).to(CreateConversationController);
+serverContainer.bind(CONTROLLERS.LIST_CONVERSATIONS_CONTROLLER).to(ListConversationsController);
+serverContainer.bind(CONTROLLERS.LIST_MESSAGES_CONTROLLER).to(ListMessagesForConversationController);
+serverContainer.bind(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER).to(ListResearchContextsController);
+serverContainer.bind(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER).to(ListSourceDataController);
 
+/** USECASES */
+serverContainer.bind<interfaces.Factory<CreateConversationInputPort, []>>(USECASE_FACTORY.CREATE_CONVERSATION).toFactory<CreateConversationInputPort>((context: interfaces.Context) => () => {
+  const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
 
+  return new CreateConversationUsecase(conversationGateway);
+});
 
 export default serverContainer;

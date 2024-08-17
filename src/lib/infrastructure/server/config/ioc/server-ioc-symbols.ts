@@ -14,6 +14,10 @@ export const UTILS = {
     LOGGER_FACTORY: Symbol.for('LOGGER_FACTORY'),
 }
 
+export const USECASE_FACTORY ={
+    CREATE_CONVERSATION: Symbol("CREATE_CONVERSATION"),
+}
+
 export const OPENAI = {
     OPENAI_CLIENT: Symbol.for('OPENAI_CLIENT'),
     OPENAI_SOURCE_DATA_GATEWAY: Symbol.for('OPENAI_SOURCE_DATA_GATEWAY'),

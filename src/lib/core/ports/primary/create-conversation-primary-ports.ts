@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type TCreateConversationErrorResponse, type TCreateConversationRequest, type TCreateConversationSuccessResponse } from "../../usecase-models/create-conversation-usecase-models";
+import { type TCreateConversationResponse, type TCreateConversationErrorResponse, type TCreateConversationRequest, type TCreateConversationSuccessResponse } from "../../usecase-models/create-conversation-usecase-models";
 
 export interface CreateConversationInputPort {
-    presenter: CreateConversationOutputPort<any>;
-    execute(request: TCreateConversationRequest): Promise<void>;
+    execute(request: TCreateConversationRequest): Promise<TCreateConversationResponse>;
 }
 
-export interface CreateConversationOutputPort<TResponse> {
-    response: TResponse;
+export interface CreateConversationOutputPort {
     presentSuccess(success: TCreateConversationSuccessResponse): void;
     presentError(error: TCreateConversationErrorResponse): void;
 }

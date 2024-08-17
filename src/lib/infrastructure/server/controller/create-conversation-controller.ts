@@ -2,7 +2,9 @@ import { injectable } from "inversify";
 import { TCreateConversationErrorViewModel, TCreateConversationSuccessViewModel, TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import serverContainer from "../config/ioc/server-container";
 import KernelConversationGateway from "../gateway/kernel-conversation-gateway";
-import { GATEWAYS } from "../config/ioc/server-ioc-symbols";
+import { GATEWAYS, USECASE_FACTORY } from "../config/ioc/server-ioc-symbols";
+import { CreateConversationInputPort } from "~/lib/core/ports/primary/create-conversation-primary-ports";
+import CreateConversationPresenter from "../presenter/create-conversation-presenter";
 
 export interface TCreateConversationControllerParameters {
   researchContextID: number;
@@ -15,34 +17,21 @@ export default class CreateConversationController {
     try {
       const { researchContextID, title } = params;
 
-      /**
-       * TODO: move to USECASE
-       */
-      const conversationGateway = serverContainer.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY); // will be injected
+      const usecaseFactory: () => CreateConversationInputPort = serverContainer.get(USECASE_FACTORY.CREATE_CONVERSATION);
+      const usecase = usecaseFactory();
 
-      const createConversationDTO = await conversationGateway.createConversation(researchContextID, title);
+      const presenter = new CreateConversationPresenter();
 
-      if (!createConversationDTO.success) {
-        const viewModel: TCreateConversationErrorViewModel = {
-          status: "error",
-          message: createConversationDTO.data.message,
-          context: {
-            researchContextId: researchContextID,
-            title: title,
-          },
-        };
+      const responseModel = await usecase.execute({
+        researchContextID: researchContextID,
+        conversationTitle: title,
+      });
 
-        return viewModel;
+      if (responseModel.status == "success") {
+        return presenter.presentSuccess(responseModel);
+      } else {
+        return presenter.presentError(responseModel);
       }
-
-      const conversation = createConversationDTO.data;
-
-      const viewModel: TCreateConversationSuccessViewModel = {
-        status: "success",
-        conversation: conversation,
-      };
-
-      return viewModel;
     } catch (error) {
       const err = error as Error;
       const viewModel: TCreateConversationErrorViewModel = {
