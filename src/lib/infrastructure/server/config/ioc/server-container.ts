@@ -24,6 +24,8 @@ import ListMessagesForConversationController from "../../controller/list-message
 import ListSourceDataController from "../../controller/list-source-data-controller";
 import { type CreateConversationInputPort } from "~/lib/core/ports/primary/create-conversation-primary-ports";
 import CreateConversationUsecase from "~/lib/core/usecase/create-conversation-usecase";
+import { type ListConversationsInputPort } from "~/lib/core/ports/primary/list-conversations-primary-ports";
+import ListConversationsUsecase from "~/lib/core/usecase/list-conversations-usecase";
 
 const serverContainer = new Container();
 
@@ -67,10 +69,18 @@ serverContainer.bind(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER).to(ListResea
 serverContainer.bind(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER).to(ListSourceDataController);
 
 /** USECASES */
+// CreateConversationUsecase
 serverContainer.bind<interfaces.Factory<CreateConversationInputPort, []>>(USECASE_FACTORY.CREATE_CONVERSATION).toFactory<CreateConversationInputPort>((context: interfaces.Context) => () => {
   const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
 
   return new CreateConversationUsecase(conversationGateway);
+});
+
+// ListConversationsUsecase
+serverContainer.bind<interfaces.Factory<ListConversationsInputPort, []>>(USECASE_FACTORY.LIST_CONVERSATONS).toFactory<ListConversationsInputPort>((context: interfaces.Context) => () => {
+  const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
+
+  return new ListConversationsUsecase(conversationGateway);
 });
 
 export default serverContainer;

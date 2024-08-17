@@ -16,6 +16,7 @@ export const UTILS = {
 
 export const USECASE_FACTORY ={
     CREATE_CONVERSATION: Symbol("CREATE_CONVERSATION"),
+    LIST_CONVERSATONS: Symbol("LIST_CONVERSATIONS"),
 }
 
 export const OPENAI = {

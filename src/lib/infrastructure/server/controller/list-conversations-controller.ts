@@ -2,7 +2,9 @@ import { injectable } from "inversify";
 import { TListConversationsErrorViewModel, TListConversationsSuccessViewModel, TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 import serverContainer from "../config/ioc/server-container";
 import KernelConversationGateway from "../gateway/kernel-conversation-gateway";
-import { GATEWAYS } from "../config/ioc/server-ioc-symbols";
+import { GATEWAYS, USECASE_FACTORY } from "../config/ioc/server-ioc-symbols";
+import { ListConversationsInputPort } from "~/lib/core/ports/primary/list-conversations-primary-ports";
+import ListConversationsPresenter from "../presenter/list-conversations-presenter";
 
 export interface TListConversationsControllerParameters {
   researchContextID: number;
@@ -14,33 +16,20 @@ export default class ListConversationsController {
     try {
       const { researchContextID } = params;
 
-      /**
-       * TODO: move to USECASE
-       */
+      const usecaseFactory: () => ListConversationsInputPort = serverContainer.get(USECASE_FACTORY.LIST_CONVERSATONS);
+      const usecase = usecaseFactory();
 
-      const conversationGateway = serverContainer.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY); // will be injected
+      const presenter = new ListConversationsPresenter();
 
-      const listConversationsDTO = await conversationGateway.listConversations(researchContextID);
+      const responseModel = await usecase.execute({
+        researchContextID: researchContextID,
+      });
 
-      if (!listConversationsDTO.success) {
-        const viewModel: TListConversationsErrorViewModel = {
-          status: "error",
-          message: listConversationsDTO.data.message,
-          context: {
-            researchContextId: researchContextID,
-          },
-        };
-        return viewModel;
+      if (responseModel.status == "success") {
+        return presenter.presentSuccess(responseModel);
+      } else {
+        return presenter.presentError(responseModel);
       }
-
-      const conversations = listConversationsDTO.data;
-
-      const viewModel: TListConversationsSuccessViewModel = {
-        status: "success",
-        conversations: conversations,
-      };
-
-      return viewModel;
     } catch (error) {
       const err = error as Error;
       const viewModel: TListConversationsErrorViewModel = {

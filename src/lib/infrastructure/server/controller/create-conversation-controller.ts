@@ -1,8 +1,7 @@
 import { injectable } from "inversify";
-import { TCreateConversationErrorViewModel, TCreateConversationSuccessViewModel, TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
+import { TCreateConversationErrorViewModel, TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import serverContainer from "../config/ioc/server-container";
-import KernelConversationGateway from "../gateway/kernel-conversation-gateway";
-import { GATEWAYS, USECASE_FACTORY } from "../config/ioc/server-ioc-symbols";
+import { USECASE_FACTORY } from "../config/ioc/server-ioc-symbols";
 import { CreateConversationInputPort } from "~/lib/core/ports/primary/create-conversation-primary-ports";
 import CreateConversationPresenter from "../presenter/create-conversation-presenter";
 

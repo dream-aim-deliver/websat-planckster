@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type TListConversationsErrorResponse, type TListConversationsRequest, type TListConversationsSuccessResponse } from "../../usecase-models/list-conversations-usecase-models";
+import { type TListConversationsResponse, type TListConversationsErrorResponse, type TListConversationsRequest, type TListConversationsSuccessResponse } from "../../usecase-models/list-conversations-usecase-models";
+import { type TListConversationsErrorViewModel, type TListConversationsSuccessViewModel } from "../../view-models/list-conversations-view-model";
 
 export interface ListConversationsInputPort {
-    presenter: ListConversationsOutputPort<any>;
-    execute(request: TListConversationsRequest): Promise<void>;
+    execute(request: TListConversationsRequest): Promise<TListConversationsResponse>;
 }
 
-export interface ListConversationsOutputPort<TResponse> {
-    response: TResponse;
-    presentSuccess(success: TListConversationsSuccessResponse): void;
-    presentError(error: TListConversationsErrorResponse): void;
+export interface ListConversationsOutputPort {
+    presentSuccess(success: TListConversationsSuccessResponse): TListConversationsSuccessViewModel;
+    presentError(error: TListConversationsErrorResponse): TListConversationsErrorViewModel;
 }
