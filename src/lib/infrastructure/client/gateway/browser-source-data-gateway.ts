@@ -358,33 +358,25 @@ export default class BrowserSourceDataGateway implements SourceDataGatewayOutput
     }
 
 
-    async listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO> {
-        try {
-            const researchContextIDNumber = parseInt(researchContextID);
+    async listForResearchContext(researchContextID: number): Promise<ListSourceDataDTO> {
 
-            const response = await this.api.kernel.sourceData.listForResearchContext.query({
-                researchContextId: researchContextIDNumber
-            })
-
-            return response;
-
-        } catch (error) {
-            const err = error as Error;
-            this.logger.error(`An error occurred while listing source data for research context: ${err.message}`);
-            return {
-                success: false,
-                data: {
-                    operation: "browser#source-data#list-for-research-context",
-                    message: `An error occurred while listing source data for research context: ${err.message}`,
-                },
-            };
-
+        return {
+            success: false,
+            data: {
+                operation: "browser#source-data#list",
+                message: `Method deprecated`,
+            },
         }
     }
 
     async list(): Promise<ListSourceDataDTO> {
-        const response = await this.api.kernel.sourceData.listForClient.query()
-        return response;
+        return {
+            success: false,
+            data: {
+                operation: "browser#source-data#list",
+                message: `Method deprecated`,
+            },
+        }
     }
 
     async get(fileID: string): Promise<GetSourceDataDTO> {

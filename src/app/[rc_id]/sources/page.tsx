@@ -5,7 +5,7 @@ import { GATEWAYS, TRPC } from "~/lib/infrastructure/server/config/ioc/server-io
 import type { TServerComponentAPI } from "~/lib/infrastructure/server/trpc/server-api";
 
 export default async function Home(
-    { params }: { params: { rc_id: string } }
+    { params }: { params: { rc_id: number } }
 ) {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
   const sessionDTO = await authGateway.getSession();
@@ -17,21 +17,29 @@ export default async function Home(
   );
 }
 
-async function ListSourceData({ rc_id }: { rc_id: string }) {
+async function ListSourceData({ rc_id }: { rc_id: number }) {
   const api: TServerComponentAPI = serverContainer.get(TRPC.REACT_SERVER_COMPONENTS_API);
-  const rc_id_int = parseInt(rc_id);
   
-  const sourceDataDTO = await api.kernel.sourceData.listForResearchContext(
+  const sourceDataVM = await api.kernel.sourceData.list(
     {
-        researchContextId: rc_id_int,
+        researchContextID: rc_id,
     }
   )
 
-  if (!sourceDataDTO.success) {
-    return <div>Error: {sourceDataDTO.data.message}</div>;
+  if (sourceDataVM.status === "error") {
+    return <div>Error: {sourceDataVM.message}</div>;
   }
 
-  const sourceData = sourceDataDTO.data
+  if (sourceDataVM.status === "success" && !sourceDataVM.sourceData) {
+    return <div>No source data found</div>;
+  }
+
+  if (sourceDataVM.status === "success" && sourceDataVM.sourceData.length === 0) {
+    return <div>No source data found</div>;
+  }
+
+  if (sourceDataVM.status === "success") {
+  const sourceData = sourceDataVM.sourceData;
 
   // Return a simple HTML unordered list
   return (
@@ -45,5 +53,5 @@ async function ListSourceData({ rc_id }: { rc_id: string }) {
 
   );
 
-
+}
 }

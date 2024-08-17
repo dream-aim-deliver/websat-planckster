@@ -84,7 +84,7 @@ export default class KernelSourceDataGateway implements SourceDataGatewayOutputP
         }
     }
 
-    async listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO> {
+    async listForResearchContext(researchContextID: number): Promise<ListSourceDataDTO> {
         const kpCredentialsDTO = await this.authGateway.extractKPCredentials()
         if (!kpCredentialsDTO.success) {
             this.logger.error(kpCredentialsDTO, `Failed to extract KP credentials from the session.`)
@@ -101,7 +101,7 @@ export default class KernelSourceDataGateway implements SourceDataGatewayOutputP
 
         try{
             kernelListSourceDataViewModel = await this.kernelSDK.listSourceDataForResearchContext({
-                id: parseInt(researchContextID),
+                id: researchContextID,
                 xAuthToken: kpCredentialsDTO.data.xAuthToken,
             })
         }catch(error){

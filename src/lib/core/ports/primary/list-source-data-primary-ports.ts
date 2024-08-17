@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type TListSourceDataErrorResponse, type TListSourceDataRequest, type TListSourceDataSuccessResponse } from "../../usecase-models/list-source-data-view-models";
+import { type TListSourceDataResponse, type TListSourceDataErrorResponse, type TListSourceDataRequest, type TListSourceDataSuccessResponse } from "../../usecase-models/list-source-data-view-models";
+import { type TListSourceDataErrorViewModel, type TListSourceDataSuccessViewModel } from "../../view-models/list-source-data-view-models";
 
 export interface ListSourceDataInputPort {
-    presenter: ListSourceDataOutputPort<any>;
-    execute(request: TListSourceDataRequest): Promise<void>;
+    execute(request: TListSourceDataRequest): Promise<TListSourceDataResponse>;
 }
 
-export interface ListSourceDataOutputPort<TResponse> {
-    response: TResponse;
-    presentSuccess(success: TListSourceDataSuccessResponse): void;
-    presentError(error: TListSourceDataErrorResponse): void;
+export interface ListSourceDataOutputPort {
+    presentSuccess(success: TListSourceDataSuccessResponse): TListSourceDataSuccessViewModel;
+    presentError(error: TListSourceDataErrorResponse): TListSourceDataErrorViewModel;
 }

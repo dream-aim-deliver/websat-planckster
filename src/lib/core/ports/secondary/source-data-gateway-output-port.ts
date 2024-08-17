@@ -6,7 +6,7 @@ import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
  */
 export default interface SourceDataGatewayOutputPort {
     list(): Promise<ListSourceDataDTO>;
-    listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO>;
+    listForResearchContext(researchContextID: number): Promise<ListSourceDataDTO>;
     get(fileID: string): Promise<GetSourceDataDTO>;
     upload(file: LocalFile, relativePath: string): Promise<UploadSourceDataDTO>;
     download(file: RemoteFile, localPath?: string): Promise<DownloadSourceDataDTO>;

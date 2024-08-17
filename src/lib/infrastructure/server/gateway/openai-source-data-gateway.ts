@@ -20,7 +20,7 @@ export default class OpenAISourceDataGateway implements SourceDataGatewayOutputP
     ) {
         this.logger = loggerFactory("OpenAISourceDataRepository");
     }
-    async listForResearchContext(researchContextID: string): Promise<ListSourceDataDTO> {
+    async listForResearchContext(researchContextID: number): Promise<ListSourceDataDTO> {
         this.logger.error("Use Kernel Source Data Repository!!! Tried accessing an unimplemented method 'listForResearchContext' in OpenAISourceDataRepository.")
         return {
             success: false,

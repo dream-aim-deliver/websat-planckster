@@ -4,12 +4,12 @@ import { type SourceData } from "@maany_shr/kernel-planckster-sdk-ts";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import type { TBaseErrorDTOData } from "~/sdk/core/dto";
 import serverContainer from "../../../config/ioc/server-container";
-import { GATEWAYS, KERNEL, UTILS } from "../../../config/ioc/server-ioc-symbols";
+import { CONTROLLERS, GATEWAYS, KERNEL, UTILS } from "../../../config/ioc/server-ioc-symbols";
 import { type TKernelSDK } from "../../../config/kernel/kernel-sdk";
 import { createTRPCRouter, protectedProcedure } from "../../server";
-import { type ListSourceDataDTO } from "~/lib/core/dto/source-data-gateway-dto";
-import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import { type Logger } from "pino";
+import type ListSourceDataController from "../../../controller/list-source-data-controller";
+import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 
 
 const getLogger = () => {
@@ -22,14 +22,21 @@ const getLogger = () => {
 
 export const sourceDataRouter = createTRPCRouter({
 
-  listForClient: protectedProcedure
-    .query(async (): Promise<ListSourceDataDTO> => {
+  list: protectedProcedure
+    .input(
+      z.object({
+        researchContextID: z.number().optional(),
+      }),
+    )
+    .query(async ({ input }): Promise<TListSourceDataViewModel> => {
 
-      const sourceDataGateway = serverContainer.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
+      const ListSourceDataController = serverContainer.get<ListSourceDataController>(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER);
 
-      const dto = await sourceDataGateway.list();
+      const viewModel = await ListSourceDataController.execute({
+        researchContextID: input.researchContextID,
+      });
 
-      return dto;
+      return viewModel;
 
     }),
 
@@ -219,19 +226,4 @@ export const sourceDataRouter = createTRPCRouter({
 
     }),
 
-  listForResearchContext: protectedProcedure
-    .input(
-      z.object({
-        researchContextId: z.number(),
-      }),
-    )
-    .query(async ({ input }): Promise<ListSourceDataDTO> => {
-
-      const sourceDataGateway = serverContainer.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
-
-      const dto = await sourceDataGateway.listForResearchContext(input.researchContextId.toString());
-
-      return dto;
-
-    }),
 });
