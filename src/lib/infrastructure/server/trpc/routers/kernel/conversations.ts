@@ -2,50 +2,51 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/server/trpc/server";
 import serverContainer from "../../../config/ioc/server-container";
-import { GATEWAYS } from "../../../config/ioc/server-ioc-symbols";
-import type ConversationGatewayOutputPort from "~/lib/core/ports/secondary/conversation-gateway-output-port";
-import { type CreateConversationDTO, type ListConversationsDTO } from "~/lib/core/dto/conversation-gateway-dto";
-
+import { CONTROLLERS } from "../../../config/ioc/server-ioc-symbols";
+import type CreateConversationController from "../../../controller/create-conversation-controller";
+import { type TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
+import type ListConversationsController from "../../../controller/list-conversations-controller";
+import { type TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 
 export const conversationRouter = createTRPCRouter({
-
-    /**
-     * NOTE: this is a gateway-to-gateway router function, so it pipes a DTO
-     */
-    list: protectedProcedure
+  /**
+   * NOTE: this is a controller-to-controller router function, so it pipes a view model
+   */
+  list: protectedProcedure
     .input(
-        z.object({
-            researchContextID: z.number(),
-        }),
+      z.object({
+        researchContextID: z.number(),
+      }),
     )
-    .query(async ({ input }): Promise<ListConversationsDTO> => {
+    .query(async ({ input }): Promise<TListConversationsViewModel> => {
+      const listConversationsController = serverContainer.get<ListConversationsController>(CONTROLLERS.LIST_CONVERSATIONS_CONTROLLER);
 
-        const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
+      const viewModel = await listConversationsController.execute({
+        researchContextID: input.researchContextID,
+      });
 
-        const dto = await conversationGateway.listConversations(input.researchContextID.toString());
-
-        return dto;
+      return viewModel;
 
     }),
 
+  /**
+   * NOTE: this is a controller-to-controller router function, so it pipes a view model
+   */
+  create: protectedProcedure
+    .input(
+      z.object({
+        researchContextID: z.number(),
+        conversationTitle: z.string(),
+      }),
+    )
+    .mutation(async ({ input }): Promise<TCreateConversationViewModel> => {
+      const createConversationController = serverContainer.get<CreateConversationController>(CONTROLLERS.CREATE_CONVERSATION_CONTROLLER);
 
-    /**
-     * NOTE: this is a gateway-to-gateway router function, so it pipes a DTO
-     */
-    create: protectedProcedure
-        .input(
-            z.object({
-                researchContextID: z.number(),
-                conversationTitle: z.string(),
-            }),
-        )
-        .mutation(async ({ input }): Promise<CreateConversationDTO> => {
+      const viewModel = await createConversationController.execute({
+        researchContextID: input.researchContextID,
+        title: input.conversationTitle,
+      });
 
-            const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
-
-            const dto = await conversationGateway.createConversation(input.researchContextID.toString(), input.conversationTitle);
-
-            return dto;
-        }),
-
+      return viewModel;
+    }),
 });

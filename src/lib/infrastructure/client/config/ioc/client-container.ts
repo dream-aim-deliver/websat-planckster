@@ -17,7 +17,6 @@ import BrowserListResearchContextsController from "../../controller/browser-list
 import BrowserListSourceDataController from "../../controller/browser-list-source-data-controller";
 import BrowserSendMessageToConversationController from "../../controller/browser-send-message-to-conversation-controller";
 import BrowserAgentGateway from "../../gateway/browser-agent-gateway";
-import BrowserConversationGateway from "../../gateway/browser-conversation-gateway";
 import BrowserResearchContextGateway from "../../gateway/browser-research-context-gateway";
 import { type CreateResearchContextInputPort } from "~/lib/core/ports/primary/create-research-context-primary-ports";
 import { type TSignal } from "~/lib/core/entity/signals";
@@ -56,7 +55,6 @@ clientContainer.bind(TRPC.VANILLA_CLIENT).toConstantValue(vanilla);
 
 /** GATEWAYS */
 clientContainer.bind(GATEWAYS.AGENT_GATEWAY).to(BrowserAgentGateway).inSingletonScope();
-clientContainer.bind(GATEWAYS.CONVERSATION_GATEWAY).to(BrowserConversationGateway).inSingletonScope();
 clientContainer.bind(GATEWAYS.RESEARCH_CONTEXT_GATEWAY).to(BrowserResearchContextGateway).inSingletonScope();
 clientContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(BrowserVectorStoreGateway).inSingletonScope();
 

@@ -1,66 +1,56 @@
 import { injectable } from "inversify";
-import { TSignal } from "~/lib/core/entity/signals";
-import { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
-import ListConversationsPresenter from "../presenter/list-conversations-presenter";
+import { TListConversationsErrorViewModel, TListConversationsSuccessViewModel, TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 import serverContainer from "../config/ioc/server-container";
 import KernelConversationGateway from "../gateway/kernel-conversation-gateway";
 import { GATEWAYS } from "../config/ioc/server-ioc-symbols";
 
 export interface TListConversationsControllerParameters {
-    response: TSignal<TListConversationsViewModel>;
-    researchContextID: string;
+  researchContextID: number;
 }
 
 @injectable()
 export default class ListConversationsController {
-    async execute(params: TListConversationsControllerParameters): Promise<void> {
-        try {
+  async execute(params: TListConversationsControllerParameters): Promise<TListConversationsViewModel> {
+    try {
+      const { researchContextID } = params;
 
-            const { researchContextID } = params;
+      /**
+       * TODO: move to USECASE
+       */
 
-            /** 
-             * TODO: move to USECASE
-             */
+      const conversationGateway = serverContainer.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY); // will be injected
 
-            const presenter = new ListConversationsPresenter(params.response);  // will be injected
+      const listConversationsDTO = await conversationGateway.listConversations(researchContextID);
 
-            const conversationGateway = serverContainer.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);  // will be injected
+      if (!listConversationsDTO.success) {
+        const viewModel: TListConversationsErrorViewModel = {
+          status: "error",
+          message: listConversationsDTO.data.message,
+          context: {
+            researchContextId: researchContextID,
+          },
+        };
+        return viewModel;
+      }
 
-            const listConversationsDTO = await conversationGateway.listConversations(researchContextID);
+      const conversations = listConversationsDTO.data;
 
-            if (!listConversationsDTO.success) {
-                presenter.presentError({
-                    message: listConversationsDTO.data.message,
-                    operation: "list-conversations",
-                    context: {
-                        researchContextId: researchContextID,
-                    },
-                });
-                return;
-            }
+      const viewModel: TListConversationsSuccessViewModel = {
+        status: "success",
+        conversations: conversations,
+      };
 
-            const conversations = listConversationsDTO.data;
-
-            presenter.presentSuccess({
-                conversations: conversations,
-            });
-
-            return;
-
-
-        } catch (error) {
-
-            const err = error as Error;
-            const presenter = new ListConversationsPresenter(params.response);
-            presenter.presentError({
-                message: err.message,
-                operation: "list-conversations",
-                context: {
-                    researchContextId: params.researchContextID,
-                },
-            });
-
-        }
-
+      return viewModel;
+    } catch (error) {
+      const err = error as Error;
+      const viewModel: TListConversationsErrorViewModel = {
+        status: "error",
+        message: err.message,
+        context: {
+          researchContextId: params.researchContextID,
+        },
+      };
+      return viewModel;
     }
+  }
 }

@@ -1,67 +1,60 @@
 import { injectable } from "inversify";
-import { TSignal } from "~/lib/core/entity/signals";
-import { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
-import CreateConversationPresenter from "../presenter/create-conversation-presenter";
+import { TCreateConversationErrorViewModel, TCreateConversationSuccessViewModel, TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import serverContainer from "../config/ioc/server-container";
 import KernelConversationGateway from "../gateway/kernel-conversation-gateway";
 import { GATEWAYS } from "../config/ioc/server-ioc-symbols";
 
-
 export interface TCreateConversationControllerParameters {
-    response: TSignal<TCreateConversationViewModel>;
-    researchContextID: string;
-    title: string;
+  researchContextID: number;
+  title: string;
 }
 
 @injectable()
 export default class CreateConversationController {
-    async execute(params: TCreateConversationControllerParameters): Promise<void> {
-        try {
+  async execute(params: TCreateConversationControllerParameters): Promise<TCreateConversationViewModel> {
+    try {
+      const { researchContextID, title } = params;
 
-            const { researchContextID, title } = params;
+      /**
+       * TODO: move to USECASE
+       */
+      const conversationGateway = serverContainer.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY); // will be injected
 
-            /**
-             * TODO: move to USECASE
-             */
-            const presenter = new CreateConversationPresenter(params.response); // will be injected
+      const createConversationDTO = await conversationGateway.createConversation(researchContextID, title);
 
-            const conversationGateway = serverContainer.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);  // will be injected
+      if (!createConversationDTO.success) {
+        const viewModel: TCreateConversationErrorViewModel = {
+          status: "error",
+          message: createConversationDTO.data.message,
+          context: {
+            researchContextId: researchContextID,
+            title: title,
+          },
+        };
 
-            const createConversationDTO = await conversationGateway.createConversation(researchContextID, title);
- 
-            if (!createConversationDTO.success) {
-                presenter.presentError({
-                    message: createConversationDTO.data.message,
-                    operation: "create-conversation",
-                    context: {
-                        researchContextId: researchContextID,
-                        title: title,
-                    },
-                });
-                return;
-            }
+        return viewModel;
+      }
 
-            const conversation = createConversationDTO.data;
+      const conversation = createConversationDTO.data;
 
-            presenter.presentSuccess({
-                conversation: conversation
-            });
+      const viewModel: TCreateConversationSuccessViewModel = {
+        status: "success",
+        conversation: conversation,
+      };
 
-            return;
+      return viewModel;
+    } catch (error) {
+      const err = error as Error;
+      const viewModel: TCreateConversationErrorViewModel = {
+        status: "error",
+        message: err.message,
+        context: {
+          researchContextId: params.researchContextID,
+          title: params.title,
+        },
+      };
 
-
-        } catch (error) {
-            const err = error as Error;
-            const presenter = new CreateConversationPresenter(params.response);
-            presenter.presentError({
-                message: err.message,
-                operation: "create-conversation",
-                context: {
-                    researchContextId: params.researchContextID,
-                    title: params.title,
-                },
-            });
-        }
-
+      return viewModel;
     }
+  }
 }

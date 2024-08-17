@@ -1,66 +1,38 @@
-import { injectable } from "inversify";
-import { TSignal } from "~/lib/core/entity/signals";
-import { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
-import BrowserCreateConversationPresenter from "../presenter/browser-create-conversation-presenter";
-import clientContainer from "../config/ioc/client-container";
-import { GATEWAYS } from "../config/ioc/client-ioc-symbols";
-import BrowserConversationGateway from "../gateway/browser-conversation-gateway";
+import { inject, injectable } from "inversify";
+import { TCreateConversationErrorViewModel, TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
+import { TRPC } from "../config/ioc/client-ioc-symbols";
+import { type TVanillaAPI } from "../trpc/vanilla-api";
 
 export interface TBrowserCreateConversationControllerParameters {
-    response: TSignal<TCreateConversationViewModel>;
-    researchContextID: string;
-    title: string;
+  researchContextID: number;
+  title: string;
 }
 
 @injectable()
 export default class BrowserCreateConversationController {
-    async execute(params: TBrowserCreateConversationControllerParameters): Promise<void> {
-        try {
+  constructor(@inject(TRPC.VANILLA_CLIENT) private api: TVanillaAPI) {}
 
-            const { researchContextID, title } = params;
+  async execute(params: TBrowserCreateConversationControllerParameters): Promise<TCreateConversationViewModel> {
+    try {
+      const { researchContextID, title } = params;
 
-            /**
-             * TODO: move to USECASE
-             */
-            const presenter = new BrowserCreateConversationPresenter(params.response); // will be injected
+      const viewModel = await this.api.kernel.conversation.create.mutate({
+        researchContextID: researchContextID,
+        conversationTitle: title,
+      });
 
-            const conversationGateway = clientContainer.get<BrowserConversationGateway>(GATEWAYS.CONVERSATION_GATEWAY); // would be injected
-
-            const createConversationDTO = await conversationGateway.createConversation(researchContextID, title);
- 
-            if (!createConversationDTO.success) {
-                presenter.presentError({
-                    message: createConversationDTO.data.message,
-                    operation: "create-conversation",
-                    context: {
-                        researchContextId: researchContextID,
-                        title: title,
-                    },
-                });
-                return;
-            }
-
-            const conversation = createConversationDTO.data;
-
-            presenter.presentSuccess({
-                conversation: conversation
-            });
-
-            return;
-
-
-        } catch (error) {
-            const err = error as Error;
-            const presenter = new BrowserCreateConversationPresenter(params.response);
-            presenter.presentError({
-                message: err.message,
-                operation: "create-conversation",
-                context: {
-                    researchContextId: params.researchContextID,
-                    title: params.title,
-                },
-            });
-        }
-
+      return viewModel;
+    } catch (error) {
+      const err = error as Error;
+      const viewModel: TCreateConversationErrorViewModel = {
+        status: "error",
+        message: err.message,
+        context: {
+          researchContextId: params.researchContextID,
+          title: params.title,
+        },
+      };
+      return viewModel;
     }
+  }
 }

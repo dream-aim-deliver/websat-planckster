@@ -18,7 +18,7 @@ export const ListConversationErrorViewModelSchema = z.object({
     message: z.string(),
     context: z.any(),
 })
-export type TListConversationErrorViewModel = z.infer<typeof ListConversationErrorViewModelSchema>
+export type TListConversationsErrorViewModel = z.infer<typeof ListConversationErrorViewModelSchema>
 
 export const ListConversationsViewModelSchema = z.discriminatedUnion('status', [
     ListConversationsRequestViewModelSchema,

@@ -10,214 +10,187 @@ import { TBaseErrorDTOData } from "~/sdk/core/dto";
 
 @injectable()
 export default class KernelConversationGateway implements ConversationGatewayOutputPort {
-
-    private logger: Logger
-    constructor(
+  private logger: Logger;
+  constructor(
     @inject(GATEWAYS.AUTH_GATEWAY) private authGateway: AuthGatewayOutputPort,
     @inject(KERNEL.KERNEL_SDK) private kernelSDK: TKernelSDK,
-    @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger
-    ) {
-    this.logger = this.loggerFactory("ConversationGateway")
+    @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger,
+  ) {
+    this.logger = this.loggerFactory("ConversationGateway");
+  }
+
+  async createConversation(researchContextID: number, conversationTitle: string): Promise<CreateConversationDTO> {
+    try {
+      const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
+
+      if (!kpCredentialsDTO.success) {
+        this.logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#conversation#create",
+            message: "Failed to get KP credentials",
+          } as TBaseErrorDTOData,
+        };
+      }
+
+      const newConversationViewModel = await this.kernelSDK.createConversation({
+        id: researchContextID,
+        xAuthToken: kpCredentialsDTO.data.xAuthToken,
+        conversationTitle: conversationTitle,
+      });
+
+      if (newConversationViewModel.status) {
+        this.logger.debug(`Successfully created conversation '${conversationTitle}' for Research Context with ID ${researchContextID}. View model code: ${newConversationViewModel.code}`);
+
+        return {
+          success: true,
+          data: {
+            id: newConversationViewModel.conversation_id,
+            title: conversationTitle,
+          },
+        };
+      }
+
+      this.logger.error(`Failed to create conversation for Research Context with ID ${researchContextID}: ${newConversationViewModel.errorMessage}`);
+
+      return {
+        success: false,
+        data: {
+          message: `Failed to create conversation for Research Context with ID ${researchContextID}`,
+          operation: "kernel#conversation#create",
+        },
+      };
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`An error occurred while creating a conversation: ${err.message}`);
+      return {
+        success: false,
+        data: {
+          message: err.message,
+          operation: "kernel#conversation#create",
+        },
+      };
     }
+  }
 
-    async createConversation(researchContextID: string, conversationTitle: string): Promise<CreateConversationDTO> {
-        try {
+  async listConversations(researchContextID: number): Promise<ListConversationsDTO> {
+    try {
+      const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
 
-            const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
+      if (!kpCredentialsDTO.success) {
+        this.logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#conversation#list",
+            message: "Failed to get KP credentials",
+          } as TBaseErrorDTOData,
+        };
+      }
 
-            if (!kpCredentialsDTO.success) {
-                this.logger.error(
-                    `Failed to get KP credentials: ${kpCredentialsDTO.data.message}`
-                );
-                return {
-                    success: false,
-                    data: {
-                        operation: "kernel#conversation#create",
-                        message: "Failed to get KP credentials",
-                    } as TBaseErrorDTOData
-                };
-            }
+      const listConversationsViewModel = await this.kernelSDK.listConversations({
+        id: researchContextID,
+        xAuthToken: kpCredentialsDTO.data.xAuthToken,
+      });
 
-            const researchContextIDNumber = parseInt(researchContextID);
+      if (listConversationsViewModel.status) {
+        this.logger.debug(`Successfully listed conversations for Research Context with ID ${researchContextID}. View model code: ${listConversationsViewModel.code}`);
 
-            const newConversationViewModel = await this.kernelSDK.createConversation({
-                id: researchContextIDNumber,
-                xAuthToken: kpCredentialsDTO.data.xAuthToken,
-                conversationTitle: conversationTitle,
-            });
+        return {
+          success: true,
+          data: listConversationsViewModel.conversations,
+        };
+      }
 
-            if(newConversationViewModel.status) {
-                this.logger.debug(`Successfully created conversation '${conversationTitle}' for Research Context with ID ${researchContextID}. View model code: ${newConversationViewModel.code}`);
-                
-                return {
-                    success: true,
-                    data: {
-                        id: newConversationViewModel.conversation_id,
-                        title: conversationTitle,
-                    }
-                };
-            }
-
-            this.logger.error(`Failed to create conversation for Research Context with ID ${researchContextID}: ${newConversationViewModel.errorMessage}`);
-
-            return {
-                success: false,
-                data: {
-                    message: `Failed to create conversation for Research Context with ID ${researchContextID}`,
-                    operation: "kernel#conversation#create",
-                }
-            }
-
-        } catch (error) {
-            const err = error as Error;
-            this.logger.error(`An error occurred while creating a conversation: ${err.message}`);
-            return {
-                success: false,
-                data: {
-                    message: err.message,
-                    operation: "kernel#conversation#create",
-
-                }
-            }
-        }
-
+      this.logger.error(`Failed to list conversations for Research Context with ID ${researchContextID}: ${listConversationsViewModel.errorMessage}`);
+      return {
+        success: false,
+        data: {
+          operation: "kernel#conversation#list",
+          message: `Failed to list messages for Research Context with ID ${researchContextID}`,
+        } as TBaseErrorDTOData,
+      };
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`An error occurred while listing conversations: ${err.message}`);
+      return {
+        success: false,
+        data: {
+          message: err.message,
+          operation: "kernel#conversation#list",
+        },
+      };
     }
+  }
 
-    async listConversations(researchContextID: string): Promise<ListConversationsDTO> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async sendMessage(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
+    throw new Error("Method not implemented.");
+  }
 
-        try {
+  async getConversationMessages(conversationID: string): Promise<ListMessagesForConversationDTO> {
+    try {
+      const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
 
-            const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
+      if (!kpCredentialsDTO.success) {
+        this.logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#conversation#get-messages",
+            message: "Failed to get KP credentials",
+          } as TBaseErrorDTOData,
+        };
+      }
 
-            if (!kpCredentialsDTO.success) {
-                this.logger.error(
-                    `Failed to get KP credentials: ${kpCredentialsDTO.data.message}`
-                );
-                return {
-                    success: false,
-                    data: {
-                        operation: "kernel#conversation#list",
-                        message: "Failed to get KP credentials",
-                    } as TBaseErrorDTOData
-                };
-            }
+      const conversationIDNumber = parseInt(conversationID);
 
-            const researchContextIDNumber = parseInt(researchContextID);
+      const listMessagesViewModel = await this.kernelSDK.listMessages({
+        id: conversationIDNumber,
+        xAuthToken: kpCredentialsDTO.data.xAuthToken,
+      });
 
-            const listConversationsViewModel = await this.kernelSDK.listConversations({
-                id: researchContextIDNumber,
-                xAuthToken: kpCredentialsDTO.data.xAuthToken,
-            });
+      if (listMessagesViewModel.status) {
+        this.logger.debug(`Successfully listed messages for conversation with ID ${conversationID}. View model code: ${listMessagesViewModel.code}`);
 
-            if(listConversationsViewModel.status) {
+        const kpMessages = listMessagesViewModel.message_list;
 
-                this.logger.debug(`Successfully listed conversations for Research Context with ID ${researchContextID}. View model code: ${listConversationsViewModel.code}`);
+        const messages: TMessage[] = kpMessages.map((kpMessage) => {
+          return {
+            id: kpMessage.id,
+            content: kpMessage.content,
+            timestamp: kpMessage.timestamp,
+            sender: kpMessage.sender,
+            senderType: kpMessage.sender_type,
+          };
+        });
 
-                return {
-                    success: true,
-                    data: listConversationsViewModel.conversations
-                };
-            }
+        return {
+          success: true,
+          data: messages,
+        };
+      }
 
-            this.logger.error(
-                `Failed to list conversations for Research Context with ID ${researchContextID}: ${listConversationsViewModel.errorMessage}`
-            );
-            return {
-                success: false,
-                data: {
-                    operation: "kernel#conversation#list",
-                    message: `Failed to list messages for Research Context with ID ${researchContextID}`,
-                } as TBaseErrorDTOData
-            };
+      this.logger.error(`Failed to list messages for conversation with ID ${conversationID}: ${listMessagesViewModel.errorMessage}`);
 
-        } catch (error) {
-            const err = error as Error;
-            this.logger.error(`An error occurred while listing conversations: ${err.message}`);
-            return {
-                success: false,
-                data: {
-                    message: err.message,
-                    operation: "kernel#conversation#list",
-                }
-            }
-        }
+      return {
+        success: false,
+        data: {
+          operation: "kernel#conversation#get-messages",
+          message: `Failed to list messages for conversation with ID ${conversationID}`,
+        } as TBaseErrorDTOData,
+      };
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error(`An error occurred while listing messages for conversation: ${err.message}`);
+      return {
+        success: false,
+        data: {
+          message: err.message,
+          operation: "kernel#conversation#get-messages",
+        },
+      };
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    async sendMessage(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
-        throw new Error("Method not implemented.");
-    }
-
-    async getConversationMessages(conversationID: string): Promise<ListMessagesForConversationDTO> {
-
-        try {
-
-            const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
-
-            if (!kpCredentialsDTO.success) {
-                this.logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
-                return {
-                    success: false,
-                    data: {
-                        operation: "kernel#conversation#get-messages",
-                        message: "Failed to get KP credentials",
-                    } as TBaseErrorDTOData
-                };
-            }
-
-            const conversationIDNumber = parseInt(conversationID);
-
-            const listMessagesViewModel = await this.kernelSDK.listMessages({
-                id: conversationIDNumber,
-                xAuthToken: kpCredentialsDTO.data.xAuthToken, 
-            });
-
-            if(listMessagesViewModel.status) {
-
-                this.logger.debug(`Successfully listed messages for conversation with ID ${conversationID}. View model code: ${listMessagesViewModel.code}`);
-
-                const kpMessages = listMessagesViewModel.message_list
-
-                const messages: TMessage[] = kpMessages.map((kpMessage) => {
-                    return {
-                        id: kpMessage.id,
-                        content: kpMessage.content,
-                        timestamp: kpMessage.timestamp,
-                        sender: kpMessage.sender,
-                        senderType: kpMessage.sender_type,
-                    }
-                });
-
-                return {
-                    success: true,
-                    data: messages
-                };
-            }
-
-            this.logger.error(`Failed to list messages for conversation with ID ${conversationID}: ${listMessagesViewModel.errorMessage}`);
-
-            return {
-                success: false,
-                data: {
-                    operation: "kernel#conversation#get-messages",
-                    message: `Failed to list messages for conversation with ID ${conversationID}`,
-                } as TBaseErrorDTOData
-            };
-
-
-        } catch (error) {
-            const err = error as Error;
-            this.logger.error(`An error occurred while listing messages for conversation: ${err.message}`);
-            return {
-                success: false,
-                data: {
-                    message: err.message,
-                    operation: "kernel#conversation#get-messages",
-                }
-            }
-        }
-
-
-
-    }
+  }
 }
