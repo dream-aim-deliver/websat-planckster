@@ -1,8 +1,7 @@
 import { injectable } from "inversify";
 import { TListConversationsErrorViewModel, TListConversationsSuccessViewModel, TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 import serverContainer from "../config/ioc/server-container";
-import KernelConversationGateway from "../gateway/kernel-conversation-gateway";
-import { GATEWAYS, USECASE_FACTORY } from "../config/ioc/server-ioc-symbols";
+import { USECASE_FACTORY } from "../config/ioc/server-ioc-symbols";
 import { ListConversationsInputPort } from "~/lib/core/ports/primary/list-conversations-primary-ports";
 import ListConversationsPresenter from "../presenter/list-conversations-presenter";
 

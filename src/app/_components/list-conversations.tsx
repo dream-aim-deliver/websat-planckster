@@ -1,18 +1,28 @@
 "use client";
-import { ConversationPage } from "@maany_shr/planckster-ui-kit";
-import { type Conversation } from "node_modules/@maany_shr/kernel-planckster-sdk-ts";
+import { type TConversation } from "~/lib/core/entity/kernel-models";
+import { type TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 
-export type ListConversationsPageProps = {
-  conversations: Conversation[];
-  kernelPlancksterHost: string;
-};
 
-export function ListConversationsPage(props: ListConversationsPageProps) {
-  return (
-    <ConversationPage
-      convs={props.conversations}
-      onAddConversationClick={() => {console.log("Add conversation clicked")}}  // TODO: add the mutation here
-      apiUrl={props.kernelPlancksterHost}
-    />
-  );
+export function ListConversationsClientPage(viewModel: TListConversationsViewModel) {
+  if (viewModel.status == "error") {
+    return (
+      <div>
+        <h1>Error</h1>
+        <p>{viewModel.message}</p>
+      </div>
+    );
+  }
+
+  if (viewModel.status == "success") {
+    return (
+      <div>
+        <h1>Conversations</h1>
+        <ul>
+          {viewModel.conversations.map((conversation: TConversation) => (
+            <li key={conversation.id}>{conversation.title}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
 }

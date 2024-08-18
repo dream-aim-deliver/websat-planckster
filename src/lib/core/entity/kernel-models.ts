@@ -10,6 +10,7 @@ export type TResearchContext = z.infer<typeof ResearchContextSchema>;
 export const ConversationSchema = z.object({
     id: z.number(),
     title: z.string(),
+    created_at: z.string().optional(),
 });
 export type TConversation = z.infer<typeof ConversationSchema>;
 
