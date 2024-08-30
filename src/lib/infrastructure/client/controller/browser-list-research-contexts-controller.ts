@@ -1,9 +1,9 @@
 import { injectable } from "inversify";
-import { TSignal } from "~/lib/core/entity/signals";
+import { Signal } from "~/lib/core/entity/signals";
 import { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 
 export interface TBrowserListResearchContextsControllerParameters {
-    response: TSignal<TListResearchContextsViewModel>;
+    response: Signal<TListResearchContextsViewModel>;
 }
 
 @injectable()

@@ -1,10 +1,10 @@
-import type { TSignal } from "~/lib/core/entity/signals";
+import type { Signal } from "~/lib/core/entity/signals";
 import type { TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
 import type { RemoteFile } from "~/lib/core/entity/file";
 import { injectable } from "inversify";
 
 export interface TBrowserCreateResearchContextControllerParameters {
-    response: TSignal<TCreateResearchContextViewModel>;
+    response: Signal<TCreateResearchContextViewModel>;
     title: string;
     description: string;
     sourceDataList: RemoteFile[];

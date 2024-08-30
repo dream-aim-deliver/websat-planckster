@@ -3,13 +3,13 @@ import clientContainer from "../config/ioc/client-container";
 import { GATEWAYS } from "../config/ioc/client-ioc-symbols";
 import BrowserFileUploadPresenter from "../presenter/browser-file-upload-presenter";
 import { TFileUploadingViewModel } from "~/lib/core/view-models/file-upload-view-model";
-import { TSignal } from "~/lib/core/entity/signals";
+import { Signal } from "~/lib/core/entity/signals";
 import { LocalFile, RemoteFile } from "~/lib/core/entity/file";
 import BrowserSourceDataGateway from "../gateway/browser-source-data-gateway";
 
 export interface TBrowserFileUploadControllerParameters {
   file: File;
-  response: TSignal<TFileUploadingViewModel>;
+  response: Signal<TFileUploadingViewModel>;
 }
 
 @injectable()

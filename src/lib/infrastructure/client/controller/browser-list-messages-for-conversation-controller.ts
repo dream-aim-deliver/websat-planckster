@@ -1,5 +1,5 @@
 import { injectable } from "inversify";
-import { TSignal } from "~/lib/core/entity/signals";
+import { Signal } from "~/lib/core/entity/signals";
 import { TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
 import BrowserListMessagesForConversationPresenter from "../presenter/browser-list-messages-for-conversation-presenter";
 import clientContainer from "../config/ioc/client-container";
@@ -8,7 +8,7 @@ import { GATEWAYS } from "../config/ioc/client-ioc-symbols";
 
 export interface TBrowserListMessagesForConversationControllerParameters {
     conversationID: string;
-    response: TSignal<TListMessagesForConversationViewModel>;
+    response: Signal<TListMessagesForConversationViewModel>;
 
 }
 

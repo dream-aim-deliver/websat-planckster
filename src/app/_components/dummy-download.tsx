@@ -6,7 +6,7 @@ import clientContainer from "~/lib/infrastructure/client/config/ioc/client-conta
 import signalsContainer from "~/lib/infrastructure/client/config/ioc/signals-container";
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 
-import type { TSignal } from "~/lib/core/entity/signals";
+import type { Signal } from "~/lib/core/entity/signals";
 import { CONTROLLERS, SIGNAL_FACTORY } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 import {type TSourceDataBasicInformation} from "~/lib/infrastructure/client/controller/browser-file-download-controller";
 import type BrowserFileDownloadController from "~/lib/infrastructure/client/controller/browser-file-download-controller";
@@ -24,7 +24,7 @@ export const DummyDownloadComponent = () => {
     });
 
     const signalFactory = signalsContainer.get<
-        (update: (value: TFileDownloadViewModel) => void) => TSignal<TFileDownloadViewModel>
+        (update: (value: TFileDownloadViewModel) => void) => Signal<TFileDownloadViewModel>
     >(SIGNAL_FACTORY.KERNEL_FILE_DOWNLOAD);
 
     const S_KERNEL_FILE_DOWNLOAD_VIEW_MODEL = signalFactory(setDownloadViewModel);

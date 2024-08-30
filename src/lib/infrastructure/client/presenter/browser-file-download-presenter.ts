@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { type TSignal } from "../../../core/entity/signals";
+import { type Signal } from "../../../core/entity/signals";
 import { type FileDownloadOutputPort } from "~/lib/core/ports/primary/file-download-primary-ports";
 import { type TFileDownloadPartialResponse, type TFileDownloadErrorResponse, type TFileDownloadProgressResponse, type TFileDownloadSuccessResponse } from "~/lib/core/usecase-models/file-download-usecase-models";
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 
 
-export default class BrowserFileDownloadPresenter implements FileDownloadOutputPort<TSignal<TFileDownloadViewModel>>{
-    response: TSignal<TFileDownloadViewModel>;
-    constructor(response: TSignal<TFileDownloadViewModel>) {
+export default class BrowserFileDownloadPresenter implements FileDownloadOutputPort<Signal<TFileDownloadViewModel>>{
+    response: Signal<TFileDownloadViewModel>;
+    constructor(response: Signal<TFileDownloadViewModel>) {
         this.response = response;
     }
 

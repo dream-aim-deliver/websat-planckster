@@ -1,4 +1,4 @@
-import { TSignal } from "~/lib/core/entity/signals";
+import { Signal } from "~/lib/core/entity/signals";
 import { TFileUploadingViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
 import { CONTROLLERS, GATEWAYS, REPOSITORY, TRPC } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";

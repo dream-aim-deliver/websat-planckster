@@ -9,7 +9,7 @@ import {
   SIGNAL_FACTORY,
 } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 import type BrowserFileUploadController from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
-import type { TSignal } from "~/lib/core/entity/signals";
+import type { Signal } from "~/lib/core/entity/signals";
 
 export const DummyUploadComponent = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -17,7 +17,7 @@ export const DummyUploadComponent = () => {
     status: "request",
     message: "File upload not started",
   });
-  const signalFactory = signalsContainer.get<(update: (value: TFileUploadingViewModel) => void, initialValue: TFileUploadingViewModel ) => TSignal<TFileUploadingViewModel>
+  const signalFactory = signalsContainer.get<(update: (value: TFileUploadingViewModel) => void, initialValue: TFileUploadingViewModel ) => Signal<TFileUploadingViewModel>
   >(SIGNAL_FACTORY.KERNEL_FILE_UPLOAD);
 
   const S_KERNEL_FILE_UPLOAD_VIEW_MODEL = signalFactory(setUploadViewModel, {

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { type TSignal } from "../../../core/entity/signals";
+import { type Signal } from "../../../core/entity/signals";
 import { type FileUploadOutputPort } from "../../../core/ports/primary/file-upload-primary-ports";
 import { type TFileUploadErrorResponse, type TFileUploadSuccessResponse, type TFileUploadProgressResponse } from "../../../core/usecase-models/file-upload-usecase-models";
 import { type TFileUploadingViewModel } from "../../../core/view-models/file-upload-view-model";
 
-export default class BrowserFileUploadPresenter implements FileUploadOutputPort<TSignal<TFileUploadingViewModel>>{
-    response: TSignal<TFileUploadingViewModel>;
-    constructor(response: TSignal<TFileUploadingViewModel>) {
+export default class BrowserFileUploadPresenter implements FileUploadOutputPort<Signal<TFileUploadingViewModel>>{
+    response: Signal<TFileUploadingViewModel>;
+    constructor(response: Signal<TFileUploadingViewModel>) {
         this.response = response;
     }
 

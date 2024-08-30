@@ -19,7 +19,7 @@ import BrowserSendMessageToConversationController from "../../controller/browser
 import BrowserAgentGateway from "../../gateway/browser-agent-gateway";
 import BrowserResearchContextGateway from "../../gateway/browser-research-context-gateway";
 import { type CreateResearchContextInputPort } from "~/lib/core/ports/primary/create-research-context-primary-ports";
-import { type TSignal } from "~/lib/core/entity/signals";
+import { type Signal } from "~/lib/core/entity/signals";
 import { type TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
 import BrowserCreateResearchContextPresenter from "../../presenter/browser-create-research-context-presenter";
 import type AgentGatewayOutputPort from "~/lib/core/ports/secondary/agent-gateway-output-port";
@@ -76,8 +76,8 @@ clientContainer.bind(CONTROLLERS.SEND_MESSAGE_TO_CONVERSATION_CONTROLLER).to(Bro
 /* eslint-disable  */
 clientContainer
     .bind<interfaces.Factory<CreateResearchContextInputPort>>(USECASE_FACTORY.CREATE_RESEARCH_CONTEXT)
-    .toFactory<CreateResearchContextInputPort, [TSignal<TCreateResearchContextViewModel>]>((context: interfaces.Context) =>
-        (response: TSignal<TCreateResearchContextViewModel>) => {
+    .toFactory<CreateResearchContextInputPort, [Signal<TCreateResearchContextViewModel>]>((context: interfaces.Context) =>
+        (response: Signal<TCreateResearchContextViewModel>) => {
             const presenter = new BrowserCreateResearchContextPresenter(response);
             const agentGateway = context.container.get<AgentGatewayOutputPort<any>>(GATEWAYS.AGENT_GATEWAY);
             const researchContextGateway = context.container.get<ResearchContextGatewayOutputPort>(GATEWAYS.RESEARCH_CONTEXT_GATEWAY);
@@ -89,8 +89,8 @@ clientContainer
 
 clientContainer
     .bind<interfaces.Factory<SendMessageToConversationInputPort>>(USECASE_FACTORY.SEND_MESSAGE_TO_CONVERSATION)
-    .toFactory<SendMessageToConversationInputPort, [TSignal<TSendMessageToConversationViewModel>]>((context: interfaces.Context) =>
-        (response: TSignal<TSendMessageToConversationViewModel>) => {
+    .toFactory<SendMessageToConversationInputPort, [Signal<TSendMessageToConversationViewModel>]>((context: interfaces.Context) =>
+        (response: Signal<TSendMessageToConversationViewModel>) => {
             const loggerFactory = context.container.get<(module: string) => Logger<ILogObj>>(UTILS.LOGGER_FACTORY);
             const presenter = new BrowserSendMessageToConversationPresenter(response, loggerFactory);
             const agentGateway = context.container.get<AgentGatewayOutputPort<any>>(GATEWAYS.AGENT_GATEWAY);

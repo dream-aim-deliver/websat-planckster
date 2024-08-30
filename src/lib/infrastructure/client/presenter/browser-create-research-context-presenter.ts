@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import type { TSignal } from "~/lib/core/entity/signals";
+import type { Signal } from "~/lib/core/entity/signals";
 import type { CreateResearchContextOutputPort } from "~/lib/core/ports/primary/create-research-context-primary-ports";
 import { type TCreateResearchContextErrorResponse, type TCreateResearchContextProgressResponse, type TCreateResearchContextSuccessResponse } from "~/lib/core/usecase-models/create-research-context-usecase-models";
 import type { TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
 
-export default class BrowserCreateResearchContextPresenter implements CreateResearchContextOutputPort<TSignal<TCreateResearchContextViewModel>> {
-    response: TSignal<TCreateResearchContextViewModel>;
+export default class BrowserCreateResearchContextPresenter implements CreateResearchContextOutputPort<Signal<TCreateResearchContextViewModel>> {
+    response: Signal<TCreateResearchContextViewModel>;
     constructor(
-        response: TSignal<TCreateResearchContextViewModel>
+        response: Signal<TCreateResearchContextViewModel>
     ) {
         this.response = response
     }

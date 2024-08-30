@@ -1,4 +1,4 @@
-export class TSignal<TValue> {
+export class Signal<TValue> {
   name: string;
   description: string;
   value: TValue;

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { injectable } from "inversify";
 import clientContainer from "../config/ioc/client-container";
-import { TSignal } from "~/lib/core/entity/signals";
+import { Signal } from "~/lib/core/entity/signals";
 import { TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 import BrowserFileDownloadPresenter from "../presenter/browser-file-download-presenter";
 import { GATEWAYS } from "../config/ioc/client-ioc-symbols";
@@ -26,7 +26,7 @@ export type TSourceDataBasicInformation = z.infer<typeof SourceDataBasicInformat
 
 export interface TBrowserFileDownloadControllerParameters {
     sourceDataBasicInformationList: TSourceDataBasicInformation[];
-    response: TSignal<TFileDownloadViewModel>;
+    response: Signal<TFileDownloadViewModel>;
 }
 
 @injectable()

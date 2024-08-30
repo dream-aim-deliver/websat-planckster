@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { type TSignal } from "~/lib/core/entity/signals";
+import { type Signal } from "~/lib/core/entity/signals";
 import { type ListResearchContextsOutputPort } from "~/lib/core/ports/primary/list-research-contexts-primary-ports";
 import { type TListResearchContextsSuccessResponse, type TListResearchContextsErrorResponse } from "~/lib/core/usecase-models/list-research-contexts-usecase-models";
 import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 
-export default class BrowserListResearchContextsPresenter implements ListResearchContextsOutputPort<TSignal<TListResearchContextsViewModel>> {
-    response: TSignal<TListResearchContextsViewModel>;
-    constructor(response: TSignal<TListResearchContextsViewModel>) {
+export default class BrowserListResearchContextsPresenter implements ListResearchContextsOutputPort<Signal<TListResearchContextsViewModel>> {
+    response: Signal<TListResearchContextsViewModel>;
+    constructor(response: Signal<TListResearchContextsViewModel>) {
         this.response = response;
     }
     presentSuccess(success: TListResearchContextsSuccessResponse): void {
