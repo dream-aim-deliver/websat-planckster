@@ -24,7 +24,7 @@ export const conversationRouter = createTRPCRouter({
       const viewModel = await listConversationsController.execute({
         researchContextID: input.researchContextID,
       });
-
+      //TODO: return the signal here, not the vm
       return viewModel;
 
     }),

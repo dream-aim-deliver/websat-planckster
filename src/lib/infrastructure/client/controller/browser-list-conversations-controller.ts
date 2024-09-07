@@ -1,27 +1,30 @@
-import { inject, injectable } from "inversify";
-import { TSignal } from "~/lib/core/entity/signals";
+import { injectable } from "inversify";
+import { Signal } from "~/lib/core/entity/signals";
 import { TListConversationsErrorViewModel, TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 import { TRPC } from "../config/ioc/client-ioc-symbols";
 import { type TVanillaAPI } from "../trpc/vanilla-api";
+import clientContainer from "../config/ioc/client-container";
 
 export interface BrowserListConversationsControllerParameters {
-  response: TSignal<TListConversationsViewModel>;
+  response: Signal<TListConversationsViewModel>;
   researchContextID: number;
 }
 
 @injectable()
 export default class BrowserListConversationsController {
-  constructor(@inject(TRPC.VANILLA_CLIENT) private api: TVanillaAPI) {}
 
-  async execute(params: BrowserListConversationsControllerParameters): Promise<TListConversationsViewModel> {
+  async execute(params: BrowserListConversationsControllerParameters): Promise<void> {
     try {
       const { researchContextID } = params;
 
-      const viewModel = await this.api.kernel.conversation.list.query({
+      const api = clientContainer.get<TVanillaAPI>(TRPC.VANILLA_CLIENT);
+
+      const viewModel: TListConversationsViewModel = await api.kernel.conversation.list.query({
         researchContextID: researchContextID,
       });
 
-      return viewModel;
+      params.response.update(viewModel);
+
     } catch (error) {
       const err = error as Error;
       const viewModel: TListConversationsErrorViewModel = {
@@ -31,7 +34,7 @@ export default class BrowserListConversationsController {
           researchContextId: params.researchContextID,
         },
       };
-      return viewModel;
+      params.response.update(viewModel);
     }
   }
 }

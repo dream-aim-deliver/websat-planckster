@@ -6,6 +6,8 @@ import { CONTROLLERS, GATEWAYS } from "~/lib/infrastructure/server/config/ioc/se
 import type ListConversationsController from "~/lib/infrastructure/server/controller/list-conversations-controller";
 import { type TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 
+
+// TODO: wrap this in a "suspense" so we can show a loading spinner while the data is being fetched
 export default async function ListConversationsServerPage({ params }: { params: { rc_id: string } }) {
 
   const researchContextID = parseInt(params.rc_id);

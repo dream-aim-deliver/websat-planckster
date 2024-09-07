@@ -2,9 +2,27 @@
 import { type TConversation } from "~/lib/core/entity/kernel-models";
 import { type TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 import { type ConversationAGGridProps, ConversationAGGrid } from "@maany_shr/rage-ui-kit"
+import { useState } from "react";
+import signalsContainer from "~/lib/infrastructure/client/config/ioc/signals-container";
+import { Signal } from "~/lib/core/entity/signals";
+import { SIGNAL_FACTORY } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 
 
+// TODO: look at one of the ralph pages
 export function ListConversationsClientPage(viewModel: TListConversationsViewModel) {
+
+  const [ListConversationsViewModel, setListConversationsViewModel] = useState<TListConversationsViewModel>({
+    status: "request",
+  });
+
+  const signalFactory = signalsContainer.get<(update: (value: TListConversationsViewModel) => void, initialValue: TListConversationsViewModel ) => Signal<TListConversationsViewModel>
+  >(SIGNAL_FACTORY.KERNEL_LIST_CONVERSATIONS);
+
+  const S_KERNEL_LIST_CONVERSATIONS_VIEW_MODEL = signalFactory(setListConversationsViewModel, {
+    status: "request",
+  });
+
+
 
   if (viewModel.status == "error") {
 
