@@ -9,6 +9,7 @@ import {
 } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 import type { TServerComponentAPI } from "~/lib/infrastructure/server/trpc/server-api";
 import env from "~/lib/infrastructure/server/config/env";
+import { Menu } from "./_components/layouts/menu";
 
 export default async function ListResearchContexts() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(
@@ -31,7 +32,8 @@ export default async function ListResearchContexts() {
   // }
 
   return (
-    <div>
+    <div className="flex">
+      <Menu/>
       {/*<ListResearchContextsPage
         researchContexts={researchContexts}
         kernelPlancksterHost={env.KP_HOST! as string}
