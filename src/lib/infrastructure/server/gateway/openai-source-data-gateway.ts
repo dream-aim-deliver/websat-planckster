@@ -20,7 +20,7 @@ export default class OpenAISourceDataGateway implements SourceDataGatewayOutputP
     ) {
         this.logger = loggerFactory("OpenAISourceDataRepository");
     }
-    async listForResearchContext(researchContextID: number): Promise<ListSourceDataDTO> {
+    async listSourceDataForResearchContext(researchContextID: number): Promise<ListSourceDataDTO> {
         this.logger.error("Use Kernel Source Data Repository!!! Tried accessing an unimplemented method 'listForResearchContext' in OpenAISourceDataRepository.")
         return {
             success: false,
@@ -32,7 +32,7 @@ export default class OpenAISourceDataGateway implements SourceDataGatewayOutputP
 
     }
 
-    async list(): Promise<ListSourceDataDTO> {
+    async listSourceDataForClient(): Promise<ListSourceDataDTO> {
         const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
         if (!kpCredentialsDTO.success) {
             this.logger.error({ kpCredentialsDTO }, `Failed to get KP credentials. This is required to list files in OpenAI.`);

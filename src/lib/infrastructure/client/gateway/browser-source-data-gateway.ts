@@ -358,7 +358,7 @@ export default class BrowserSourceDataGateway implements SourceDataGatewayOutput
     }
 
 
-    async listForResearchContext(researchContextID: number): Promise<ListSourceDataDTO> {
+    async listSourceDataForResearchContext(researchContextID: number): Promise<ListSourceDataDTO> {
 
         return {
             success: false,
@@ -369,7 +369,7 @@ export default class BrowserSourceDataGateway implements SourceDataGatewayOutput
         }
     }
 
-    async list(): Promise<ListSourceDataDTO> {
+    async listSourceDataForClient(): Promise<ListSourceDataDTO> {
         return {
             success: false,
             data: {

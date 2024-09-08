@@ -65,10 +65,10 @@ serverContainer.bind(KERNEL.KERNEL_SDK).toConstantValue(KernelSDK);
 
 /** GATEWAYS */
 serverContainer.bind(GATEWAYS.AGENT_GATEWAY).to(OpenAIAgentGateway);
+serverContainer.bind(GATEWAYS.KERNEL_CONVERSATION_GATEWAY).to(KernelConversationGateway);
 serverContainer.bind(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY).to(KernelSourceDataGateway);
 serverContainer.bind(GATEWAYS.RESEARCH_CONTEXT_GATEWAY).to(ResearchContextGateway);
 serverContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(OpenAIVectorStoreGateway);
-serverContainer.bind(GATEWAYS.KERNEL_CONVERSATION_GATEWAY).to(KernelConversationGateway);
 
 /** REPOSITORY */
 
@@ -117,10 +117,5 @@ serverContainer
   });
 
 // ListSourceDataUsecase
-serverContainer.bind<interfaces.Factory<ListSourceDataInputPort, []>>(USECASE_FACTORY.LIST_SOURCE_DATA).toFactory<ListSourceDataInputPort>((context: interfaces.Context) => () => {
-  const sourceDataGateway = context.container.get<KernelSourceDataGateway>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
-
-  return new ListSourceDataUsecase(sourceDataGateway);
-});
 
 export default serverContainer;

@@ -1,6 +1,6 @@
 import { postRouter } from "~/lib/infrastructure/server/trpc/routers/post";
 import { researchContextRouter } from "~/lib/infrastructure/server/trpc/routers/kernel/research-contexts";
-import { sourceDataRouter } from "~/lib/infrastructure/server/trpc/routers/kernel/source-data";
+import { sourceDataRouter as kernelSourceDataRouter } from "~/lib/infrastructure/server/trpc/routers/kernel/source-data";
 import { kernelPlancksterHealthCheckRouter } from "./routers/kernel/health-check";
 import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/server/trpc/server";
 import { createResearchContextsRouter } from "./routers/research-contexts/create-research-contexts-router";
@@ -12,6 +12,7 @@ import { z } from "zod";
 import { serverFileRouter } from "./routers/server/server-file-router";
 import { conversationRouter } from "./routers/controller/conversation-router";
 import { messageRouter } from "./routers/controller/message-router";
+import { sourceDataRouter } from "./routers/controller/source-data";
 
 /**
  * This is the primary router for your server.
@@ -21,11 +22,12 @@ import { messageRouter } from "./routers/controller/message-router";
 export const appRouter = createTRPCRouter({
   controllers: {
     conversation: conversationRouter,
-    message: messageRouter
+    message: messageRouter,
+    sourceData: sourceDataRouter,
   },
   kernel: {
     researchContext: researchContextRouter,
-    sourceData: sourceDataRouter,
+    sourceData: kernelSourceDataRouter,
     healthCheck: kernelPlancksterHealthCheckRouter,
   },
   post: postRouter,

@@ -8,7 +8,8 @@ import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-downloa
 import type { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 import { SIGNAL_FACTORY } from "./signals-ioc-container";
 import { type TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
-import { TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
+import { type TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
+import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 
 const signalsContainer = new Container();
 
@@ -62,6 +63,15 @@ signalsContainer.bind<interfaces.Factory<Signal<TListMessagesForConversationView
     )}
 );
 
+signalsContainer.bind<interfaces.Factory<Signal<TListSourceDataViewModel>>>(SIGNAL_FACTORY.KERNEL_LIST_SOURCE_DATA).toFactory<Signal<TListSourceDataViewModel>, [TListSourceDataViewModel, (value: TListSourceDataViewModel) => void]>((context: interfaces.Context) =>
+  (initialValue: TListSourceDataViewModel, update?: (value: TListSourceDataViewModel) => void) => {
+    return new Signal<TListSourceDataViewModel>(
+      "KernelListSourceData",
+      "Display the status of the List Source Data feature",
+      initialValue,
+      update,
+    )}
+);
 
 
 export default signalsContainer;

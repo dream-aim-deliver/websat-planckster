@@ -8,8 +8,6 @@ import { CONTROLLERS, GATEWAYS, KERNEL, UTILS } from "../../../config/ioc/server
 import { type TKernelSDK } from "../../../config/kernel/kernel-sdk";
 import { createTRPCRouter, protectedProcedure } from "../../server";
 import { type Logger } from "pino";
-import type ListSourceDataController from "../../../controller/list-source-data-controller";
-import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 
 
 const getLogger = () => {
@@ -21,24 +19,6 @@ const getLogger = () => {
 
 
 export const sourceDataRouter = createTRPCRouter({
-
-  list: protectedProcedure
-    .input(
-      z.object({
-        researchContextID: z.number().optional(),
-      }),
-    )
-    .query(async ({ input }): Promise<TListSourceDataViewModel> => {
-
-      const ListSourceDataController = serverContainer.get<ListSourceDataController>(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER);
-
-      const viewModel = await ListSourceDataController.execute({
-        researchContextID: input.researchContextID,
-      });
-
-      return viewModel;
-
-    }),
 
   getUploadSignedUrl: protectedProcedure
     .input(

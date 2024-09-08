@@ -6,10 +6,7 @@ import { FileSchema, RemoteFileSchema } from "../entity/file";
 /**
  * Represents a list of source data DTOs.
  */
-export const ListSourceDataDTOSchema = DTOSchemaFactory(
-    z.array(FileSchema),
-    BaseErrorDTOSchema
-);
+export const ListSourceDataDTOSchema = DTOSchemaFactory(z.array(FileSchema), BaseErrorDTOSchema);
 export type ListSourceDataDTO = z.infer<typeof ListSourceDataDTOSchema>;
 
 export const UploadSourceDataDTOSchema = DTOSchemaFactory(RemoteFileSchema, BaseErrorDTOSchema);
@@ -22,8 +19,9 @@ export const GetSourceDataDTOSchema = DTOSchemaFactory(RemoteFileSchema, BaseErr
 export type GetSourceDataDTO = z.infer<typeof GetSourceDataDTOSchema>;
 
 export const DeleteSourceDataDTOSchema = DTOSchemaFactory(
-    z.object({
-        message: z.string().optional(),
-    }), BaseErrorDTOSchema);
+  z.object({
+    message: z.string().optional(),
+  }),
+  BaseErrorDTOSchema,
+);
 export type DeleteSourceDataDTO = z.infer<typeof DeleteSourceDataDTOSchema>;
-
