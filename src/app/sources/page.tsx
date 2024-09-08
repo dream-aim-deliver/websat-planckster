@@ -4,22 +4,21 @@ import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 
-//export default async function Home() {
-  //const authGateway = serverContainer.get<AuthGatewayOutputPort>(
-    //GATEWAYS.AUTH_GATEWAY,
-  //);
-  //const sessionDTO = await authGateway.getSession();
-  //if (!sessionDTO.success) {
-    //redirect("/auth/login");
-  //}
-  //return (
-   //<div className="flex flex-col gap-4">
+export default async function Home() {
+  const authGateway = serverContainer.get<AuthGatewayOutputPort>(
+    GATEWAYS.AUTH_GATEWAY,
+  );
+  const sessionDTO = await authGateway.getSession();
+  if (!sessionDTO.success) {
+    redirect("/auth/login");
+  }
+  return (
+   <div className="flex flex-col gap-4">
 
-      //<DummyUploadComponent />
+      <DummyUploadComponent />
 
-      //<DummyDownloadComponent />
 
-   //</div> 
-  //);
-//}
+   </div> 
+  );
+}
 
