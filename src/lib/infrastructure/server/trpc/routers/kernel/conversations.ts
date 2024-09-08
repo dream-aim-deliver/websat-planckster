@@ -9,25 +9,7 @@ import type ListConversationsController from "../../../controller/list-conversat
 import { type TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 
 export const conversationRouter = createTRPCRouter({
-  /**
-   * NOTE: this is a controller-to-controller router function, so it pipes a view model
-   */
-  list: protectedProcedure
-    .input(
-      z.object({
-        researchContextID: z.number(),
-      }),
-    )
-    .query(async ({ input }): Promise<TListConversationsViewModel> => {
-      const listConversationsController = serverContainer.get<ListConversationsController>(CONTROLLERS.LIST_CONVERSATIONS_CONTROLLER);
 
-      const viewModel = await listConversationsController.execute({
-        researchContextID: input.researchContextID,
-      });
-      //TODO: return the signal here, not the vm
-      return viewModel;
-
-    }),
 
   /**
    * NOTE: this is a controller-to-controller router function, so it pipes a view model

@@ -1,44 +1,25 @@
 import { injectable } from "inversify";
-import { TListConversationsErrorViewModel, TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
+import { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 import serverContainer from "../config/ioc/server-container";
 import { USECASE_FACTORY } from "../config/ioc/server-ioc-symbols";
 import { ListConversationsInputPort } from "~/lib/core/ports/primary/list-conversations-primary-ports";
-import ListConversationsPresenter from "../presenter/list-conversations-presenter";
+import { Signal } from "~/lib/core/entity/signals";
+import { TListConversationsRequest } from "~/lib/core/usecase-models/list-conversations-usecase-models";
 
 export interface TListConversationsControllerParameters {
+  response: Signal<TListConversationsViewModel>;
   researchContextID: number;
 }
 
 @injectable()
 export default class ListConversationsController {
-  async execute(params: TListConversationsControllerParameters): Promise<TListConversationsViewModel> {
-    try {
-      const { researchContextID } = params;
-
-      const usecaseFactory: () => ListConversationsInputPort = serverContainer.get(USECASE_FACTORY.LIST_CONVERSATONS);
-      const usecase = usecaseFactory();
-
-      const presenter = new ListConversationsPresenter();
-
-      const responseModel = await usecase.execute({
-        researchContextID: researchContextID,
-      });
-
-      if (responseModel.status == "success") {
-        return presenter.presentSuccess(responseModel);
-      } else {
-        return presenter.presentError(responseModel);
-      }
-    } catch (error) {
-      const err = error as Error;
-      const viewModel: TListConversationsErrorViewModel = {
-        status: "error",
-        message: err.message,
-        context: {
-          researchContextId: params.researchContextID,
-        },
-      };
-      return viewModel;
-    }
+  async execute(params: TListConversationsControllerParameters): Promise<void> {
+    const { response, researchContextID } = params;
+    const request: TListConversationsRequest = {
+      researchContextID,
+    };
+    const usecaseFactory = serverContainer.get<(response: Signal<TListConversationsViewModel>) => ListConversationsInputPort>(USECASE_FACTORY.LIST_CONVERSATIONS);
+    const usecase = usecaseFactory(response);
+    await usecase.execute(request);
   }
 }

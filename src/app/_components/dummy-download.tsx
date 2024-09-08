@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
-import signalsContainer from "~/lib/infrastructure/client/config/ioc/signals-container";
+import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 
 import type { Signal } from "~/lib/core/entity/signals";

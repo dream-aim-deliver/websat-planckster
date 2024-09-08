@@ -1,20 +1,21 @@
 import { postRouter } from "~/lib/infrastructure/server/trpc/routers/post";
 import { researchContextRouter } from "~/lib/infrastructure/server/trpc/routers/kernel/research-contexts";
-import { conversationRouter } from "~/lib/infrastructure/server/trpc/routers/kernel/conversations";
 import { messageRouter } from "~/lib/infrastructure/server/trpc/routers/kernel/messages";
 import { sourceDataRouter } from "~/lib/infrastructure/server/trpc/routers/kernel/source-data";
 import { kernelPlancksterHealthCheckRouter } from "./routers/kernel/health-check";
 import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/server/trpc/server";
-import { openAIFileRouter } from "./routers/openai/openai-file-router";
-import { openAIVectorStoreRouter } from "./routers/openai/openai-vector-store-router";
-import { openAIAssistantRouter } from "./routers/openai/openai-assistant-router";
-import { serverFileRouter } from "./routers/server/server-file-router";
 import { createResearchContextsRouter } from "./routers/research-contexts/create-research-contexts-router";
 import serverContainer from "../config/ioc/server-container";
-import { CONTROLLERS } from "../config/ioc/server-ioc-symbols";
+import { CONTROLLERS, UTILS } from "../config/ioc/server-ioc-symbols";
 import type ListResearchContextsController from "../controller/list-research-contexts-controller";
 import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 import { z } from "zod";
+import { Signal } from "~/lib/core/entity/signals";
+import type ListConversationsController from "../controller/list-conversations-controller";
+import type { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
+import { serverFileRouter } from "./routers/server/server-file-router";
+import type { Logger } from "pino";
+import { conversationRouter } from "./routers/controller/conversation-router";
 
 /**
  * This is the primary router for your server.
@@ -22,9 +23,12 @@ import { z } from "zod";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+  controllers: {
+    conversation: conversationRouter,
+  },
   kernel: {
     researchContext: researchContextRouter,
-    conversation: conversationRouter,
+    // conversation: conversationRouter,
     message: messageRouter,
     sourceData: sourceDataRouter,
     healthCheck: kernelPlancksterHealthCheckRouter,
@@ -75,7 +79,7 @@ export const appRouter = createTRPCRouter({
     },
     list: protectedProcedure.query(async () => {
       return { status: "request" }
-     }),
+    }),
     sendMessage: protectedProcedure.mutation(async ({ input }) => {
       // call a server controller and usecase to send a message, try to fix any errors
       return { status: "request" }

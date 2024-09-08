@@ -5,7 +5,7 @@ import { TRPC } from "../config/ioc/client-ioc-symbols";
 import { type TVanillaAPI } from "../trpc/vanilla-api";
 import clientContainer from "../config/ioc/client-container";
 
-export interface BrowserListConversationsControllerParameters {
+export interface TBrowserListConversationsControllerParameters {
   response: Signal<TListConversationsViewModel>;
   researchContextID: number;
 }
@@ -13,17 +13,15 @@ export interface BrowserListConversationsControllerParameters {
 @injectable()
 export default class BrowserListConversationsController {
 
-  async execute(params: BrowserListConversationsControllerParameters): Promise<void> {
+  async execute(params: TBrowserListConversationsControllerParameters): Promise<void> {
     try {
-      const { researchContextID } = params;
+      const { researchContextID, response } = params;
 
       const api = clientContainer.get<TVanillaAPI>(TRPC.VANILLA_CLIENT);
-
-      const viewModel: TListConversationsViewModel = await api.kernel.conversation.list.query({
+      const serverResponse: Signal<TListConversationsViewModel> = await api.controllers.conversation.list.query({
         researchContextID: researchContextID,
-      });
-
-      params.response.update(viewModel);
+      })
+      response.update(serverResponse.value);
 
     } catch (error) {
       const err = error as Error;

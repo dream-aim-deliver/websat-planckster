@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { type TFileUploadingViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
-import signalsContainer from "~/lib/infrastructure/client/config/ioc/signals-container";
+import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import {
   CONTROLLERS,
   SIGNAL_FACTORY,

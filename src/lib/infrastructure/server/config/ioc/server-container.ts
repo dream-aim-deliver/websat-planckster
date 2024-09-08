@@ -28,6 +28,9 @@ import { type ListConversationsInputPort } from "~/lib/core/ports/primary/list-c
 import ListConversationsUsecase from "~/lib/core/usecase/list-conversations-usecase";
 import { type ListSourceDataInputPort } from "~/lib/core/ports/primary/list-source-data-primary-ports";
 import ListSourceDataUsecase from "~/lib/core/usecase/list-source-data-usecase";
+import { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
+import { Signal } from "~/lib/core/entity/signals";
+import ListConversationsPresenter from "../../presenter/list-conversations-presenter";
 
 const serverContainer = new Container();
 
@@ -79,10 +82,15 @@ serverContainer.bind<interfaces.Factory<CreateConversationInputPort, []>>(USECAS
 });
 
 // ListConversationsUsecase
-serverContainer.bind<interfaces.Factory<ListConversationsInputPort, []>>(USECASE_FACTORY.LIST_CONVERSATONS).toFactory<ListConversationsInputPort>((context: interfaces.Context) => () => {
-  const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
-
-  return new ListConversationsUsecase(conversationGateway);
+serverContainer
+  .bind<interfaces.Factory<ListConversationsInputPort>>(USECASE_FACTORY.LIST_CONVERSATIONS)
+  .toFactory<ListConversationsInputPort, [Signal<TListConversationsViewModel>]>((context: interfaces.Context) => 
+    (response: Signal<TListConversationsViewModel>) => {
+      const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
+      const loggerFactory = context.container.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
+      const presenter = new ListConversationsPresenter(response, loggerFactory);
+      const usecase = new ListConversationsUsecase(presenter, conversationGateway);
+      return usecase;
 });
 
 // ListSourceDataUsecase

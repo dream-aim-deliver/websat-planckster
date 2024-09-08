@@ -2,7 +2,7 @@ import { Signal } from "~/lib/core/entity/signals";
 import { TFileUploadingViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
 import { CONTROLLERS, GATEWAYS, REPOSITORY, TRPC } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
-import signalsContainer from "~/lib/infrastructure/client/config/ioc/signals-container";
+import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 import BrowserFileUploadController from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
 import { TVanillaAPI } from "~/lib/infrastructure/client/trpc/vanilla-api";
