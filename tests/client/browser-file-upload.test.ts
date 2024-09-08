@@ -1,8 +1,8 @@
-import { Signal } from "~/lib/core/entity/signals";
-import { TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
+import { TSignal } from "~/lib/core/entity/signals";
+import { TFileUploadingViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
 import { CONTROLLERS, GATEWAYS, REPOSITORY, TRPC } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
-import signalsContainer from "~/lib/infrastructure/common/signals-container";
+import signalsContainer from "~/lib/infrastructure/client/config/ioc/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 import BrowserFileUploadController from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
 import { TVanillaAPI } from "~/lib/infrastructure/client/trpc/vanilla-api";
@@ -14,7 +14,7 @@ import BrowserKernelSourceDataGateway from "~/lib/infrastructure/client/gateway/
 describe('Kernel Planckster File Repository ', () => {
 
   it('should upload a file', async () => {
-    jest.spyOn(clientContainer.get<BrowserKernelSourceDataGateway>(GATEWAYS.SOURCE_DATA_GATEWAY), "upload").mockResolvedValue({
+    jest.spyOn(clientContainer.get<BrowserKernelSourceDataGateway>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY), "upload").mockResolvedValue({
       success: true,
       data: {
         provider: 'test',
