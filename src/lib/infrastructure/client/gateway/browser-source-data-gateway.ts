@@ -1,6 +1,5 @@
 import type { ListSourceDataDTO, GetSourceDataDTO, DeleteSourceDataDTO, DownloadSourceDataDTO, UploadSourceDataDTO } from "~/lib/core/dto/source-data-gateway-dto";
 import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
-import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import type { Logger, ILogObj } from "tslog";
 import { inject, injectable } from "inversify";
 import { TRPC, UTILS } from "../config/ioc/client-ioc-symbols";
@@ -16,7 +15,7 @@ import { GetClientDataForUploadDTO, GetClientDataForDownloadDTO, NewSourceDataDT
  * Uploads and Downloads are done using signed URLs.
  */
 @injectable()
-export default class BrowserSourceDataGateway implements SourceDataGatewayOutputPort, KernelPlancksterSourceDataOutputPort {
+export default class BrowserKernelSourceDataGateway implements KernelPlancksterSourceDataOutputPort {
   private logger: Logger<ILogObj>;
   constructor(
     @inject(TRPC.VANILLA_CLIENT) private api: TVanillaAPI,

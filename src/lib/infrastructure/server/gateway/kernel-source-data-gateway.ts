@@ -1,7 +1,6 @@
 import { inject, injectable } from "inversify";
 import { type ListSourceDataDTO, type GetSourceDataDTO, type UploadSourceDataDTO, type DownloadSourceDataDTO, type DeleteSourceDataDTO } from "~/lib/core/dto/source-data-gateway-dto";
 import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
-import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import { GATEWAYS, KERNEL, UTILS } from "../config/ioc/server-ioc-symbols";
 import { Logger } from "pino";
 import type { TKernelSDK } from "../config/kernel/kernel-sdk";
@@ -15,7 +14,7 @@ import KernelPlancksterSourceDataOutputPort from "../../common/ports/secondary/k
 import { GetClientDataForDownloadDTO, GetClientDataForUploadDTO, NewSourceDataDTO } from "../../common/dto/kernel-planckster-source-data-gateway-dto";
 
 @injectable()
-export default class KernelSourceDataGateway implements SourceDataGatewayOutputPort, KernelPlancksterSourceDataOutputPort {
+export default class KernelSourceDataGateway implements KernelPlancksterSourceDataOutputPort {
   private logger: Logger;
   constructor(
     @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger,

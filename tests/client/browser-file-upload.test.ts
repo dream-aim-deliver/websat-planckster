@@ -8,13 +8,13 @@ import BrowserFileUploadController from "~/lib/infrastructure/client/controller/
 import { TVanillaAPI } from "~/lib/infrastructure/client/trpc/vanilla-api";
 import axios from "axios";
 import { create } from "domain";
-import BrowserSourceDataGateway from "~/lib/infrastructure/client/gateway/browser-source-data-gateway";
+import BrowserKernelSourceDataGateway from "~/lib/infrastructure/client/gateway/browser-source-data-gateway";
 
 
 describe('Kernel Planckster File Repository ', () => {
 
   it('should upload a file', async () => {
-    jest.spyOn(clientContainer.get<BrowserSourceDataGateway>(GATEWAYS.SOURCE_DATA_GATEWAY), "upload").mockResolvedValue({
+    jest.spyOn(clientContainer.get<BrowserKernelSourceDataGateway>(GATEWAYS.SOURCE_DATA_GATEWAY), "upload").mockResolvedValue({
       success: true,
       data: {
         provider: 'test',
