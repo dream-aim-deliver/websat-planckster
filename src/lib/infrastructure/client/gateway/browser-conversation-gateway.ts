@@ -36,28 +36,17 @@ export default class BrowserConversationGateway implements ConversationGatewayOu
     };
   }
 
-  async sendMessage(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
+  async sendMessageToConversation(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
     throw new Error("Method not implemented.");
   }
 
-  async getConversationMessages(conversationID: string): Promise<ListMessagesForConversationDTO> {
-    try {
-      const conversationIDNumber = parseInt(conversationID);
-      const response = await this.api.kernel.message.list.query({
-        conversationID: conversationIDNumber,
-      });
-
-      return response;
-    } catch (error) {
-      const err = error as Error;
-      this.logger.error(`Error getting conversation messages: ${err.message}`);
-      return {
-        success: false,
-        data: {
-          operation: "browser#conversation#get-conversation-messages",
-          message: err.message,
-        },
-      };
-    }
+  async listMessagesForConversation(conversationID: number): Promise<ListMessagesForConversationDTO> {
+    return {
+      success: false,
+      data: {
+        operation: "browser#conversation#list-messages-for-conversation",
+        message: "Method deprecated",
+      },
+    };
   }
 }

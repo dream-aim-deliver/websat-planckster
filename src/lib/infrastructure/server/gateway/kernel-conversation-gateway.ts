@@ -105,6 +105,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
       }
 
       this.logger.error({listConversationsViewModel}, `Failed to list conversations for Research Context with ID ${researchContextID}`);
+
       return {
         success: false,
         data: {
@@ -112,6 +113,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
           message: `Failed to list messages for Research Context with ID ${researchContextID}`,
         } as TBaseErrorDTOData,
       };
+
     } catch (error) {
       const err = error as Error;
       this.logger.error({err}, `An error occurred while listing conversations: ${err.message}`);
@@ -126,11 +128,11 @@ export default class KernelConversationGateway implements ConversationGatewayOut
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async sendMessage(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
+  async sendMessageToConversation(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
     throw new Error("Method not implemented.");
   }
 
-  async getConversationMessages(conversationID: string): Promise<ListMessagesForConversationDTO> {
+  async listMessagesForConversation(conversationID: number): Promise<ListMessagesForConversationDTO> {
     try {
       const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
 
@@ -145,15 +147,13 @@ export default class KernelConversationGateway implements ConversationGatewayOut
         };
       }
 
-      const conversationIDNumber = parseInt(conversationID);
-
       const listMessagesViewModel = await this.kernelSDK.listMessages({
-        id: conversationIDNumber,
+        id: conversationID,
         xAuthToken: kpCredentialsDTO.data.xAuthToken,
       });
 
       if (listMessagesViewModel.status) {
-        this.logger.debug(`Successfully listed messages for conversation with ID ${conversationID}. View model code: ${listMessagesViewModel.code}`);
+        this.logger.debug({listMessagesViewModel}, `Successfully listed messages for conversation with ID ${conversationID}`);
 
         const kpMessages = listMessagesViewModel.message_list;
 
@@ -173,7 +173,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
         };
       }
 
-      this.logger.error(`Failed to list messages for conversation with ID ${conversationID}: ${listMessagesViewModel.errorMessage}`);
+      this.logger.error({listMessagesViewModel}, `Failed to list messages for conversation with ID ${conversationID}`);
 
       return {
         success: false,
@@ -182,9 +182,10 @@ export default class KernelConversationGateway implements ConversationGatewayOut
           message: `Failed to list messages for conversation with ID ${conversationID}`,
         } as TBaseErrorDTOData,
       };
+
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`An error occurred while listing messages for conversation: ${err.message}`);
+      this.logger.error({err}, `An error occurred while listing messages for conversation: ${err.message}`);
       return {
         success: false,
         data: {

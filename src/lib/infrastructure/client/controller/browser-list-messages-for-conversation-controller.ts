@@ -1,69 +1,38 @@
 import { injectable } from "inversify";
 import { Signal } from "~/lib/core/entity/signals";
 import { TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
-import BrowserListMessagesForConversationPresenter from "../presenter/browser-list-messages-for-conversation-presenter";
 import clientContainer from "../config/ioc/client-container";
-import BrowserConversationGateway from "../gateway/browser-conversation-gateway";
-import { GATEWAYS } from "../config/ioc/client-ioc-symbols";
+import { TVanillaAPI } from "../trpc/vanilla-api";
+import { TRPC } from "../config/ioc/client-ioc-symbols";
 
 export interface TBrowserListMessagesForConversationControllerParameters {
-    conversationID: string;
-    response: Signal<TListMessagesForConversationViewModel>;
-
+  response: Signal<TListMessagesForConversationViewModel>;
+  conversationID: number;
 }
 
 @injectable()
 export default class BrowserListMessagesForConversationController {
-    async execute(params: TBrowserListMessagesForConversationControllerParameters): Promise<void> {
-        try {
+  async execute(params: TBrowserListMessagesForConversationControllerParameters): Promise<void> {
+    try {
+      const { response, conversationID } = params;
 
-            const { conversationID } = params;
+      const api = clientContainer.get<TVanillaAPI>(TRPC.VANILLA_CLIENT);
 
-            /**
-             * TODO: move to USECASE
-            */
+      const serverResponse: Signal<TListMessagesForConversationViewModel> = await api.controllers.message.list.query({
+        conversationID: conversationID,
+      });
 
-            const presenter = new BrowserListMessagesForConversationPresenter(params.response);  // will be injected
-
-            const conversationGateway = clientContainer.get<BrowserConversationGateway>(GATEWAYS.CONVERSATION_GATEWAY);  // would be injected
-
-            const listMessagesForConversationDTO = await conversationGateway.getConversationMessages(conversationID);
-
-            if (!listMessagesForConversationDTO.success) {
-                presenter.presentError({
-                    message: listMessagesForConversationDTO.data.message,
-                    operation: "list-messages-for-conversation",
-                    context: {
-                        conversationId: conversationID,
-                    },
-                });
-                return;
-            }
-
-            const messages = listMessagesForConversationDTO.data;
-
-            presenter.presentSuccess({
-                messages: messages,
-            });
-
-            return;
-
-
-        } catch (error) {
-            const err = error as Error;
-            const presenter = new BrowserListMessagesForConversationPresenter(params.response);
-            presenter.presentError({
-                message: err.message,
-                operation: "list-messages-for-conversation",
-                context: {
-                    conversationID: params.conversationID,
-                },
-            });
-
-        }
-
-
-
-
+      response.update(serverResponse.value);
+    } catch (error) {
+      const err = error as Error;
+      const viewModel: TListMessagesForConversationViewModel = {
+        status: "error",
+        message: err.message,
+        context: {
+          conversationID: params.conversationID,
+        },
+      };
+      params.response.update(viewModel);
     }
+  }
 }

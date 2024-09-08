@@ -12,17 +12,17 @@ export interface TBrowserListConversationsControllerParameters {
 
 @injectable()
 export default class BrowserListConversationsController {
-
   async execute(params: TBrowserListConversationsControllerParameters): Promise<void> {
     try {
       const { response, researchContextID } = params;
 
       const api = clientContainer.get<TVanillaAPI>(TRPC.VANILLA_CLIENT);
+
       const serverResponse: Signal<TListConversationsViewModel> = await api.controllers.conversation.list.query({
         researchContextID: researchContextID,
-      })
-      response.update(serverResponse.value);
+      });
 
+      response.update(serverResponse.value);
     } catch (error) {
       const err = error as Error;
       const viewModel: TListConversationsErrorViewModel = {

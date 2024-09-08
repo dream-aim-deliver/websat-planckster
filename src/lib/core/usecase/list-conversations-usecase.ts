@@ -28,14 +28,18 @@ export default class ListConversationsUsecase implements ListConversationsInputP
         })
         return;
       }
+
       const successResponse: TListConversationsResponse = {
         status: "success",
         conversations: dto.data,
       };
+
       await this.presenter.presentSuccess(successResponse);
+
 
     } catch (error) {
       const err = error as Error;
+
       await this.presenter.presentError({
         status: "error",
         message: err.message ?? "An error occurred while listing conversations",

@@ -33,6 +33,10 @@ import { type Signal } from "~/lib/core/entity/signals";
 import ListConversationsPresenter from "../../presenter/list-conversations-presenter";
 import { type TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import CreateConversationPresenter from "../../presenter/create-conversation-presenter";
+import { type ListMessagesForConversationInputPort } from "~/lib/core/ports/primary/list-messages-for-conversation-primary-ports";
+import { type TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
+import ListMessagesForConversationPresenter from "../../presenter/list-messages-for-conversation-presenter";
+import ListMessagesForConversationUsecase from "~/lib/core/usecase/list-messages-for-conversation-usecase";
 
 const serverContainer = new Container();
 
@@ -99,6 +103,18 @@ serverContainer
       const usecase = new ListConversationsUsecase(presenter, conversationGateway);
       return usecase;
 });
+
+// ListMessagesForConversationUsecase
+serverContainer
+  .bind<interfaces.Factory<ListMessagesForConversationInputPort>>(USECASE_FACTORY.LIST_MESSAGES_FOR_CONVERSATION)
+  .toFactory<ListMessagesForConversationInputPort, [Signal<TListMessagesForConversationViewModel>]>((context: interfaces.Context) =>
+    (response: Signal<TListMessagesForConversationViewModel>) => {
+      const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
+      const loggerFactory = context.container.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
+      const presenter = new ListMessagesForConversationPresenter(response, loggerFactory);
+      const usecase = new ListMessagesForConversationUsecase(presenter, conversationGateway);
+      return usecase;
+  });
 
 // ListSourceDataUsecase
 serverContainer.bind<interfaces.Factory<ListSourceDataInputPort, []>>(USECASE_FACTORY.LIST_SOURCE_DATA).toFactory<ListSourceDataInputPort>((context: interfaces.Context) => () => {

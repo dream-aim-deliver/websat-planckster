@@ -1,11 +1,11 @@
 import { z } from 'zod'
-
 import { MessageSchema } from '../entity/kernel-models'
 
 export const ListMessagesForConversationRequestViewModelSchema = z.object({
     status: z.enum(['request']),
-    conversationID: z.string(),
+    conversationID: z.number(),
 })
+
 export type TListMessagesForConversationRequestViewModel = z.infer<typeof ListMessagesForConversationRequestViewModelSchema>
 
 export const ListMessagesForConversationSuccessViewModelSchema = z.object({

@@ -19,7 +19,7 @@ export default class BrowserSendMessageToConversationUseCase implements SendMess
     async execute(request: TSendMessageToConversationRequest): Promise<void> {
         // TODO: check if conversation exists
         // send incoming message to the conversation
-        const registerIncomingMessageDTO = await this.conversationGateway.sendMessage(request.conversationID, request.message)
+        const registerIncomingMessageDTO = await this.conversationGateway.sendMessageToConversation(request.conversationID, request.message)
 
         if (!registerIncomingMessageDTO.success) {
             this.presenter.presentError(
@@ -68,7 +68,7 @@ export default class BrowserSendMessageToConversationUseCase implements SendMess
             context: sendMessageToAgentDTO
         })
 
-        const registerOutgoingMessageDTO = await this.conversationGateway.sendMessage(request.conversationID, sendMessageToAgentDTO.data)
+        const registerOutgoingMessageDTO = await this.conversationGateway.sendMessageToConversation(request.conversationID, sendMessageToAgentDTO.data)
         if (!registerOutgoingMessageDTO.success) {
             this.presenter.presentError(
                 {

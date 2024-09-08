@@ -8,10 +8,12 @@ import type { TListConversationsViewModel } from "~/lib/core/view-models/list-co
 export default class ListConversationsPresenter implements ListConversationsOutputPort {
   logger: Logger;
   response: Signal<TListConversationsViewModel>;
+
   constructor(response: Signal<TListConversationsViewModel>, loggerFactory: (module: string) => Logger) {
     this.response = response;
     this.logger = loggerFactory("ListConversationsPresenter");
   }
+
   async presentSuccess(usecaseSuccessResponse: TListConversationsSuccessResponse): Promise<void> {
     this.logger.debug({usecaseSuccessResponse},`Successfully retrieved ${usecaseSuccessResponse.conversations.length} conversations`);
     this.response.update({
@@ -28,4 +30,5 @@ export default class ListConversationsPresenter implements ListConversationsOutp
       context: usecaseErrorResponse.context,
     });
   }
+
 }

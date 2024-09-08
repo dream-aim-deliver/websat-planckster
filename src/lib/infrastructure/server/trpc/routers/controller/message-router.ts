@@ -1,40 +1,57 @@
 import { z } from "zod";
-
-import OpenAIGateway from "~/lib/infrastructure/server/gateway/openai-gateway-old";
-import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import serverContainer from "../../../config/ioc/server-container";
-import { GATEWAYS, KERNEL, UTILS } from "../../../config/ioc/server-ioc-symbols";
 import { createTRPCRouter, protectedProcedure } from "../../server";
-import { type TBaseErrorDTOData } from "~/sdk/core/dto";
+import serverContainer from "../../../config/ioc/server-container";
 import { type Logger } from "pino";
-import { type TKernelSDK } from "../../../config/kernel/kernel-sdk";
-import type ConversationGatewayOutputPort from "~/lib/core/ports/secondary/conversation-gateway-output-port";
-import { type ListMessagesForConversationDTO } from "~/lib/core/dto/conversation-gateway-dto";
-
-
-const getLogger = () => {
-  const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
-  const logger = loggerFactory("conversationRouter");
-  return logger;
-}
+import { CONTROLLERS, UTILS } from "../../../config/ioc/server-ioc-symbols";
+import signalsContainer from "~/lib/infrastructure/common/signals-container";
+import { type TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
+import { type Signal } from "~/lib/core/entity/signals";
+import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
+import type ListMessagesForConversationController from "../../../controller/list-messages-for-conversation-controller";
 
 export const messageRouter = createTRPCRouter({
-    list: protectedProcedure
+  list: protectedProcedure
     .input(
-        z.object({
-            conversationID: z.number(),
-        }),
+      z.object({
+        conversationID: z.number(),
+      }),
     )
-    .query(async ({ input }): Promise<ListMessagesForConversationDTO> => {
+    .query(async ({ input }) => {
 
-        const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
+      const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY)
 
-        const dto = await conversationGateway.getConversationMessages(input.conversationID.toString());
+      const logger = loggerFactory("ListConversations TRPC Router")
 
-        return dto;
+      const signalFactory = signalsContainer.get<(initialValue: TListMessagesForConversationViewModel, update?: (value: TListMessagesForConversationViewModel) => void) => Signal<TListMessagesForConversationViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_CONVERSATIONS)
 
+      const response: Signal<TListMessagesForConversationViewModel> = signalFactory({
+        status: "request",
+        conversationID: input.conversationID
+      })
+
+      try {
+        const controller = serverContainer.get<ListMessagesForConversationController>(CONTROLLERS.LIST_MESSAGES_CONTROLLER)
+
+        await controller.execute({
+          response: response,
+          conversationID: input.conversationID
+        })
+        
+        return response;
+
+      } catch (error) {
+        response.update({
+          status: "error",
+          message: "Could not invoke the server side feature to list messages for conversation",
+        })
+        logger.error({ error }, "Could not invoke the server side feature to list messages for conversation")
+
+        return response;
+      }
     }),
 
+
+    // OLD CODE
     // create: protectedProcedure
     // .input(
     //     z.object({
@@ -141,4 +158,6 @@ export const messageRouter = createTRPCRouter({
 
     // }),
 
-});
+
+
+})
