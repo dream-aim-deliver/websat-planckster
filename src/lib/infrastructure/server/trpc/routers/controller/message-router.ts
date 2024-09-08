@@ -22,7 +22,7 @@ export const messageRouter = createTRPCRouter({
 
       const logger = loggerFactory("ListConversations TRPC Router")
 
-      const signalFactory = signalsContainer.get<(initialValue: TListMessagesForConversationViewModel, update?: (value: TListMessagesForConversationViewModel) => void) => Signal<TListMessagesForConversationViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_CONVERSATIONS)
+      const signalFactory = signalsContainer.get<(initialValue: TListMessagesForConversationViewModel, update?: (value: TListMessagesForConversationViewModel) => void) => Signal<TListMessagesForConversationViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_MESSAGES_FOR_CONVERSATION)
 
       const response: Signal<TListMessagesForConversationViewModel> = signalFactory({
         status: "request",
