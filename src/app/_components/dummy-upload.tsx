@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { type TFileUploadingViewModel } from "~/lib/core/view-models/file-upload-view-model";
+import { type TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import {
@@ -13,11 +13,11 @@ import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-containe
 
 export const DummyUploadComponent = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [UploadViewModel, setUploadViewModel] = useState<TFileUploadingViewModel>({
+  const [UploadViewModel, setUploadViewModel] = useState<TFileUploadViewModel>({
     status: "request",
     message: "File upload not started",
   });
-  const signalFactory = signalsContainer.get<(update: (value: TFileUploadingViewModel) => void, initialValue: TFileUploadingViewModel ) => Signal<TFileUploadingViewModel>
+  const signalFactory = signalsContainer.get<(update: (value: TFileUploadViewModel) => void, initialValue: TFileUploadViewModel ) => Signal<TFileUploadViewModel>
   >(SIGNAL_FACTORY.KERNEL_FILE_UPLOAD);
 
   const S_KERNEL_FILE_UPLOAD_VIEW_MODEL = signalFactory(setUploadViewModel, {

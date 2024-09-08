@@ -1,5 +1,6 @@
 import type { DeleteSourceDataDTO, DownloadSourceDataDTO, GetSourceDataDTO, ListSourceDataDTO, UploadSourceDataDTO } from "~/lib/core/dto/source-data-gateway-dto";
 import type { LocalFile, RemoteFile } from "~/lib/core/entity/file";
+
 /**
  * Represents the output port for the SourceDataGateway.
  * This interface defines the methods for retrieving, listing, and deleting source data.

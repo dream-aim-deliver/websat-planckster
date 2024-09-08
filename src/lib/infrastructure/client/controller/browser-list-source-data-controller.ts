@@ -1,4 +1,4 @@
-import { inject, injectable } from "inversify";
+import { injectable } from "inversify";
 import { TRPC } from "../config/ioc/client-ioc-symbols";
 import { TListSourceDataErrorViewModel, TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import { type TVanillaAPI } from "../trpc/vanilla-api";

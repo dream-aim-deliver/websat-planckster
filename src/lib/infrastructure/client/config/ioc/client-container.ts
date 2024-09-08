@@ -32,26 +32,31 @@ import { type TSendMessageToConversationViewModel } from "~/lib/core/view-models
 import BrowserSendMessageToConversationUseCase from "~/lib/core/usecase/send-message-to-conversation-usecase";
 import BrowserSendMessageToConversationPresenter from "../../presenter/browser-send-message-to-conversation-presenter";
 import type ConversationGatewayOutputPort from "~/lib/core/ports/secondary/conversation-gateway-output-port";
+import { type FileUploadInputPort } from "~/lib/core/ports/primary/file-upload-primary-ports";
+import { type TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
+import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
+import BrowserFileUploadPresenter from "../../presenter/browser-file-upload-presenter";
+import FileUploadUsecase from "~/lib/core/usecase/file-upload-usecase";
+import { type FileDownloadInputPort } from "~/lib/core/ports/primary/file-download-primary-ports";
+import FileDownloadUsecase from "~/lib/core/usecase/file-download-usecase";
+import BrowserFileDownloadPresenter from "../../presenter/browser-file-download-presenter";
 
 const clientContainer = new Container();
 
 /** Aspect: Logging */
-clientContainer.bind<interfaces.Factory<Logger<unknown>>>(UTILS.LOGGER_FACTORY).toFactory<Logger<unknown>, [string]>((context: interfaces.Context) =>
-    (module: string) => {
-        const logger = new Logger<unknown>({
-            ...config,
-            name: module,
-        });
-        return logger;
-    }
-);
+clientContainer.bind<interfaces.Factory<Logger<unknown>>>(UTILS.LOGGER_FACTORY).toFactory<Logger<unknown>, [string]>((context: interfaces.Context) => (module: string) => {
+  const logger = new Logger<unknown>({
+    ...config,
+    name: module,
+  });
+  return logger;
+});
 
 /** TRPC */
 clientContainer.bind(TRPC.REACT_CLIENT_COMPONENTS_API).toConstantValue(api);
 clientContainer.bind(TRPC.VANILLA_CLIENT).toConstantValue(vanilla);
 
 /** REPOSITORY */
-
 
 /** GATEWAYS */
 clientContainer.bind(GATEWAYS.AGENT_GATEWAY).to(BrowserAgentGateway).inSingletonScope();
@@ -71,34 +76,45 @@ clientContainer.bind(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER).to(BrowserLi
 clientContainer.bind(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER).to(BrowserListSourceDataController);
 clientContainer.bind(CONTROLLERS.SEND_MESSAGE_TO_CONVERSATION_CONTROLLER).to(BrowserSendMessageToConversationController);
 
-
 /** USECASE FACTORY */
 /* eslint-disable  */
 clientContainer
-    .bind<interfaces.Factory<CreateResearchContextInputPort>>(USECASE_FACTORY.CREATE_RESEARCH_CONTEXT)
-    .toFactory<CreateResearchContextInputPort, [Signal<TCreateResearchContextViewModel>]>((context: interfaces.Context) =>
-        (response: Signal<TCreateResearchContextViewModel>) => {
-            const presenter = new BrowserCreateResearchContextPresenter(response);
-            const agentGateway = context.container.get<AgentGatewayOutputPort<any>>(GATEWAYS.AGENT_GATEWAY);
-            const researchContextGateway = context.container.get<ResearchContextGatewayOutputPort>(GATEWAYS.RESEARCH_CONTEXT_GATEWAY);
-            const vectorStore = context.container.get<VectorStoreOutputPort>(GATEWAYS.VECTOR_STORE_GATEWAY);
-            const usecase = new CreateResearchContextUsecase(presenter, researchContextGateway, agentGateway, vectorStore);
-            return usecase;
-        }
-    );
+  .bind<interfaces.Factory<CreateResearchContextInputPort>>(USECASE_FACTORY.CREATE_RESEARCH_CONTEXT)
+  .toFactory<CreateResearchContextInputPort, [Signal<TCreateResearchContextViewModel>]>((context: interfaces.Context) => (response: Signal<TCreateResearchContextViewModel>) => {
+    const presenter = new BrowserCreateResearchContextPresenter(response);
+    const agentGateway = context.container.get<AgentGatewayOutputPort<any>>(GATEWAYS.AGENT_GATEWAY);
+    const researchContextGateway = context.container.get<ResearchContextGatewayOutputPort>(GATEWAYS.RESEARCH_CONTEXT_GATEWAY);
+    const vectorStore = context.container.get<VectorStoreOutputPort>(GATEWAYS.VECTOR_STORE_GATEWAY);
+    const usecase = new CreateResearchContextUsecase(presenter, researchContextGateway, agentGateway, vectorStore);
+    return usecase;
+  });
 
 clientContainer
-    .bind<interfaces.Factory<SendMessageToConversationInputPort>>(USECASE_FACTORY.SEND_MESSAGE_TO_CONVERSATION)
-    .toFactory<SendMessageToConversationInputPort, [Signal<TSendMessageToConversationViewModel>]>((context: interfaces.Context) =>
-        (response: Signal<TSendMessageToConversationViewModel>) => {
-            const loggerFactory = context.container.get<(module: string) => Logger<ILogObj>>(UTILS.LOGGER_FACTORY);
-            const presenter = new BrowserSendMessageToConversationPresenter(response, loggerFactory);
-            const agentGateway = context.container.get<AgentGatewayOutputPort<any>>(GATEWAYS.AGENT_GATEWAY);
-            const conversationGateway = context.container.get<ConversationGatewayOutputPort>(GATEWAYS.CONVERSATION_GATEWAY);
-            const usecase = new BrowserSendMessageToConversationUseCase(presenter, agentGateway, conversationGateway);
-            return usecase;
-        }
-    );
+  .bind<interfaces.Factory<SendMessageToConversationInputPort>>(USECASE_FACTORY.SEND_MESSAGE_TO_CONVERSATION)
+  .toFactory<SendMessageToConversationInputPort, [Signal<TSendMessageToConversationViewModel>]>((context: interfaces.Context) => (response: Signal<TSendMessageToConversationViewModel>) => {
+    const loggerFactory = context.container.get<(module: string) => Logger<ILogObj>>(UTILS.LOGGER_FACTORY);
+    const presenter = new BrowserSendMessageToConversationPresenter(response, loggerFactory);
+    const agentGateway = context.container.get<AgentGatewayOutputPort<any>>(GATEWAYS.AGENT_GATEWAY);
+    const conversationGateway = context.container.get<ConversationGatewayOutputPort>(GATEWAYS.CONVERSATION_GATEWAY);
+    const usecase = new BrowserSendMessageToConversationUseCase(presenter, agentGateway, conversationGateway);
+    return usecase;
+  });
+
+clientContainer.bind<interfaces.Factory<FileUploadInputPort>>(USECASE_FACTORY.FILE_UPLOAD).toFactory<FileUploadInputPort, [Signal<TFileUploadViewModel>]>((context: interfaces.Context) => (response: Signal<TFileUploadViewModel>) => {
+  const loggerFactory = context.container.get<(module: string) => Logger<ILogObj>>(UTILS.LOGGER_FACTORY);
+  const presenter = new BrowserFileUploadPresenter(response, loggerFactory);
+  const sourceDataGateway = context.container.get<BrowserSourceDataGateway>(GATEWAYS.SOURCE_DATA_GATEWAY);
+  const usecase = new FileUploadUsecase(presenter, sourceDataGateway);
+  return usecase;
+});
+
+clientContainer.bind<interfaces.Factory<FileDownloadInputPort>>(USECASE_FACTORY.FILE_DOWNLOAD).toFactory<FileDownloadInputPort, [Signal<TFileDownloadViewModel>]>((context: interfaces.Context) => (response: Signal<TFileDownloadViewModel>) => {
+  const loggerFactory = context.container.get<(module: string) => Logger<ILogObj>>(UTILS.LOGGER_FACTORY);
+  const presenter = new BrowserFileDownloadPresenter(response, loggerFactory);
+  const sourceDataGateway = context.container.get<BrowserSourceDataGateway>(GATEWAYS.SOURCE_DATA_GATEWAY);
+  const usecase = new FileDownloadUsecase(presenter, sourceDataGateway);
+  return usecase;
+});
 
 /* eslint-enable  */
 

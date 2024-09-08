@@ -83,37 +83,34 @@ serverContainer.bind(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER).to(ListSourceDataC
 // CreateConversationUsecase
 serverContainer
   .bind<interfaces.Factory<CreateConversationInputPort>>(USECASE_FACTORY.CREATE_CONVERSATION)
-  .toFactory<CreateConversationInputPort, [Signal<TCreateConversationViewModel>]>((context: interfaces.Context) =>
-    (response: Signal<TCreateConversationViewModel>) => {
-      const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
-      const loggerFactory = context.container.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
-      const presenter = new CreateConversationPresenter(response, loggerFactory);
-      const usecase = new CreateConversationUsecase(presenter, conversationGateway);
-      return usecase;
+  .toFactory<CreateConversationInputPort, [Signal<TCreateConversationViewModel>]>((context: interfaces.Context) => (response: Signal<TCreateConversationViewModel>) => {
+    const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
+    const loggerFactory = context.container.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
+    const presenter = new CreateConversationPresenter(response, loggerFactory);
+    const usecase = new CreateConversationUsecase(presenter, conversationGateway);
+    return usecase;
   });
 
 // ListConversationsUsecase
 serverContainer
   .bind<interfaces.Factory<ListConversationsInputPort>>(USECASE_FACTORY.LIST_CONVERSATIONS)
-  .toFactory<ListConversationsInputPort, [Signal<TListConversationsViewModel>]>((context: interfaces.Context) => 
-    (response: Signal<TListConversationsViewModel>) => {
-      const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
-      const loggerFactory = context.container.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
-      const presenter = new ListConversationsPresenter(response, loggerFactory);
-      const usecase = new ListConversationsUsecase(presenter, conversationGateway);
-      return usecase;
-});
+  .toFactory<ListConversationsInputPort, [Signal<TListConversationsViewModel>]>((context: interfaces.Context) => (response: Signal<TListConversationsViewModel>) => {
+    const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
+    const loggerFactory = context.container.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
+    const presenter = new ListConversationsPresenter(response, loggerFactory);
+    const usecase = new ListConversationsUsecase(presenter, conversationGateway);
+    return usecase;
+  });
 
 // ListMessagesForConversationUsecase
 serverContainer
   .bind<interfaces.Factory<ListMessagesForConversationInputPort>>(USECASE_FACTORY.LIST_MESSAGES_FOR_CONVERSATION)
-  .toFactory<ListMessagesForConversationInputPort, [Signal<TListMessagesForConversationViewModel>]>((context: interfaces.Context) =>
-    (response: Signal<TListMessagesForConversationViewModel>) => {
-      const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
-      const loggerFactory = context.container.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
-      const presenter = new ListMessagesForConversationPresenter(response, loggerFactory);
-      const usecase = new ListMessagesForConversationUsecase(presenter, conversationGateway);
-      return usecase;
+  .toFactory<ListMessagesForConversationInputPort, [Signal<TListMessagesForConversationViewModel>]>((context: interfaces.Context) => (response: Signal<TListMessagesForConversationViewModel>) => {
+    const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
+    const loggerFactory = context.container.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
+    const presenter = new ListMessagesForConversationPresenter(response, loggerFactory);
+    const usecase = new ListMessagesForConversationUsecase(presenter, conversationGateway);
+    return usecase;
   });
 
 // ListSourceDataUsecase

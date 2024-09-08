@@ -14,7 +14,7 @@ export default class CreateConversationPresenter implements CreateConversationOu
   }
 
   async presentSuccess(usecaseSuccessResponse: TCreateConversationSuccessResponse): Promise<void> {
-    this.logger.debug({usecaseSuccessResponse}, `Successfully created conversation: ${usecaseSuccessResponse.conversation.title}`);
+    this.logger.debug({ usecaseSuccessResponse }, `Successfully created conversation: ${usecaseSuccessResponse.conversation.title}`);
     this.response.update({
       status: "success",
       conversation: usecaseSuccessResponse.conversation,
@@ -22,7 +22,7 @@ export default class CreateConversationPresenter implements CreateConversationOu
   }
 
   async presentError(usecaseErrorResponse: TCreateConversationErrorResponse): Promise<void> {
-    this.logger.error({usecaseErrorResponse}, `Failed to create conversation: ${usecaseErrorResponse.message}`);
+    this.logger.error({ usecaseErrorResponse }, `Failed to create conversation: ${usecaseErrorResponse.message}`);
     this.response.update({
       status: "error",
       message: usecaseErrorResponse.message,

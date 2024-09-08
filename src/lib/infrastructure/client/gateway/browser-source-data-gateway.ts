@@ -5,9 +5,10 @@ import type { Logger, ILogObj } from "tslog";
 import { inject, injectable } from "inversify";
 import { TRPC, UTILS } from "../config/ioc/client-ioc-symbols";
 import type { TVanillaAPI } from "../trpc/vanilla-api";
-import { TBaseErrorDTOData } from "~/sdk/core/dto";
 import axios from "axios";
 import saveAs from "file-saver";
+import KernelPlancksterSourceDataOutputPort from "../../common/ports/secondary/kernel-planckster-source-data-output-port";
+import { GetClientDataForUploadDTO, GetClientDataForDownloadDTO, NewSourceDataDTO } from "../../common/dto/kernel-planckster-source-data-gateway-dto";
 
 /**
  * Represents a class that interacts with a remote storage element that is managed by kernel.
@@ -15,375 +16,254 @@ import saveAs from "file-saver";
  * Uploads and Downloads are done using signed URLs.
  */
 @injectable()
-export default class BrowserSourceDataGateway implements SourceDataGatewayOutputPort {
-
-    private logger: Logger<ILogObj>
-    constructor(
+export default class BrowserSourceDataGateway implements SourceDataGatewayOutputPort, KernelPlancksterSourceDataOutputPort {
+  private logger: Logger<ILogObj>;
+  constructor(
     @inject(TRPC.VANILLA_CLIENT) private api: TVanillaAPI,
-    @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger<ILogObj>
-    ) {
-    this.logger = this.loggerFactory("BrowserSourceDataRepository")
-    }
+    @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger<ILogObj>,
+  ) {
+    this.logger = this.loggerFactory("BrowserSourceDataRepository");
+  }
 
-    /**
-     * Retrieves the signed URL for uploading a file to the remote storage.
-     *
-     * @param protocol - The protocol to use for the upload.
-     * @param relativePath - The relative path of the file.
-     * @returns A promise that resolves to an object containing the signed URL and the provider, or an object containing an error message.
-     */
-    private async __getUploadSignedUrl(protocol: string, relativePath: string): Promise<
-    | {
-        success: true;
-        data: {
-        url: string;
-        provider: string;
-        };
-    }
-    | {
-        success: false;
-        data: TBaseErrorDTOData;
-    }
-    > {
+  async getClientDataForUpload(relativePath: string): Promise<GetClientDataForUploadDTO> {
     try {
-        const response = await this.api.kernel.sourceData.getUploadSignedUrl.query({
-            protocol: protocol,
-            relativePath: relativePath,
-        });
+      const dto = await this.api.gateways.sourceData.getClientDataForUpload.query({
+        relativePath,
+      });
 
-        if (!response) {
-        this.logger.error(`Could not get signed url from the TRPC server to upload file: did not receive a response.`);
-        return {
-            success: false,
-            data: {
-            message: `Could not get signed url from the TRPC server to upload file: did not receive a response.`,
-            operation: "kp-file-repository#get-upload-signed-url",
-            },
-        };
-        }
-        if (!response.success) {
-        this.logger.error(`An error occurred while getting signed URL for upload. Error: ${JSON.stringify(response.data, null, 2)}`);
-        return {
-            success: false,
-            data: {
-            message: `An error occurred while getting signed URL for upload. Error: ${JSON.stringify(response.data, null, 2)}`,
-            operation: "kp#get-upload-signed-url",
-            },
-        };
-        }
+      this.logger.debug({ dto }, `Successfully fetched client data for upload for relative path: ${relativePath}`);
 
-        const signedUrl = response.data;
+      return dto;
+    } catch (error) {
+      this.logger.error({ error }, "Could not invoke the server side feature to get client data for upload");
 
-        if (!signedUrl || typeof signedUrl !== "string") {
-        this.logger.error(`An error occurred while getting signed URL for upload. Signed URL received from TRPC server is invalid: ${JSON.stringify(response)}`);
-
-        return {
-            success: false,
-            data: {
-            message: `An error occurred. Signed URL received from TRPC server is invalid: ${JSON.stringify(response)}`,
-            operation: "kp#get-upload-signed-url",
-            },
-        };
-        }
-
-        return {
-        success: true,
-        data: {
-            url: signedUrl,
-            provider: "kernel#s3",
-        },
-        };
-    } catch (error: unknown) {
-        const err = error as Error;
-        this.logger.error(`An error occurred while getting signed URL for upload. Error: ${err.message}`);
-        return {
+      return {
         success: false,
         data: {
-            message: `An error occurred while getting signed URL for upload. Error: ${err.message}`,
-            operation: "kp#get-upload-signed-url",
+          operation: "sourceDataRouter#getClientDataForUpload",
+          message: "Could not invoke the server side feature to get client data for upload",
         },
-        };
+      };
     }
-    }
+  }
 
-
-    /**
-     * Retrieves a signed URL for downloading a file from the remote storage.
-     *
-     * @param protocol The protocol to use for the download.
-     * @param relativePath The relative path of the file to download.
-     * @returns A promise that resolves to the signed URL for downloading the file.
-     */
-    private async __getDownloadSignedUrl(
-        protocol: string,
-        relativePath: string,
-    ): Promise<
-        | {
-        success: true;
-        data: {
-            url: string;
-            provider: string;
-        };
-        }
-        | { success: false; data: TBaseErrorDTOData }
-    > {
-        try {
-
-            const response = await this.api.kernel.sourceData.getDownloadSignedUrl.query({
-                protocol: protocol,
-                relativePath: relativePath,
-            });
-
-            if (!response) {
-                this.logger.error(`Could not get signed url from the TRPC server to download file: did not receive a response.`);
-                return {
-                    success: false,
-                    data: {
-                        message: `Could not get signed url from the TRPC server to download file: did not receive a response.`,
-                        operation: "kp-file-repository#get-download-signed-url",
-                    }
-                }
-            }
-
-            if (!response.success) {
-                this.logger.error(`An error occurred while getting signed URL for download. Error: ${JSON.stringify(response.data, null, 2)}`);
-                return {
-                    success: false,
-                    data: {
-                        message: `An error occurred. Error: ${JSON.stringify(response.data, null, 2)}`,
-                        operation: "kp#get-download-signed-url",
-                    }
-                }
-            }
-
-            const signedUrl = response.data;
-
-            if (!signedUrl || typeof signedUrl !== 'string') {
-                this.logger.error(`An error occurred while getting signed URL for download. Signed URL received from TRPC server is invalid: ${JSON.stringify(response)}`);
-                return {
-                    success: false,
-                    data: {
-                        message: `An error occurred while getting signed URL for download. Signed URL received from TRPC server is invalid: ${JSON.stringify(response)}`,
-                        operation: "kp#get-download-signed-url",
-                    }
-                }
-            }
-
-            return {
-                success: true,
-                data: {
-                    url: signedUrl,
-                    provider: "kernel#s3",
-                }
-            };
-        }
-
-        catch (error: unknown) {
-            const err = error as Error;
-            this.logger.error(`An error occurred while getting signed URL for download. Error: ${err.message}`);
-            return {
-                success: false,
-                data: {
-                    message: `An error occurred while getting signed URL for download. Error: ${err.message}`,
-                    operation: "kp#get-download-signed-url",
-                }
-            }
-        }
-    }
-
-    async download(file: RemoteFile, localPath?: string): Promise<DownloadSourceDataDTO> {
-
+  async getClientDataForDownload(relativePath: string): Promise<GetClientDataForDownloadDTO> {
     try {
-        // 1. Get signed URL for download
-        const signedUrlDTO = await this.__getDownloadSignedUrl("s3", file.relativePath);
+      const dto = await this.api.gateways.sourceData.getClientDataForDownload.query({
+        relativePath,
+      });
 
-        if (!signedUrlDTO.success) {
-            this.logger.error(`Failed to get signed URL for download: ${signedUrlDTO.data.message}`);
-            return {
-            success: false,
-            data: {
-                operation: `${signedUrlDTO.data.operation}`,
-                message: `Failed to get signed URL for download: ${signedUrlDTO.data.message}`,
-            },
-            };
-        }
+      this.logger.debug({ dto }, `Successfully fetched client data for download for relative path: ${relativePath}`);
 
-        const signedUrl = signedUrlDTO.data.url;
+      return dto;
+    } catch (error) {
+      this.logger.error({ error }, "Could not invoke the server side feature to get client data for download");
 
-        // 2. Fetch file from signed URL
-            const response = await axios.get<Blob>(signedUrl, {responseType: "blob"});
+      return {
+        success: false,
+        data: {
+          operation: "sourceDataRouter#getClientDataForDownload",
+          message: "Could not invoke the server side feature to get client data for download",
+        },
+      };
+    }
+  }
 
-            if (response.status !== 200 || !response.data) {
-            this.logger.error(`Failed to download file. Status code: ${response.status}. Message: ${response.statusText}`);
-            return {
-                success: false,
-                data: {
-                operation: "BrowserSourceDataGateway#download",
-                message: `Failed to download file. Status code: ${response.status}. Message: ${response.statusText}`,
-                },
-            };
-            }
+  async newSourceData(sourceDataName: string, relativePath: string): Promise<NewSourceDataDTO> {
+    try {
+      const dto = await this.api.gateways.sourceData.newSourceData.mutate({
+        sourceDataName,
+        relativePath,
+      });
 
-        // 3. Save file to local path
-        saveAs(response.data, localPath);
+      this.logger.debug({ dto }, `Successfully created new source data for relative path: ${relativePath}`);
 
-        // 4. Return local file object
-        const localFile: LocalFile = {
-            type: "local",
-            relativePath: file.name,
-            name: file.name,
+      return dto;
+    } catch (error) {
+      this.logger.error({ error }, "Could not invoke the server side feature to create new source data");
+
+      return {
+        success: false,
+        data: {
+          operation: "sourceDataRouter#newSourceData",
+          message: "Could not invoke the server side feature to create new source data",
+        },
+      };
+    }
+  }
+
+  async download(file: RemoteFile, localPath?: string): Promise<DownloadSourceDataDTO> {
+    try {
+      // 1. Get signed URL for download
+      const signedUrlDTO = await this.getClientDataForDownload(file.relativePath);
+
+      if (!signedUrlDTO.success) {
+        this.logger.error(`Failed to get signed URL for download: ${signedUrlDTO.data.message}`);
+        return {
+          success: false,
+          data: {
+            operation: `${signedUrlDTO.data.operation}`,
+            message: `Failed to get signed URL for download: ${signedUrlDTO.data.message}`,
+          },
         };
+      }
 
+      const signedUrl = signedUrlDTO.data;
+
+      // 2. Fetch file from signed URL
+      const response = await axios.get<Blob>(signedUrl, { responseType: "blob" });
+
+      if (response.status !== 200 || !response.data) {
+        this.logger.error(`Failed to download file. Status code: ${response.status}. Message: ${response.statusText}`);
         return {
-            success: true,
-            data: localFile
+          success: false,
+          data: {
+            operation: "BrowserSourceDataGateway#download",
+            message: `Failed to download file. Status code: ${response.status}. Message: ${response.statusText}`,
+          },
         };
+      }
 
-        } catch (error: unknown) {
-        const err = error as Error;
-        this.logger.error(`An error occurred while downloading file: ${err.message}`);
+      // 3. Save file to local path, if any
+      saveAs(response.data, localPath);
+
+      // 4. Return local file object
+      const localFile: LocalFile = {
+        type: "local",
+        relativePath: file.name,
+        name: file.name,
+      };
+
+      return {
+        success: true,
+        data: localFile,
+      };
+    } catch (error: unknown) {
+      const err = error as Error;
+      this.logger.error(`An error occurred while downloading file: ${err.message}`);
+      return {
+        success: false,
+        data: {
+          operation: "kp#download",
+          message: `An error occurred while downloading file: ${err.message}`,
+        },
+      };
+    }
+  }
+
+  /**
+   * Uploads a file to the remote storage managed by Kernel and registers the file as a source data.
+   *
+   * @param file - The file to be uploaded.
+   * @returns A promise that resolves to an UploadSourceDataDTO object containing the result of the upload operation.
+   */
+  async upload(file: LocalFile, relativePath: string): Promise<UploadSourceDataDTO> {
+    try {
+      // check if LocalFile contains the raw file
+      if (!file.raw) {
+        this.logger.error(`LocalFile does not contain the raw file.`);
         return {
-            success: false,
-            data: {
-            operation: "kp#download",
-            message: `An error occurred while downloading file: ${err.message}`,
-            },
+          success: false,
+          data: {
+            operation: "kp#upload",
+            message: `LocalFile does not contain the raw file.`,
+          },
         };
-        }
+      }
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const rawFile: File = file.raw;
+      const fileName = rawFile.name;
 
+      // 1. Get signed URL
+      const signedUrlDTO = await this.getClientDataForUpload(relativePath);
 
-    }
-
-    /**
-     * Uploads a file to the remote storage managed by Kernel and registers the file as a source data.
-     *
-     * @param file - The file to be uploaded.
-     * @returns A promise that resolves to an UploadSourceDataDTO object containing the result of the upload operation.
-     */
-    async upload(file: LocalFile, relativePath: string): Promise<UploadSourceDataDTO> {
-        try {
-            // check if LocalFile contains the raw file
-            if (!file.raw) {
-                this.logger.error(`LocalFile does not contain the raw file.`);
-                return {
-                    success: false,
-                    data: {
-                    operation: "kp#upload",
-                    message: `LocalFile does not contain the raw file.`,
-                    },
-                };
-            }
-
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            const rawFile: File = file.raw;
-            const fileName = rawFile.name;
-
-            // 1. Get signed URL
-            const signedUrlDTO = await this.__getUploadSignedUrl("s3", relativePath);
-
-            if (!signedUrlDTO.success) {
-                this.logger.error(`Failed to get signed URL for upload: ${signedUrlDTO.data.message}`);
-                return {
-                    success: false,
-                    data: {
-                    operation: "kp#upload",
-                    message: `Failed to get signed URL for upload: ${signedUrlDTO.data.message}`,
-                    },
-                };
-            }
-
-            const signedUrl = signedUrlDTO.data.url;
-
-            // 2. Upload file to signed URL with axios
-            const axiosResponse = await axios.put(signedUrl, rawFile);
-
-            if (axiosResponse.status !== 200) {
-                this.logger.error(`Failed to upload file to signed URL. Status code: ${axiosResponse.status}. Message: ${axiosResponse.statusText}`);
-                return {
-                    success: false,
-                    data: {
-                    operation: "kp#upload",
-                    message: `Failed to upload file to signed URL. Status code: ${axiosResponse.status}. Message: ${axiosResponse.statusText}`,
-                    },
-                };
-            }
-
-            // 3. Register the new source data
-            const createSourceDataDTO = await this.api.kernel.sourceData.create.mutate({
-            relativePath: relativePath,
-            sourceDataName: fileName,
-            protocol: "s3",
-            });
-
-            if (!createSourceDataDTO.success) {
-                this.logger.error(`Failed to register the new source data after correct upload: ${createSourceDataDTO.data.message}`);
-                return {
-                success: false,
-                data: {
-                    operation: "kp#upload",
-                    message: `Failed to register the new source data after correct upload: ${createSourceDataDTO.data.message}`,
-                },
-                };
-            }
-
-            // 4. Return a remote file object
-            const newSourceData = createSourceDataDTO.data;
-
-            const remoteFile: RemoteFile = {
-                id: newSourceData.id.toString(),
-                type: "remote",
-                name: newSourceData.name,
-                relativePath: newSourceData.relative_path,
-                provider: "kernel#s3",
-                createdAt: newSourceData.created_at,
-            };
-
-            return {
-                success: true,
-                data: remoteFile,
-            };
-        } catch (error: unknown) {
-            const err = error as Error;
-            this.logger.error(`An error occurred while uploading file: ${err.message}`);
-            return {
-                success: false,
-                data: {
-                    operation: "kp#upload",
-                    message: `An error occurred while uploading file: ${err.message}`,
-                },
-            };
-        }
-
-    }
-
-
-    async listSourceDataForResearchContext(researchContextID: number): Promise<ListSourceDataDTO> {
-
+      if (!signedUrlDTO.success) {
+        this.logger.error(`Failed to get signed URL for upload: ${signedUrlDTO.data.message}`);
         return {
-            success: false,
-            data: {
-                operation: "browser#source-data#list",
-                message: `Method deprecated`,
-            },
-        }
-    }
+          success: false,
+          data: {
+            operation: "kp#upload",
+            message: `Failed to get signed URL for upload: ${signedUrlDTO.data.message}`,
+          },
+        };
+      }
 
-    async listSourceDataForClient(): Promise<ListSourceDataDTO> {
+      const signedUrl = signedUrlDTO.data;
+
+      // 2. Upload file to signed URL with axios
+      const axiosResponse = await axios.put(signedUrl, rawFile);
+
+      if (axiosResponse.status !== 200) {
+        this.logger.error(`Failed to upload file to signed URL. Status code: ${axiosResponse.status}. Message: ${axiosResponse.statusText}`);
         return {
-            success: false,
-            data: {
-                operation: "browser#source-data#list",
-                message: `Method deprecated`,
-            },
-        }
-    }
+          success: false,
+          data: {
+            operation: "kp#upload",
+            message: `Failed to upload file to signed URL. Status code: ${axiosResponse.status}. Message: ${axiosResponse.statusText}`,
+          },
+        };
+      }
 
-    async get(fileID: string): Promise<GetSourceDataDTO> {
-        throw new Error("Method not implemented.");
-    }
+      // 3. Register the new source data
+      const createSourceDataDTO = await this.newSourceData(fileName, relativePath);
 
-    async delete(file: RemoteFile): Promise<DeleteSourceDataDTO> {
-        throw new Error("Method not implemented.");
+      if (!createSourceDataDTO.success) {
+        this.logger.error(`Failed to register the new source data after correct upload: ${createSourceDataDTO.data.message}`);
+        return {
+          success: false,
+          data: {
+            operation: "kp#upload",
+            message: `Failed to register the new source data after correct upload: ${createSourceDataDTO.data.message}`,
+          },
+        };
+      }
+
+      // 4. Return a remote file object
+      const newSourceDataRemoteFile = createSourceDataDTO.data;
+
+      return {
+        success: true,
+        data: newSourceDataRemoteFile,
+      };
+    } catch (error: unknown) {
+      const err = error as Error;
+      this.logger.error(`An error occurred while uploading file: ${err.message}`);
+      return {
+        success: false,
+        data: {
+          operation: "kp#upload",
+          message: `An error occurred while uploading file: ${err.message}`,
+        },
+      };
     }
+  }
+
+  async listSourceDataForResearchContext(researchContextID: number): Promise<ListSourceDataDTO> {
+    return {
+      success: false,
+      data: {
+        operation: "browser#source-data#list",
+        message: `Method deprecated`,
+      },
+    };
+  }
+
+  async listSourceDataForClient(): Promise<ListSourceDataDTO> {
+    return {
+      success: false,
+      data: {
+        operation: "browser#source-data#list",
+        message: `Method deprecated`,
+      },
+    };
+  }
+
+  async get(fileID: string): Promise<GetSourceDataDTO> {
+    throw new Error("Method not implemented.");
+  }
+
+  async delete(file: RemoteFile): Promise<DeleteSourceDataDTO> {
+    throw new Error("Method not implemented.");
+  }
 }

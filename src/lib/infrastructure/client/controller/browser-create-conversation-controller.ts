@@ -1,4 +1,4 @@
-import { inject, injectable } from "inversify";
+import { injectable } from "inversify";
 import { TCreateConversationErrorViewModel, TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import { TRPC } from "../config/ioc/client-ioc-symbols";
 import { type TVanillaAPI } from "../trpc/vanilla-api";

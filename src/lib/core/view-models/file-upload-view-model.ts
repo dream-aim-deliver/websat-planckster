@@ -1,32 +1,32 @@
 import { z } from "zod";
 import { BaseViewModelRequestSchema } from "../../../sdk/core/view-models";
 
-export const FileUploadingRequestViewModelSchema = BaseViewModelRequestSchema.extend({
+export const FileUploadRequestViewModelSchema = BaseViewModelRequestSchema.extend({
 });
 
-export const FileUploadingSuccessViewModelSchema = z.object({
+export const FileUploadSuccessViewModelSchema = z.object({
     status: z.enum(["success"]),
     message: z.string(),
     fileName: z.string(),
 });
 
-export const FileUploadingProgressViewModelSchema = z.object({
+export const FileUploadProgressViewModelSchema = z.object({
     status: z.enum(["progress"]),
     message: z.string(),
     progress: z.number(),
 });
 
-export const FileUploadingErrorResponseViewModelSchema = z.object({
+export const FileUploadErrorResponseViewModelSchema = z.object({
     status: z.enum(["error"]),
     message: z.string(),
     context: z.any().optional(),
 });
 
-export const FileUploadingViewModelSchema = z.discriminatedUnion("status", [
-    FileUploadingRequestViewModelSchema,
-    FileUploadingSuccessViewModelSchema,
-    FileUploadingProgressViewModelSchema,
-    FileUploadingErrorResponseViewModelSchema,
+export const FileUploadViewModelSchema = z.discriminatedUnion("status", [
+    FileUploadRequestViewModelSchema,
+    FileUploadSuccessViewModelSchema,
+    FileUploadProgressViewModelSchema,
+    FileUploadErrorResponseViewModelSchema,
 ]);
 
-export type TFileUploadingViewModel = z.infer<typeof FileUploadingViewModelSchema>;
+export type TFileUploadViewModel = z.infer<typeof FileUploadViewModelSchema>;

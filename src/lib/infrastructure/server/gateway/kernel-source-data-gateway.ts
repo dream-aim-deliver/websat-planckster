@@ -11,9 +11,11 @@ import fs from "fs";
 import * as stream from "stream";
 import { promisify } from "util";
 import { TBaseErrorDTOData } from "~/sdk/core/dto";
+import KernelPlancksterSourceDataOutputPort from "../../common/ports/secondary/kernel-planckster-source-data-output-port";
+import { GetClientDataForDownloadDTO, GetClientDataForUploadDTO, NewSourceDataDTO } from "../../common/dto/kernel-planckster-source-data-gateway-dto";
 
 @injectable()
-export default class KernelSourceDataGateway implements SourceDataGatewayOutputPort {
+export default class KernelSourceDataGateway implements SourceDataGatewayOutputPort, KernelPlancksterSourceDataOutputPort {
   private logger: Logger;
   constructor(
     @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger,
@@ -21,6 +23,170 @@ export default class KernelSourceDataGateway implements SourceDataGatewayOutputP
     @inject(GATEWAYS.AUTH_GATEWAY) private authGateway: AuthGatewayOutputPort,
   ) {
     this.logger = this.loggerFactory("KernelSourceDataRepository");
+  }
+
+  async getClientDataForUpload(relativePath: string): Promise<GetClientDataForUploadDTO> {
+    try {
+      const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
+
+      if (!kpCredentialsDTO.success) {
+        this.logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#sourceData#getSignedURLForUpload",
+            message: "Failed to get KP credentials",
+          } as TBaseErrorDTOData,
+        };
+      }
+
+      const clientDataForUploadViewModel = await this.kernelSDK.getClientDataForUpload({
+        id: kpCredentialsDTO.data.clientID,
+        protocol: "s3",
+        relativePath: relativePath,
+        xAuthToken: kpCredentialsDTO.data.xAuthToken,
+      });
+
+      if (!clientDataForUploadViewModel.status) {
+        this.logger.error({ clientDataForUploadViewModel }, `Failed to get client data for upload.`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#sourceData#getSignedURLForUpload",
+            message: `Failed to get signed url for upload. Error: ${clientDataForUploadViewModel.errorMessage}`,
+          },
+        };
+      }
+
+      this.logger.debug({ clientDataForUploadViewModel }, `Successfully retrieved signed url for upload.`);
+      return {
+        success: true,
+        data: clientDataForUploadViewModel.signed_url,
+      };
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error({ err }, `Failed to get client data for upload.`);
+      return {
+        success: false,
+        data: {
+          operation: "kernel#sourceData#getSignedURLForUpload",
+          message: `Failed to get signed url for upload. Error: ${err.message}`,
+        },
+      };
+    }
+  }
+
+  async getClientDataForDownload(relativePath: string): Promise<GetClientDataForDownloadDTO> {
+    try {
+      const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
+
+      if (!kpCredentialsDTO.success) {
+        this.logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#sourceData#getSignedURLForUpload",
+            message: "Failed to get KP credentials",
+          } as TBaseErrorDTOData,
+        };
+      }
+
+      const clientDataForDownloadViewModel = await this.kernelSDK.getClientDataForDownload({
+        id: kpCredentialsDTO.data.clientID,
+        protocol: "s3",
+        relativePath: relativePath,
+        xAuthToken: kpCredentialsDTO.data.xAuthToken,
+      });
+
+      if (!clientDataForDownloadViewModel.status) {
+        this.logger.error({ clientDataForDownloadViewModel }, `Failed to get client data for download.`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#sourceData#getSignedURLForDownload",
+            message: `Failed to get signed url for download. Error: ${clientDataForDownloadViewModel.errorMessage}`,
+          },
+        };
+      }
+
+      this.logger.debug({ clientDataForDownloadViewModel }, `Successfully retrieved signed url for download.`);
+      return {
+        success: true,
+        data: clientDataForDownloadViewModel.signed_url,
+      };
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error({ err }, `Failed to get client data for download.`);
+      return {
+        success: false,
+        data: {
+          operation: "kernel#sourceData#getSignedURLForDownload",
+          message: `Failed to get signed url for download. Error: ${err.message}`,
+        },
+      };
+    }
+  }
+
+  async newSourceData(sourceDataName: string, relativePath: string): Promise<NewSourceDataDTO> {
+    try {
+      const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
+
+      if (!kpCredentialsDTO.success) {
+        this.logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#sourceData#newSourceData",
+            message: "Failed to get KP credentials",
+          } as TBaseErrorDTOData,
+        };
+      }
+
+      const newSourceDataViewModel = await this.kernelSDK.registerSourceData({
+        id: kpCredentialsDTO.data.clientID,
+        xAuthToken: kpCredentialsDTO.data.xAuthToken,
+        sourceDataName: sourceDataName,
+        sourceDataRelativePath: relativePath,
+        sourceDataProtocol: "s3",
+      });
+
+      if (!newSourceDataViewModel.status || !newSourceDataViewModel.source_data) {
+        this.logger.error({ newSourceDataViewModel }, `Failed to create source data.`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#sourceData#newSourceData",
+            message: `Failed to create source data. Error: ${newSourceDataViewModel.errorMessage}`,
+          },
+        };
+      }
+
+      const newSourceData = newSourceDataViewModel.source_data;
+      const remoteFile: RemoteFile = {
+        id: newSourceData.id.toString(),
+        type: "remote",
+        provider: "kernel#s3",
+        relativePath: newSourceData.relative_path,
+        name: newSourceData.name,
+        createdAt: newSourceData.created_at,
+      };
+
+      this.logger.debug({ newSourceDataViewModel }, `Successfully created source data.`);
+      return {
+        success: true,
+        data: remoteFile,
+      };
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error({ err }, `Failed to create source data.`);
+      return {
+        success: false,
+        data: {
+          operation: "kernel#sourceData#newSourceData",
+          message: `Failed to create source data. Error: ${err.message}`,
+        },
+      };
+    }
   }
 
   async listSourceDataForClient(): Promise<ListSourceDataDTO> {

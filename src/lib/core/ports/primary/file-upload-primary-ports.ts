@@ -1,14 +1,15 @@
-import { type TFileUploadErrorResponse, type TFileUploadProgressResponse, type TFileUploadRequest, type TFileUploadSuccessResponse } from "../../usecase-models/file-upload-usecase-models";
-
-export interface FileUploadOutputPort<TResponse> {
-    response: TResponse;
-    presentProgress(progress: TFileUploadProgressResponse): void;
-    presentSuccess(response: TFileUploadSuccessResponse): void;
-    presentError(error: TFileUploadErrorResponse): void;
-}
-
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { type Signal } from "../../entity/signals";
+import type { TFileUploadErrorResponse, TFileUploadProgressResponse, TFileUploadRequest, TFileUploadSuccessResponse } from "../../usecase-models/file-upload-usecase-models";
+import { type TFileUploadViewModel } from "../../view-models/file-upload-view-model";
 
 export interface FileUploadInputPort {
-    presenter: FileUploadOutputPort<unknown>;
-    execute(request: TFileUploadRequest): Promise<void>;
+  execute(request: TFileUploadRequest): Promise<void>;
+}
+
+export interface FileUploadOutputPort {
+  response: Signal<TFileUploadViewModel>;
+  presentProgress(usecaseProgressResponse: TFileUploadProgressResponse): Promise<void>;
+  presentSuccess(usecaseSuccessResponse: TFileUploadSuccessResponse): Promise<void>;
+  presentError(error: TFileUploadErrorResponse): Promise<void>;
 }
