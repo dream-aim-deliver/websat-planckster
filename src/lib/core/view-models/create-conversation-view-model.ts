@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { ConversationSchema } from "../entity/kernel-models";
 
-
 export const CreateConversationRequestViewModelSchema = z.object({
     status: z.enum(["request"]),
     conversationTitle: z.string(),

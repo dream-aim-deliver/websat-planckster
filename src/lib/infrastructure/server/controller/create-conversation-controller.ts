@@ -1,48 +1,30 @@
 import { injectable } from "inversify";
-import { TCreateConversationErrorViewModel, TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
+import { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import serverContainer from "../config/ioc/server-container";
 import { USECASE_FACTORY } from "../config/ioc/server-ioc-symbols";
 import { CreateConversationInputPort } from "~/lib/core/ports/primary/create-conversation-primary-ports";
-import CreateConversationPresenter from "../presenter/create-conversation-presenter";
+import { TCreateConversationRequest } from "~/lib/core/usecase-models/create-conversation-usecase-models";
+import { Signal } from "~/lib/core/entity/signals";
 
 export interface TCreateConversationControllerParameters {
+  response: Signal<TCreateConversationViewModel>;
   researchContextID: number;
-  title: string;
+  conversationTitle: string;
 }
 
 @injectable()
 export default class CreateConversationController {
-  async execute(params: TCreateConversationControllerParameters): Promise<TCreateConversationViewModel> {
-    try {
-      const { researchContextID, title } = params;
+  async execute(params: TCreateConversationControllerParameters): Promise<void> {
+    const { response, researchContextID, conversationTitle } = params;
 
-      const usecaseFactory: () => CreateConversationInputPort = serverContainer.get(USECASE_FACTORY.CREATE_CONVERSATION);
-      const usecase = usecaseFactory();
+    const request: TCreateConversationRequest ={
+      researchContextID: researchContextID,
+      conversationTitle: conversationTitle,
+    };
 
-      const presenter = new CreateConversationPresenter();
+    const usecaseFactory = serverContainer.get<(response: Signal<TCreateConversationViewModel>) => CreateConversationInputPort>(USECASE_FACTORY.CREATE_CONVERSATION);
 
-      const responseModel = await usecase.execute({
-        researchContextID: researchContextID,
-        conversationTitle: title,
-      });
-
-      if (responseModel.status == "success") {
-        return presenter.presentSuccess(responseModel);
-      } else {
-        return presenter.presentError(responseModel);
-      }
-    } catch (error) {
-      const err = error as Error;
-      const viewModel: TCreateConversationErrorViewModel = {
-        status: "error",
-        message: err.message,
-        context: {
-          researchContextId: params.researchContextID,
-          title: params.title,
-        },
-      };
-
-      return viewModel;
-    }
+    const usecase = usecaseFactory(response);
+    await usecase.execute(request); 
   }
 }

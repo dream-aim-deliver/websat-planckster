@@ -15,7 +15,7 @@ export default class BrowserListConversationsController {
 
   async execute(params: TBrowserListConversationsControllerParameters): Promise<void> {
     try {
-      const { researchContextID, response } = params;
+      const { response, researchContextID } = params;
 
       const api = clientContainer.get<TVanillaAPI>(TRPC.VANILLA_CLIENT);
       const serverResponse: Signal<TListConversationsViewModel> = await api.controllers.conversation.list.query({

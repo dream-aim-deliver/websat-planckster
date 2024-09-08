@@ -12,11 +12,11 @@ export default class ListConversationsPresenter implements ListConversationsOutp
     this.response = response;
     this.logger = loggerFactory("ListConversationsPresenter");
   }
-  async presentSuccess(usecaseResponse: TListConversationsSuccessResponse): Promise<void> {
-    this.logger.debug({usecaseResponse},`Successfully retrieved ${usecaseResponse.conversations.length} conversations`);
+  async presentSuccess(usecaseSuccessResponse: TListConversationsSuccessResponse): Promise<void> {
+    this.logger.debug({usecaseSuccessResponse},`Successfully retrieved ${usecaseSuccessResponse.conversations.length} conversations`);
     this.response.update({
       status: "success",
-      conversations: usecaseResponse.conversations,
+      conversations: usecaseSuccessResponse.conversations,
     });
   }
 

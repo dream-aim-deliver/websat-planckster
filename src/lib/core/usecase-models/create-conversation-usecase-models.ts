@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { ConversationSchema } from "../entity/kernel-models";
+
 export const CreateConversationRequestSchema = z.object({
     researchContextID: z.number(),
     conversationTitle: z.string(),

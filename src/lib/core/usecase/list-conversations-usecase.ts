@@ -1,5 +1,5 @@
 import type { ListConversationsOutputPort, ListConversationsInputPort } from "../ports/primary/list-conversations-primary-ports";
-import { type TListConversationsRequest, type TListConversationsResponse } from "../usecase-models/list-conversations-usecase-models";
+import type { TListConversationsRequest, TListConversationsResponse } from "../usecase-models/list-conversations-usecase-models";
 import type ConversationGatewayOutputPort from "../ports/secondary/conversation-gateway-output-port";
 
 export default class ListConversationsUsecase implements ListConversationsInputPort {

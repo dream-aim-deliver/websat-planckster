@@ -1,4 +1,4 @@
-import { type CreateConversationDTO, type ListConversationsDTO, type ListMessagesForConversationDTO, type SendMessageToConversationResponseDTO } from "../../dto/conversation-gateway-dto";
+import type { CreateConversationDTO, ListConversationsDTO, ListMessagesForConversationDTO, SendMessageToConversationResponseDTO } from "../../dto/conversation-gateway-dto";
 import type { TMessage } from "../../entity/kernel-models";
 
 export default interface ConversationGatewayOutputPort {

@@ -7,7 +7,7 @@ import { Logger } from "pino";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import { type TKernelSDK } from "../config/kernel/kernel-sdk";
 import { TBaseErrorDTOData } from "~/sdk/core/dto";
-import { AxiosError } from "axios";
+
 
 @injectable()
 export default class KernelConversationGateway implements ConversationGatewayOutputPort {
@@ -42,7 +42,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
       });
 
       if (newConversationViewModel.status) {
-        this.logger.debug(`Successfully created conversation '${conversationTitle}' for Research Context with ID ${researchContextID}. View model code: ${newConversationViewModel.code}`);
+        this.logger.debug({newConversationViewModel}, `Successfully created conversation '${conversationTitle}' for Research Context with ID ${researchContextID}`);
 
         return {
           success: true,
@@ -53,7 +53,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
         };
       }
 
-      this.logger.error(`Failed to create conversation for Research Context with ID ${researchContextID}: ${newConversationViewModel.errorMessage}`);
+      this.logger.error({newConversationViewModel}, `Failed to create conversation for Research Context with ID ${researchContextID}`);
 
       return {
         success: false,
@@ -64,7 +64,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
       };
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`An error occurred while creating a conversation: ${err.message}`);
+      this.logger.error({err}, `An error occurred while creating a conversation: ${err.message}`);
       return {
         success: false,
         data: {
@@ -96,7 +96,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
       });
 
       if (listConversationsViewModel.status) {
-        this.logger.debug({listConversationsViewModel},`Successfully listed conversations for Research Context with ID ${researchContextID}. View model code: ${listConversationsViewModel.code}`);
+        this.logger.debug({listConversationsViewModel},`Successfully listed conversations for Research Context with ID ${researchContextID}.`);
 
         return {
           success: true,

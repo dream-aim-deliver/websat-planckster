@@ -7,9 +7,10 @@ import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 
 import type { Signal } from "~/lib/core/entity/signals";
-import { CONTROLLERS, SIGNAL_FACTORY } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 import {type TSourceDataBasicInformation} from "~/lib/infrastructure/client/controller/browser-file-download-controller";
 import type BrowserFileDownloadController from "~/lib/infrastructure/client/controller/browser-file-download-controller";
+import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
+import { CONTROLLERS } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 
 
 export const DummyDownloadComponent = () => {

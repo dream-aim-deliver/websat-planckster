@@ -28,9 +28,11 @@ import { type ListConversationsInputPort } from "~/lib/core/ports/primary/list-c
 import ListConversationsUsecase from "~/lib/core/usecase/list-conversations-usecase";
 import { type ListSourceDataInputPort } from "~/lib/core/ports/primary/list-source-data-primary-ports";
 import ListSourceDataUsecase from "~/lib/core/usecase/list-source-data-usecase";
-import { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
-import { Signal } from "~/lib/core/entity/signals";
+import { type TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
+import { type Signal } from "~/lib/core/entity/signals";
 import ListConversationsPresenter from "../../presenter/list-conversations-presenter";
+import { type TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
+import CreateConversationPresenter from "../../presenter/create-conversation-presenter";
 
 const serverContainer = new Container();
 
@@ -75,11 +77,16 @@ serverContainer.bind(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER).to(ListSourceDataC
 
 /** USECASES */
 // CreateConversationUsecase
-serverContainer.bind<interfaces.Factory<CreateConversationInputPort, []>>(USECASE_FACTORY.CREATE_CONVERSATION).toFactory<CreateConversationInputPort>((context: interfaces.Context) => () => {
-  const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
-
-  return new CreateConversationUsecase(conversationGateway);
-});
+serverContainer
+  .bind<interfaces.Factory<CreateConversationInputPort>>(USECASE_FACTORY.CREATE_CONVERSATION)
+  .toFactory<CreateConversationInputPort, [Signal<TCreateConversationViewModel>]>((context: interfaces.Context) =>
+    (response: Signal<TCreateConversationViewModel>) => {
+      const conversationGateway = context.container.get<KernelConversationGateway>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
+      const loggerFactory = context.container.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
+      const presenter = new CreateConversationPresenter(response, loggerFactory);
+      const usecase = new CreateConversationUsecase(presenter, conversationGateway);
+      return usecase;
+  });
 
 // ListConversationsUsecase
 serverContainer

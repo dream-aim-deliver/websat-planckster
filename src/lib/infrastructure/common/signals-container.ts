@@ -7,6 +7,7 @@ import type { TFileUploadingViewModel } from "~/lib/core/view-models/file-upload
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 import type { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 import { SIGNAL_FACTORY } from "./signals-ioc-container";
+import { type TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 
 const signalsContainer = new Container();
 
@@ -35,6 +36,16 @@ signalsContainer.bind<interfaces.Factory<Signal<TListConversationsViewModel>>>(S
     return new Signal<TListConversationsViewModel>(
       "KernelListConversations",
       "Display the status of the List Conversations feature",
+      initialValue,
+      update,
+    )}
+);
+
+signalsContainer.bind<interfaces.Factory<Signal<TCreateConversationViewModel>>>(SIGNAL_FACTORY.KERNEL_CREATE_CONVERSATION).toFactory<Signal<TCreateConversationViewModel>, [TCreateConversationViewModel, (value: TCreateConversationViewModel) => void]>((context: interfaces.Context) =>
+  (initialValue: TCreateConversationViewModel, update?: (value: TCreateConversationViewModel) => void) => {
+    return new Signal<TCreateConversationViewModel>(
+      "KernelCreateConversation",
+      "Display the status of the Create Conversation feature",
       initialValue,
       update,
     )}

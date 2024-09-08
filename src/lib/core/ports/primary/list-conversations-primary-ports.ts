@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Signal } from "../../entity/signals";
-import { type TListConversationsErrorResponse, type TListConversationsRequest, type TListConversationsSuccessResponse } from "../../usecase-models/list-conversations-usecase-models";
+import type { TListConversationsErrorResponse, TListConversationsRequest, TListConversationsSuccessResponse } from "../../usecase-models/list-conversations-usecase-models";
 import type { TListConversationsViewModel } from "../../view-models/list-conversations-view-model";
 
 export interface ListConversationsInputPort {
@@ -9,6 +9,6 @@ export interface ListConversationsInputPort {
 
 export interface ListConversationsOutputPort {
     response: Signal<TListConversationsViewModel>;
-    presentSuccess(success: TListConversationsSuccessResponse): Promise<void>;
-    presentError(error: TListConversationsErrorResponse): Promise<void>;
+    presentSuccess(usecaseSuccessResponse: TListConversationsSuccessResponse): Promise<void>;
+    presentError(usecaseErrorResponse: TListConversationsErrorResponse): Promise<void>;
 }

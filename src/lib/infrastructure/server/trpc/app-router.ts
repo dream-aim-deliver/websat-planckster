@@ -6,15 +6,11 @@ import { kernelPlancksterHealthCheckRouter } from "./routers/kernel/health-check
 import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/server/trpc/server";
 import { createResearchContextsRouter } from "./routers/research-contexts/create-research-contexts-router";
 import serverContainer from "../config/ioc/server-container";
-import { CONTROLLERS, UTILS } from "../config/ioc/server-ioc-symbols";
+import { CONTROLLERS } from "../config/ioc/server-ioc-symbols";
 import type ListResearchContextsController from "../controller/list-research-contexts-controller";
 import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 import { z } from "zod";
-import { Signal } from "~/lib/core/entity/signals";
-import type ListConversationsController from "../controller/list-conversations-controller";
-import type { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
 import { serverFileRouter } from "./routers/server/server-file-router";
-import type { Logger } from "pino";
 import { conversationRouter } from "./routers/controller/conversation-router";
 
 /**
@@ -28,7 +24,6 @@ export const appRouter = createTRPCRouter({
   },
   kernel: {
     researchContext: researchContextRouter,
-    // conversation: conversationRouter,
     message: messageRouter,
     sourceData: sourceDataRouter,
     healthCheck: kernelPlancksterHealthCheckRouter,

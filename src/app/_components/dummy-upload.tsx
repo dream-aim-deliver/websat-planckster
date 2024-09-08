@@ -6,10 +6,10 @@ import clientContainer from "~/lib/infrastructure/client/config/ioc/client-conta
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import {
   CONTROLLERS,
-  SIGNAL_FACTORY,
 } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 import type BrowserFileUploadController from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
 import type { Signal } from "~/lib/core/entity/signals";
+import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 
 export const DummyUploadComponent = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
