@@ -13,6 +13,8 @@ import { Button } from "@maany_shr/rage-ui-kit";
 import type { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import type BrowserCreateConversationController from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
 import type { TBrowserCreateConversationControllerParameters } from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
+import { ConversationAGGrid } from '@maany_shr/rage-ui-kit';
+import type { ConversationRow } from 'node_modules/@maany_shr/rage-ui-kit/dist/components/table/ConversationAGGrid';
 
 // TODO: look at one of the ralph pages
 export function ListConversationsClientPage(props: { viewModel: TListConversationsViewModel; researchContextID: number }) {
@@ -75,13 +77,9 @@ export function ListConversationsClientPage(props: { viewModel: TListConversatio
   return (
     <div className="flex flex-col items-center justify-between">
       {enableCreateConversation && <CreateConversationButton onCreateConversation={handleCreateConversation} />}
-      <div>
+      <div className="p-4 w-screen">
         {listConversationsViewModel.status === "success" && (
-          <ul>
-            {listConversationsViewModel.conversations.map((conversation) => {
-              return <li key={conversation.id}>{conversation.title}</li>;
-            })}
-          </ul>
+          <ConversationAGGrid rowData={listConversationsViewModel.conversations as ConversationRow[]} />
         )}
         {listConversationsViewModel.status === "error" && <div>Error VM: {JSON.stringify(listConversationsViewModel)}</div>}
       </div>
