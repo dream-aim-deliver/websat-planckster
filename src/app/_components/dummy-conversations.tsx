@@ -1,6 +1,6 @@
 "use client";
 import { ConversationAGGrid } from '@maany_shr/rage-ui-kit';
-import type { ConversationRow } from '../[rc_id]/conversations/page';
+import type { ConversationRow } from 'node_modules/@maany_shr/rage-ui-kit/dist/components/table/ConversationAGGrid';
 
 export const DummyConversation  = (props:  {initialData: ConversationRow[]}) => {
     return (

@@ -10,8 +10,9 @@ import { CONTROLLERS } from "~/lib/infrastructure/client/config/ioc/client-ioc-s
 import type BrowserListConversationsController from "~/lib/infrastructure/client/controller/browser-list-conversations-controller";
 import type { TBrowserListConversationsControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-conversations-controller";
 import { Button } from "@maany_shr/rage-ui-kit";
-import { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
-import BrowserCreateConversationController, { TBrowserCreateConversationControllerParameters } from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
+import type { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
+import type BrowserCreateConversationController from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
+import type { TBrowserCreateConversationControllerParameters } from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
 
 // TODO: look at one of the ralph pages
 export function ListConversationsClientPage(props: { viewModel: TListConversationsViewModel; researchContextID: number }) {

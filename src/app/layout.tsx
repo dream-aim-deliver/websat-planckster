@@ -1,4 +1,5 @@
 import "~/styles/globals.css";
+// import "node_modules/@maany_shr/rage-ui-kit/dist/static/css/theme.css";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 
 import { Inter } from "next/font/google";
