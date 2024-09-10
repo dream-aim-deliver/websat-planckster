@@ -10,6 +10,8 @@ import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list
 import type { Signal } from "~/lib/core/entity/signals";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 import { Suspense } from "react";
+import type ListSourceDataController from "~/lib/infrastructure/server/controller/list-source-data-controller";
+import type { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 
 export default async function ListResearchContextsServerPage() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
@@ -35,10 +37,29 @@ export default async function ListResearchContextsServerPage() {
 
   await controller.execute(controllerParameters);
 
+  const listSourceDataForClientController = serverContainer.get<ListSourceDataController>(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER);
+  const listSourceDataForClientResponseSignalFactory = signalsContainer.get<(initialValue: TListSourceDataViewModel, update?: (value: TListSourceDataViewModel) => void) => Signal<TListSourceDataViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_SOURCE_DATA);
+  const listSourceDataForClientResponse: Signal<TListSourceDataViewModel> = listSourceDataForClientResponseSignalFactory({
+    status: "request",
+  });
+
+  const listSourceDataForClientControllerParameters = {
+    response: listSourceDataForClientResponse,
+    clientID: `${clientID}`,
+  };
+
+  await listSourceDataForClientController.execute(listSourceDataForClientControllerParameters);
+
+  if(listSourceDataForClientResponse.value.status !== "success") {
+    return (
+      <div>Error: {`${JSON.stringify(listSourceDataForClientResponse.value)}`}</div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <Suspense fallback={<div>AG GRID SKELETON...</div>}>
-        <ListResearchContextsClientPage viewModel={response.value} />
+        <ListResearchContextsClientPage viewModel={response.value} clientSourceData={listSourceDataForClientResponse.value.sourceData}/>
       </Suspense>
     </div>
   );

@@ -1,31 +1,31 @@
 "use client";
-import { ListResearchContextCard, ResearchContextCard, CreateResearchContextDialog } from "@maany_shr/rage-ui-kit";
-import { ResearchContextPage } from "@maany_shr/planckster-ui-kit";
-import { type ResearchContext } from "node_modules/@maany_shr/kernel-planckster-sdk-ts";
+import { ListResearchContextCard, CreateResearchContextDialog, type ResearchContextCardProps } from "@maany_shr/rage-ui-kit";
 import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
-import type { TClientComponentAPI } from "~/lib/infrastructure/client/trpc/react-api";
-import { CONTROLLERS, TRPC } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
-import { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
-import {TCreateResearchContextsViewModel} from "~/lib/core/view-models/create-research-contexts-view-models";
+import { CONTROLLERS } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
+import type { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
+import type { TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
 import { useState } from "react";
-import { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
-import { Signal } from "~/lib/core/entity/signals";
-import BrowserListResearchContextsController, { TBrowserListResearchContextsControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-research-contexts-controller";
+import type { Signal } from "~/lib/core/entity/signals";
+import type BrowserListResearchContextsController from "~/lib/infrastructure/client/controller/browser-list-research-contexts-controller";
+import { type TBrowserListResearchContextsControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-research-contexts-controller";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 import { useRouter } from "next/navigation";
-import BrowserListSourceDataController, { TBrowserListSourceDataControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
+import type BrowserCreateResearchContextController from "~/lib/infrastructure/client/controller/browser-create-research-context-controller";
+import type { SelectableSourceDataRow } from "node_modules/@maany_shr/rage-ui-kit/dist/components/table/SelectableSourceDataAGGrid";
+import type { RemoteFile } from "~/lib/core/entity/file";
 
-export function ListResearchContextsClientPage(props: { viewModel: TListResearchContextsViewModel }) {
+export function ListResearchContextsClientPage(props: { viewModel: TListResearchContextsViewModel; clientSourceData: RemoteFile[] }) {
   const [listResearchContextsViewModel, setListResearchContextsViewModel] = useState<TListResearchContextsViewModel>(props.viewModel);
-  const [createResearchContextsViewModel, setCreateResearchContextsViewModel] = useState<TCreateResearchContextsViewModel>(props.viewModel);
-  const [listSourceDataViewModel, setListSourceDataViewModel] = useState<TListSourceDataViewModel>(props.viewModel);
+  const [createResearchContextsViewModel, setCreateResearchContextsViewModel] = useState<TCreateResearchContextViewModel>({
+    status: "request",
+  } as TCreateResearchContextViewModel);
 
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { isFetching, isLoading, isError } = useQuery<Signal<TListResearchContextsViewModel>>({
+  const listResearchContextsQuery = useQuery<Signal<TListResearchContextsViewModel>>({
     queryKey: ["list-research-contexts"],
     queryFn: async () => {
       const signalFactory = signalsContainer.get<(initialValue: TListResearchContextsViewModel, update?: (value: TListResearchContextsViewModel) => void) => Signal<TListResearchContextsViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_RESEARCH_CONTEXTS);
@@ -44,93 +44,81 @@ export function ListResearchContextsClientPage(props: { viewModel: TListResearch
     },
   });
 
-  const listSourceDataQuery = useQuery<Signal<TListSourceDataViewModel>>({
-    queryKey: ["list-source-data"],
-    queryFn: async () => {
-      const signalFactory = signalsContainer.get<(initialValue: TListSourceDataViewModel, update?: (value: TListSourceDataViewModel) => void) => Signal<TListSourceDataViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_SOURCE_DATA);
-      const response: Signal<TListSourceDataViewModel> = signalFactory(
+  const createResearchContextMutation = useMutation({
+    mutationKey: ["create-research-context"],
+    retry: 3,
+    retryDelay: 3000,
+    onSuccess: async (data) => {
+      await queryClient.invalidateQueries({ queryKey: ["list-research-contexts"] });
+    },
+    mutationFn: async (request: { title: string; description: string; sourceData: SelectableSourceDataRow[] }) => {
+      const createResearchContextController = clientContainer.get<BrowserCreateResearchContextController>(CONTROLLERS.CREATE_RESEARCH_CONTEXT_CONTROLLER);
+      const signalFactory = signalsContainer.get<(initialValue: TCreateResearchContextViewModel, update?: (value: TCreateResearchContextViewModel) => void) => Signal<TCreateResearchContextViewModel>>(SIGNAL_FACTORY.CREATE_RESEARCH_CONTEXT);
+      const response = signalFactory(
         {
           status: "request",
-        },
-        setListSourceDataViewModel,
+          researchContextName: request.title,
+        } as TCreateResearchContextViewModel,
+        setCreateResearchContextsViewModel,
       );
-      const controllerParameters: TBrowserListSourceDataControllerParameters = {
+
+      const controllerParameters = {
         response: response,
+        title: request.title,
+        description: request.description,
+        sourceDataList: request.sourceData.map((sourceData) => {
+          return {
+            id: sourceData.id,
+            name: sourceData.name,
+            relativePath: sourceData.relativePath,
+            createdAt: sourceData.createdAt,
+            provider: "kernel#s3",
+            type: "remote" as const,
+          };
+        }),
       };
-      const controller = clientContainer.get<BrowserListSourceDataController>(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER);
-      await controller.execute(controllerParameters);
-      return response;
+      await createResearchContextController.execute(controllerParameters);
     },
   });
-  // if (listResearchContextsViewModel.status === "request") {
-  //   return (
-  //     <div>
-  //       <ListResearchContextCard items={listResearchContextsViewModel.researchContexts} />
-  //     </div>
-  //   );
-  // } else 
-  if (listResearchContextsViewModel.status === "success" && listSourceDataViewModel.status === "success") {
-    const cards = listResearchContextsViewModel.researchContexts.map((researchContext) => {
+
+  let cards: ResearchContextCardProps[] = [];
+  if (listResearchContextsViewModel.status === "success" && listResearchContextsViewModel.status === "success") {
+    cards = listResearchContextsViewModel.researchContexts.map((researchContext) => {
       return {
         callbacks: {
-          onNavigateToListConversationPage: () => {router.push(`/${researchContext.id}/conversations`)},
-          onNavigateToSourcesPage: () => {router.push(`/${researchContext.id}/sources`)},
+          onNavigateToListConversationPage: () => {
+            router.push(`/${researchContext.id}/conversations`);
+          },
+          onNavigateToSourcesPage: () => {
+            router.push(`/${researchContext.id}/sources`);
+          },
         },
         description: researchContext.description,
         id: researchContext.id,
         title: researchContext.title,
-      }
+      };
     });
-    return (
-      <div>
-        <ListResearchContextCard items={cards} />
-        <div>
+  }
+
+  if (listResearchContextsViewModel.status === "request") {
+  }
+  return (
+    <div className="">
+      <ListResearchContextCard items={cards} />
+      <div className="fixed bottom-0 right-0">
         <CreateResearchContextDialog
-          clientFiles={listSourceDataViewModel.sourceData}
-          onSubmit={() => {
-            queryClient.invalidateQueries({ queryKey: ["list-research-contexts"] });
+          clientFiles={props.clientSourceData}
+          onSubmit={(researchContextName: string, researchContextDescription: string, sourceData: SelectableSourceDataRow[]) => {
+            createResearchContextMutation.mutate({
+              title: researchContextName,
+              description: researchContextDescription,
+              sourceData: sourceData,
+            });
           }}
           viewModel={createResearchContextsViewModel}
         />
-        </div>
       </div>
-    );
-  }
+    </div>
+  );
 }
 
-// export type ListResearchContextsPageProps = {
-//   researchContexts: ResearchContext[];
-//   kernelPlancksterHost: string;
-// };
-
-// export function ListResearchContextsPage(props: ListResearchContextsPageProps) {
-//   const api = clientContainer.get<TClientComponentAPI>(
-//     TRPC.REACT_CLIENT_COMPONENTS_API,
-//   );
-//   const addNewContextMutation = api.kernel.researchContext.create.useMutation({
-//     onSuccess: () => {
-//       // TODO: handle success
-//       console.log("Context created");
-//     },
-//   });
-
-//   return (
-//     <div>
-//       <button disabled={false} />
-//       {addNewContextMutation.isError && (
-//         <div>Error: {addNewContextMutation.error.message}</div>
-//       )}
-//       <ResearchContextPage
-//         cards={props.researchContexts}
-//         onAddContextClick={() => {
-//           addNewContextMutation.mutate({
-//             title: "New Context",
-//             description: "New Context Description",
-//             sourceDataIdList: [1, 2, 3],
-//           });
-//         }}
-//         apiUrl={props.kernelPlancksterHost}
-//       />
-//     </div>
-//   );
-// }

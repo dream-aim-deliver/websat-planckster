@@ -10,9 +10,17 @@ import { SIGNAL_FACTORY } from "./signals-ioc-container";
 import { type TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import { type TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
-import { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
+import type { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
+import type { TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
 
 const signalsContainer = new Container();
+
+signalsContainer
+  .bind<interfaces.Factory<Signal<TCreateResearchContextViewModel>>>(SIGNAL_FACTORY.CREATE_RESEARCH_CONTEXT)
+  .toFactory<Signal<TCreateResearchContextViewModel>, [TCreateResearchContextViewModel, (value: TCreateResearchContextViewModel) => void]>((context: interfaces.Context) => (initialValue: TCreateResearchContextViewModel, update?: (value: TCreateResearchContextViewModel) => void) => {
+    return new Signal<TCreateResearchContextViewModel>("CreateResearchContext", "Display the status of a Create Research Context feature", initialValue, update);
+  });
+
 
 signalsContainer
   .bind<interfaces.Factory<Signal<TFileUploadViewModel>>>(SIGNAL_FACTORY.KERNEL_FILE_UPLOAD)
