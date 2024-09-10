@@ -1,58 +1,49 @@
 import { redirect } from "next/navigation";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
-import { CONTROLLERS, GATEWAYS, TRPC } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
-import ListSourceDataController from "~/lib/infrastructure/server/controller/list-source-data-controller";
-import type { TServerComponentAPI } from "~/lib/infrastructure/server/trpc/server-api";
+import { CONTROLLERS, GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
+import { ListSourceDataForResearchContextClientPage } from "../../_components/list-source-data-research-context";
+import ListSourceDataController, { TListSourceDataControllerParameters } from "~/lib/infrastructure/server/controller/list-source-data-controller";
+import signalsContainer from "~/lib/infrastructure/common/signals-container";
+import { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
+import type { Signal } from "~/lib/core/entity/signals";
+import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
+import { Suspense } from "react";
 
-//export default async function Home(
-    //{ params }: { params: { rc_id: number } }
-//) {
-  //const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
-  //const sessionDTO = await authGateway.getSession();
-  //if (!sessionDTO.success) {
-    //redirect("/auth/login");
-  //};
-  //return (
-        //<ListSourceData rc_id={params.rc_id} />
-  //);
-//}
 
-//async function ListSourceData({ rc_id }: { rc_id: number }) {
-  //const controller = serverContainer.get<ListSourceDataController>(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER);
-  
-  //const sourceDataVM = await api.kernel.sourceData.list(
-    //{
-        //researchContextID: rc_id,
-    //}
-  //)
+export default async function ListSourceDataForResearchContextServerPage(
+  { params }: { params: { rc_id: string } }
+) {
+  const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+  const sessionDTO = await authGateway.getSession();
+  if (!sessionDTO.success) {
+    redirect("/auth/login");
+  }
 
-  //if (sourceDataVM.status === "error") {
-    //return <div>Error: {sourceDataVM.message}</div>;
-  //}
+  const researchContextID = parseInt(params.rc_id);
+  // Initialize the source data to show
+  const controller = serverContainer.get<ListSourceDataController>(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER);
 
-  //if (sourceDataVM.status === "success" && !sourceDataVM.sourceData) {
-    //return <div>No source data found</div>;
-  //}
+  const signalFactory = signalsContainer.get<(initialValue: TListSourceDataViewModel, update?: (value: TListSourceDataViewModel) => void) => Signal<TListSourceDataViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_SOURCE_DATA);
 
-  //if (sourceDataVM.status === "success" && sourceDataVM.sourceData.length === 0) {
-    //return <div>No source data found</div>;
-  //}
+  const response: Signal<TListSourceDataViewModel> = signalFactory({
+    status: "request",
+  });
 
-  //if (sourceDataVM.status === "success") {
-  //const sourceData = sourceDataVM.sourceData;
+  const controllerParameters: TListSourceDataControllerParameters = {
+    response: response,
+  };
 
-  //// Return a simple HTML unordered list
-  //return (
-   //<ul>
-    //{sourceData.map((data, index) => (
-      //<li key={index}>
-        //{data.relativePath}
-      //</li>
-    //))}
-  //</ul>   
+  await controller.execute(controllerParameters);
 
-  //);
-
-//}
-//}
+  return (
+    <div className="flex flex-col gap-4">
+      <Suspense fallback={<div>AG GRID SKELETON...</div>}>
+        <ListSourceDataForResearchContextClientPage
+          viewModel={response.value}
+          researchContextID={researchContextID}
+        />
+      </Suspense>
+    </div>
+  );
+}
