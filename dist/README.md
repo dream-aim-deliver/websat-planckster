@@ -63,8 +63,6 @@ docker run -d --name websat-planckster \
     -e HTTPD_ENABLE_SSL=False \
     -e PRIMARY_USER_USERNAME=admin \
     -e PRIMARY_USER_PASSWORD=admin \
-    -e SECONDARY_USER_USERNAME=guest \
-    -e SECONDARY_USER_PASSWORD=guest \
     -e NEXTAUTH_SECRET="secret-1239899*@$%" \
     -e NEXTAUTH_URL=http://0.0.0.0:80 \
     -e HTTPD_ENABLE_LOGS=True \
@@ -72,6 +70,7 @@ docker run -d --name websat-planckster \
     -e KP_AUTH_TOKEN=test123 \
     -e KP_CLIENT_ID=1 \
     -p 80:80 -p 443:443 \
+    -p 3000:3000 \
     maany/websat-planckster
 ```
 
