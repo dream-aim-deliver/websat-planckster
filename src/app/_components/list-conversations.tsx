@@ -14,6 +14,7 @@ import type BrowserCreateConversationController from "~/lib/infrastructure/clien
 import type { TBrowserCreateConversationControllerParameters } from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
 import { ConversationAGGrid } from '@maany_shr/rage-ui-kit';
 import { useRouter } from "next/navigation";
+import { type ConversationRow } from "node_modules/@maany_shr/rage-ui-kit/dist/components/table/ConversationAGGrid";
 
 
 export function ListConversationsClientPage(props: { viewModel: TListConversationsViewModel; researchContextID: number }) {
@@ -90,7 +91,7 @@ export function ListConversationsClientPage(props: { viewModel: TListConversatio
         {listConversationsViewModel.status === "success" && (
           <ConversationAGGrid 
             isLoading={isFetching || isLoading}
-            rowData={listConversationsViewModel.conversations}
+            rowData={listConversationsViewModel.conversations as ConversationRow[]}
             handleGoToConversation={handleGoToConversation}
             handleNewConversation={handleCreateConversation}
             newConversationIsEnabled={enableCreateConversation}

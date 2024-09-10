@@ -3,15 +3,17 @@
 import { SourceDataAGGrid } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { Signal } from "~/lib/core/entity/signals";
-import { TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
+import { type Signal } from "~/lib/core/entity/signals";
+import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 import { TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
-import { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
+import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
 import { CONTROLLERS } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
-import BrowserFileDownloadController, { TBrowserFileDownloadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-download-controller";
+import {type TBrowserFileDownloadControllerParameters} from "~/lib/infrastructure/client/controller/browser-file-download-controller";
+import type BrowserFileDownloadController from "~/lib/infrastructure/client/controller/browser-file-download-controller";
 import BrowserFileUploadController, { TBrowserFileUploadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
-import BrowserListSourceDataController, { TBrowserListSourceDataControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
+import {type TBrowserListSourceDataControllerParameters} from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
+import type BrowserListSourceDataController from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 
@@ -75,17 +77,20 @@ export function ListSourceDataForResearchContextClientPage(
     downloadMutation.mutate({relativePath: relativePath, sourceDataName: name});
   };
 
+  const handleUploadSourceData: () => void = () => {console.log("")};
+
 
   if (listSourceDataViewModel.status === "request") {
     return (
       <div>
-        <SourceDataAGGrid isLoading={true} rowData={[]} handleDownloadSourceData={handleDownloadSourceData} />
+        <SourceDataAGGrid isLoading={true} isUploading={false} enableUpload={false} rowData={[]} handleDownloadSourceData={handleDownloadSourceData} 
+        handleUploadSourceData={handleUploadSourceData} />
       </div>
     );
   } else if (listSourceDataViewModel.status === "success") {
     return (
       <div>
-        <SourceDataAGGrid isLoading={false} enableUpload={false} rowData={listSourceDataViewModel.sourceData} handleDownloadSourceData={handleDownloadSourceData} />
+        <SourceDataAGGrid isLoading={false} isUploading={false} enableUpload={false} rowData={listSourceDataViewModel.sourceData} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
       </div>
     );
   }

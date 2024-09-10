@@ -3,9 +3,10 @@ import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { CONTROLLERS, GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 import { ListSourceDataForClientClientPage } from "../_components/list-source-data-client";
-import ListSourceDataController, { TListSourceDataControllerParameters } from "~/lib/infrastructure/server/controller/list-source-data-controller";
+import {type TListSourceDataControllerParameters} from "~/lib/infrastructure/server/controller/list-source-data-controller";
+import type ListSourceDataController from "~/lib/infrastructure/server/controller/list-source-data-controller";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
-import { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
+import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import type { Signal } from "~/lib/core/entity/signals";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 import { Suspense } from "react";

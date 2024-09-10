@@ -37,7 +37,7 @@ import { type ListMessagesForConversationInputPort } from "~/lib/core/ports/prim
 import { type TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
 import ListMessagesForConversationPresenter from "../../presenter/list-messages-for-conversation-presenter";
 import ListMessagesForConversationUsecase from "~/lib/core/usecase/list-messages-for-conversation-usecase";
-import { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
+import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import ListSourceDataPresenter from "../../presenter/list-source-data-presenter";
 
 const serverContainer = new Container();

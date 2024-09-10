@@ -3,20 +3,22 @@
 import { SourceDataAGGrid } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import { Signal } from "~/lib/core/entity/signals";
-import { TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
-import { TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
-import { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
+import { type Signal } from "~/lib/core/entity/signals";
+import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
+import { type TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
+import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
 import { CONTROLLERS } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
-import BrowserFileDownloadController, { TBrowserFileDownloadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-download-controller";
-import BrowserFileUploadController, { TBrowserFileUploadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
-import BrowserListSourceDataController, { TBrowserListSourceDataControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
+import { type TBrowserFileDownloadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-download-controller";
+import type BrowserFileDownloadController from "~/lib/infrastructure/client/controller/browser-file-download-controller";
+import { type TBrowserFileUploadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
+import type BrowserFileUploadController from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
+import { type TBrowserListSourceDataControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
+import type BrowserListSourceDataController from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 
 export function ListSourceDataForClientClientPage(props: { viewModel: TListSourceDataViewModel }) {
-
   const [uploadSourceDataViewModel, setUploadSourceDataViewModel] = useState<TFileUploadViewModel>({
     status: "request",
   } as TFileUploadViewModel);
@@ -52,7 +54,7 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
     mutationKey: ["download-source-data"],
     retry: 3,
     retryDelay: 3000,
-    mutationFn: async (params: {relativePath: string, sourceDataName: string}) => {
+    mutationFn: async (params: { relativePath: string; sourceDataName: string }) => {
       const signalFactory = signalsContainer.get<(initialValue: TFileDownloadViewModel, update?: (value: TFileDownloadViewModel) => void) => Signal<TFileDownloadViewModel>>(SIGNAL_FACTORY.KERNEL_FILE_DOWNLOAD);
       const response: Signal<TFileDownloadViewModel> = signalFactory(
         {
@@ -96,10 +98,9 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
     },
   });
 
-
   const handleDownloadSourceData = (name: string, relativePath: string) => {
     console.log("Download source data", relativePath, name);
-    downloadMutation.mutate({relativePath: relativePath, sourceDataName: name});
+    downloadMutation.mutate({ relativePath: relativePath, sourceDataName: name });
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -108,7 +109,7 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
     console.log("Upload source data");
     if (fileInputRef.current) {
       fileInputRef.current.click();
-    } 
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,15 +122,14 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
 
       uploadMutation.mutate(file);
     }
-  }
+  };
 
-  const isUploading = uploadMutation.isPending
-
+  const isUploading = uploadMutation.isPending;
 
   if (listSourceDataViewModel.status === "request") {
     return (
       <div>
-        <SourceDataAGGrid isLoading={true} isUploading={false} rowData={[]} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
+        <SourceDataAGGrid isLoading={true} isUploading={false} enableUpload={true} rowData={[]} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
       </div>
     );
   } else if (listSourceDataViewModel.status === "success") {
@@ -137,12 +137,7 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
       <div>
         <SourceDataAGGrid isLoading={false} enableUpload={true} isUploading={isUploading} rowData={listSourceDataViewModel.sourceData} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
 
-        <input
-          type="file"
-          ref={fileInputRef}
-          style={{ display: 'none' }}
-          onChange={handleFileChange}
-        />
+        <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileChange} />
       </div>
     );
   }
