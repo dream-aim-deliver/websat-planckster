@@ -10,6 +10,7 @@ import { SIGNAL_FACTORY } from "./signals-ioc-container";
 import { type TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import { type TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
+import { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 
 const signalsContainer = new Container();
 
@@ -56,6 +57,12 @@ signalsContainer
   .bind<interfaces.Factory<Signal<TListSourceDataViewModel>>>(SIGNAL_FACTORY.KERNEL_LIST_SOURCE_DATA)
   .toFactory<Signal<TListSourceDataViewModel>, [TListSourceDataViewModel, (value: TListSourceDataViewModel) => void]>((context: interfaces.Context) => (initialValue: TListSourceDataViewModel, update?: (value: TListSourceDataViewModel) => void) => {
     return new Signal<TListSourceDataViewModel>("KernelListSourceData", "Display the status of the List Source Data feature", initialValue, update);
+  });
+
+signalsContainer
+  .bind<interfaces.Factory<Signal<TListResearchContextsViewModel>>>(SIGNAL_FACTORY.KERNEL_LIST_RESEARCH_CONTEXTS)
+  .toFactory<Signal<TListResearchContextsViewModel>, [TListResearchContextsViewModel, (value: TListResearchContextsViewModel) => void]>((context: interfaces.Context) => (initialValue: TListResearchContextsViewModel, update?: (value: TListResearchContextsViewModel) => void) => {
+    return new Signal<TListResearchContextsViewModel>("KernelListResearchContexts", "Display the status of the List Research Contexts feature", initialValue, update);
   });
 
 export default signalsContainer;

@@ -1,51 +1,45 @@
 import { redirect } from "next/navigation";
-import { ListResearchContextsPage } from "./_components/list-research-contexts";
-import type { ResearchContext } from "@maany_shr/kernel-planckster-sdk-ts";
-import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
-import env from "~/lib/infrastructure/server/config/env";
+import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
+import { CONTROLLERS, GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
+import { ListResearchContextsClientPage } from "../app/_components/list-research-contexts";
+import {type TListResearchContextsControllerParameters} from "~/lib/infrastructure/server/controller/list-research-contexts-controller";
+import type ListResearchContextsController from "~/lib/infrastructure/server/controller/list-research-contexts-controller";
+import signalsContainer from "~/lib/infrastructure/common/signals-container";
+import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
+import type { Signal } from "~/lib/core/entity/signals";
+import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
+import { Suspense } from "react";
 
-export default async function ListResearchContexts() {
+export default async function ListResearchContextsServerPage() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
   const sessionDTO = await authGateway.getSession();
   if (!sessionDTO.success) {
     redirect("/auth/login");
   }
 
-  const topics: ResearchContext[] = [
-    {
-      created_at: "2024-01-01T00:00:00.000Z",
-      id: 1,
-      title: "Topic 1",
-      updated_at: "2024-01-01T00:00:00.000Z",
-      deleted_at: null,
-      deleted: false,
-      description: "Description of Topic 1",
-    },
-    {
-      created_at: "2024-01-01T00:00:00.000Z",
-      id: 2,
-      title: "Topic 2",
-      updated_at: "2024-01-01T00:00:00.000Z",
-      deleted_at: null,
-      deleted: false,
-      description: "Description of Topic 2",
-    },
-    {
-      created_at: "2024-01-01T00:00:00.000Z",
-      id: 3,
-      title: "Topic 3",
-      updated_at: "2024-01-01T00:00:00.000Z",
-      deleted_at: null,
-      deleted: false,
-      description: "Description of Topic 3",
-    }
-  ];
-  
+  const clientID = sessionDTO.data.user.kp.client_id;
+  // Initialize the research contexts to show
+  const controller = serverContainer.get<ListResearchContextsController>(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER);
+
+  const signalFactory = signalsContainer.get<(initialValue: TListResearchContextsViewModel, update?: (value: TListResearchContextsViewModel) => void) => Signal<TListResearchContextsViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_RESEARCH_CONTEXTS);
+
+  const response: Signal<TListResearchContextsViewModel> = signalFactory({
+    status: "request",
+  });
+
+  const controllerParameters: TListResearchContextsControllerParameters = {
+    response: response,
+    clientID: `${clientID}`,
+  };
+
+  await controller.execute(controllerParameters);
+
   return (
-    <div className="flex">
-      <ListResearchContextsPage researchContexts={topics} kernelPlancksterHost={env.KP_HOST! as string} />
+    <div className="flex flex-col gap-4">
+      <Suspense fallback={<div>AG GRID SKELETON...</div>}>
+        <ListResearchContextsClientPage viewModel={response.value} />
+      </Suspense>
     </div>
   );
 }
