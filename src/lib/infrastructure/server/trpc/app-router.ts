@@ -52,7 +52,7 @@ export const appRouter = createTRPCRouter({
         status: "request"
       }
       const controller = serverContainer.get<ListResearchContextsController>(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER)
-      await controller.execute({ response: response, clientID: "1234" })
+      // await controller.execute({ response: response, clientID: "1234" })
       return response;
     }),
   },
