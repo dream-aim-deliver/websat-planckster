@@ -40,6 +40,10 @@ import FileUploadUsecase from "~/lib/core/usecase/file-upload-usecase";
 import { type FileDownloadInputPort } from "~/lib/core/ports/primary/file-download-primary-ports";
 import FileDownloadUsecase from "~/lib/core/usecase/file-download-usecase";
 import BrowserFileDownloadPresenter from "../../presenter/browser-file-download-presenter";
+import { type ListResearchContextsInputPort } from "~/lib/core/ports/primary/list-research-contexts-primary-ports";
+import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
+import BrowserListResearchContextsPresenter from "../../presenter/browser-list-research-contexts-presenter";
+import ListResearchContextsUsecase from "~/lib/core/usecase/list-research-contexts-usecase";
 
 const clientContainer = new Container();
 
@@ -115,6 +119,15 @@ clientContainer.bind<interfaces.Factory<FileDownloadInputPort>>(USECASE_FACTORY.
   const usecase = new FileDownloadUsecase(presenter, sourceDataGateway);
   return usecase;
 });
+
+clientContainer.bind<interfaces.Factory<ListResearchContextsInputPort>>(USECASE_FACTORY.LIST_RESEARCH_CONTEXTS).toFactory<ListResearchContextsInputPort, [Signal<TListResearchContextsViewModel>]>((context: interfaces.Context) => (response: Signal<TListResearchContextsViewModel>) => {
+  const loggerFactory = context.container.get<(module: string) => Logger<ILogObj>>(UTILS.LOGGER_FACTORY);
+  const presenter = new BrowserListResearchContextsPresenter(response, loggerFactory);
+  const researchContextGateway = context.container.get<ResearchContextGatewayOutputPort>(GATEWAYS.RESEARCH_CONTEXT_GATEWAY);
+  const usecase = new ListResearchContextsUsecase(presenter, researchContextGateway);
+  return usecase;
+}
+);
 
 /* eslint-enable  */
 
