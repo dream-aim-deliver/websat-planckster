@@ -1,7 +1,7 @@
 import { type TListResearchContextDTO } from "../dto/research-context-gateway-dto";
 import { type ListResearchContextsInputPort, type ListResearchContextsOutputPort } from "../ports/primary/list-research-contexts-primary-ports";
 import type ResearchContextGatewayOutputPort from "../ports/secondary/research-context-gateway-output-port";
-import { type TListResearchContextsRequest, TListResearchContextsResponse, type TListResearchContextsSuccessResponse } from "../usecase-models/list-research-contexts-usecase-models";
+import { type TListResearchContextsRequest, type TListResearchContextsSuccessResponse } from "../usecase-models/list-research-contexts-usecase-models";
 
 export default class ListResearchContextsUsecase implements ListResearchContextsInputPort {
   presenter: ListResearchContextsOutputPort;
@@ -24,17 +24,30 @@ export default class ListResearchContextsUsecase implements ListResearchContexts
         });
         return;
       }
-
+      const data: { id: number, title: string, description: string }[] = dto.data
+        .filter((researchContext) => researchContext.success === true)
+        .map((researchContext) => {
+          if (researchContext.success) {
+            return {
+              id: researchContext.data.id,
+              title: researchContext.data.title,
+              description: researchContext.data.description,
+            }
+          } else {
+            return undefined;
+          }
+        })
+        .filter((researchContext) => researchContext !== undefined) as { id: number, title: string, description: string }[];
+      for (let i = 0; i < data.length; i++) {
+        if (data[i] === undefined) {
+          data.splice(i, 1);
+        }
+      }
       const successResponse: TListResearchContextsSuccessResponse = {
         status: "success",
-        researchContexts: dto.data
-          .filter((researchContext) => researchContext.success === true)
-          .map((researchContext) => ({
-            id: researchContext.data.id,
-            title: researchContext.data.title,
-            description: researchContext.data.description,
-          })),
+        researchContexts: data,
       };
+
 
       await this.presenter.presentSuccess(successResponse);
     } catch (error) {
