@@ -32,7 +32,6 @@ export default async function ListResearchContextsServerPage() {
 
   const controllerParameters: TListResearchContextsControllerParameters = {
     response: response,
-    clientID: `${clientID}`,
   };
 
   await controller.execute(controllerParameters);
@@ -59,7 +58,10 @@ export default async function ListResearchContextsServerPage() {
   return (
     <div className="flex flex-col gap-4">
       <Suspense fallback={<div>AG GRID SKELETON...</div>}>
-        <ListResearchContextsClientPage viewModel={response.value} clientSourceData={listSourceDataForClientResponse.value.sourceData}/>
+        <ListResearchContextsClientPage
+          viewModel={response.value}
+          clientSourceData={listSourceDataForClientResponse.value.sourceData}
+        />
       </Suspense>
     </div>
   );

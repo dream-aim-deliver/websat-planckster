@@ -54,12 +54,9 @@ export default class KernelResearchContextGateway implements ResearchContextGate
             return {
                 success: true,
                 data: researchContextsViewModel.research_contexts.map(researchContext => ({
-                    success: true, // TODO: handle partials
-                    data: {
                     id: researchContext.id,
                     title: researchContext.title,
                     description: researchContext.description,
-                    },
                 })),
             }
 

@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type TListResearchContextsRequest, type TListResearchContextsSuccessResponse, type TListResearchContextsErrorResponse } from "../../usecase-models/list-research-contexts-usecase-models";
+import { Signal } from "../../entity/signals";
+import { type TListResearchContextsSuccessResponse, type TListResearchContextsErrorResponse } from "../../usecase-models/list-research-contexts-usecase-models";
+import { TListResearchContextsViewModel } from "../../view-models/list-research-contexts-view-models";
 
-export interface ListResearchContextsPrimaryPorts {
-    execute(request: TListResearchContextsRequest): Promise<void>;
-    presenter: ListResearchContextsOutputPort<any>;
+export interface ListResearchContextsInputPort {
+    execute(): Promise<void>;
 }
 
-export interface ListResearchContextsOutputPort<TResponse> {
-    response: TResponse;
+export interface ListResearchContextsOutputPort {
+    response: Signal<TListResearchContextsViewModel>;
     presentSuccess(success: TListResearchContextsSuccessResponse): void;
     presentError(error: TListResearchContextsErrorResponse): void;
 }

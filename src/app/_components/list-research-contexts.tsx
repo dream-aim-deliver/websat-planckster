@@ -16,7 +16,10 @@ import type BrowserCreateResearchContextController from "~/lib/infrastructure/cl
 import type { SelectableSourceDataRow } from "node_modules/@maany_shr/rage-ui-kit/dist/components/table/SelectableSourceDataAGGrid";
 import type { RemoteFile } from "~/lib/core/entity/file";
 
-export function ListResearchContextsClientPage(props: { viewModel: TListResearchContextsViewModel; clientSourceData: RemoteFile[] }) {
+export function ListResearchContextsClientPage(props: {
+  viewModel: TListResearchContextsViewModel;
+  clientSourceData: RemoteFile[]
+}) {
   const [listResearchContextsViewModel, setListResearchContextsViewModel] = useState<TListResearchContextsViewModel>(props.viewModel);
   const [createResearchContextsViewModel, setCreateResearchContextsViewModel] = useState<TCreateResearchContextViewModel>({
     status: "request",

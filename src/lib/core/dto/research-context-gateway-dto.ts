@@ -13,7 +13,11 @@ export type TGetResearchContextDTO = z.infer<typeof GetResearchContextDTOSchema>
 
 export const ListResearchContextDTOSchema = DTOSchemaFactory(
     z.array(
-        GetResearchContextDTOSchema
+        // GetResearchContextDTOSchema
+        ResearchContextSchema.merge(z.object({
+            message: z.string().optional(),
+            context: z.any().optional(),
+        }))
     ), BaseErrorDTOSchema);
 export type TListResearchContextDTO = z.infer<typeof ListResearchContextDTOSchema>;
 
