@@ -15,23 +15,11 @@ export const ConversationSchema = z.object({
 export type TConversation = z.infer<typeof ConversationSchema>;
 
 
-export const BaseMessageSchema = z.object({
+export const MessageSchema = z.object({
     id: z.number(),
     content: z.string(),
     timestamp: z.string(),
     sender: z.string(),
 });
 
-export const UserMessageSchema = z.object({
-    senderType: z.literal("user"),
-});
-
-export const AgentMessageSchema = z.object({
-    senderType: z.literal("agent"),
-});
-
-export const MessageSchema = z.discriminatedUnion("senderType", [
-    UserMessageSchema,
-    AgentMessageSchema
-]);
 export type TMessage = z.infer<typeof MessageSchema>;
