@@ -8,8 +8,8 @@ import { USECASE_FACTORY } from "../config/ioc/client-ioc-symbols";
 
 export interface TBrowserSendMessageToConversationControllerParameters {
   response: Signal<TSendMessageToConversationViewModel>;
-  researchContextID: string;
-  conversationID: string;
+  researchContextID: number;
+  conversationID: number;
   messageToSendContent: string;
   messageToSendTimestamp: string;
 }

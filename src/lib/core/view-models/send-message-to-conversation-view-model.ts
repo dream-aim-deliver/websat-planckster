@@ -3,8 +3,9 @@ import { MessageSchema } from "../entity/kernel-models";
 
 export const SendMessageToConversationRequestViewModelSchema = z.object({
   status: z.enum(["request"]),
-  conversationID: z.string(),
-  message: z.string(),
+  researchContextID: z.number(),
+  conversationID: z.number(),
+  messageContent: z.string(),
 });
 
 export type TSendMessageToConversationRequestViewModel = z.infer<typeof SendMessageToConversationRequestViewModelSchema>;
