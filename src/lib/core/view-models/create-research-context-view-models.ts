@@ -21,7 +21,7 @@ export const CreateResearchContextErrorViewModelSchema = z.object({
 export type TCreateResearchContextErrorViewModel = z.infer<typeof CreateResearchContextErrorViewModelSchema>;
 
 export const CreateResearchContextProgressViewModelSchema = z.object({
-    status: z.enum(["progress"]),
+    status: z.string(),
     message: z.string(),
     context: z.any()
 });

@@ -57,6 +57,7 @@ export default class KernelResearchContextGateway implements ResearchContextGate
                     id: researchContext.id,
                     title: researchContext.title,
                     description: researchContext.description,
+                    status: "active",
                 })),
             }
 
@@ -120,6 +121,7 @@ export default class KernelResearchContextGateway implements ResearchContextGate
                     id: newResearchContextViewModel.research_context_id,
                     title: researchContextTitle,
                     description: researchContextDescription,
+                    status: "active",
                 },
             };
 

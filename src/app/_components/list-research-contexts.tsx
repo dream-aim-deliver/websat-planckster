@@ -104,6 +104,11 @@ export function ListResearchContextsClientPage(props: {
   }
 
   if (listResearchContextsViewModel.status === "request") {
+    return (
+      <div>
+        Loading...
+      </div>
+    );
   }
   return (
     <div className="">
