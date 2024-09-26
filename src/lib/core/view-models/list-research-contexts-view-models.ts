@@ -13,16 +13,16 @@ export const ListResearchContextsSuccessViewModelSchema = z.object({
 })
 export type TListResearchContextsSuccessViewModel = z.infer<typeof ListResearchContextsSuccessViewModelSchema>
 
-export const ListResearchContextsPartialViewModelSchema = z.object({
-    status: z.enum(["partial"]),
-    success: z.array(ResearchContextSchema),
-    errors: z.array(z.object({
-        status: z.enum(["hopeless", "hope"]),
-        message: z.string(),
-    })
-    ),
-})
-export type TListResearchContextsPartialViewModel= z.infer<typeof ListResearchContextsPartialViewModelSchema>
+// export const ListResearchContextsPartialViewModelSchema = z.object({
+//     status: z.enum(["partial"]),
+//     success: z.array(ResearchContextSchema),
+//     errors: z.array(z.object({
+//         status: z.enum(["hopeless", "hope"]),
+//         message: z.string(),
+//     })
+//     ),
+// })
+// export type TListResearchContextsPartialViewModel= z.infer<typeof ListResearchContextsPartialViewModelSchema>
 
 export const ListResearchContextsErrorViewModelSchema = z.object({
     status: z.enum(["error"]),
@@ -35,7 +35,7 @@ export type TListResearchContextsErrorViewModel = z.infer<typeof ListResearchCon
 export const ListResearchContextsViewModelSchema = z.discriminatedUnion("status", [
     ListResearchContextsRequestViewModelSchema,
     ListResearchContextsSuccessViewModelSchema,
-    ListResearchContextsPartialViewModelSchema,
+    // ListResearchContextsPartialViewModelSchema,
     ListResearchContextsErrorViewModelSchema
 ])
 export type TListResearchContextsViewModel = z.infer<typeof ListResearchContextsViewModelSchema>
