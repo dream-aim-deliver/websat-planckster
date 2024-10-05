@@ -40,6 +40,7 @@ import FileUploadUsecase from "~/lib/core/usecase/file-upload-usecase";
 import { type FileDownloadInputPort } from "~/lib/core/ports/primary/file-download-primary-ports";
 import FileDownloadUsecase from "~/lib/core/usecase/file-download-usecase";
 import BrowserFileDownloadPresenter from "../../presenter/browser-file-download-presenter";
+import BrowserConversationGateway from "../../gateway/browser-conversation-gateway";
 
 const clientContainer = new Container();
 
@@ -64,6 +65,10 @@ clientContainer.bind(GATEWAYS.RESEARCH_CONTEXT_GATEWAY).to(BrowserResearchContex
 clientContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(BrowserVectorStoreGateway).inSingletonScope();
 
 clientContainer.bind(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY).to(BrowserKernelSourceDataGateway).inSingletonScope();
+
+clientContainer.bind(GATEWAYS.CONVERSATION_GATEWAY).to(BrowserConversationGateway).inSingletonScope();
+clientContainer.bind(GATEWAYS.AGENT_GATEWAY).to(BrowserAgentGateway).inSingletonScope();
+
 
 /** CONTROLLER */
 clientContainer.bind(CONTROLLERS.KERNEL_FILE_UPLOAD_CONTROLLER).to(BrowserFileUploadController);
