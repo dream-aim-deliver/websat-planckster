@@ -31,12 +31,12 @@ export const ConversationSchema = z.object({
 });
 export type TConversation = z.infer<typeof ConversationSchema>;
 
-
 export const MessageSchema = z.object({
     id: z.number(),
     content: z.string(),
-    timestamp: z.string(),
+    timestamp: z.number(),
     sender: z.string(),
+    senderType: z.union([z.literal("user"), z.literal("agent")]),
 });
 
 export type TMessage = z.infer<typeof MessageSchema>;

@@ -83,7 +83,7 @@ export function ListConversationsClientPage(props: { viewModel: TListConversatio
 
   const handleGoToConversation = (conversationID: number) => {
     console.log("Going to conversation with ID: ", conversationID);
-    router.push(`${props.researchContextID}/conversations/${conversationID}`);
+    router.push(`conversations/${conversationID}`);
   }
 
   if (listConversationsViewModel.status === "success") {
