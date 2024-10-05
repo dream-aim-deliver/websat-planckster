@@ -11,7 +11,7 @@ export interface TBrowserSendMessageToConversationControllerParameters {
   researchContextID: number;
   conversationID: number;
   messageToSendContent: string;
-  messageToSendTimestamp: string;
+  messageToSendTimestamp: number;
 }
 
 @injectable()

@@ -7,13 +7,13 @@ export const SendMessageToConversationResponseDTODataSchema = z.discriminatedUni
     "type", [
     z.object({
         type: z.enum(["success"]),
-        conversationID: z.string(),
+        conversationID: z.number(),
         message: MessageSchema,
         response: MessageSchema,
     }),
     z.object({
         type: z.enum(["progress"]),
-        conversationID: z.string(),
+        conversationID: z.number(),
         message: MessageSchema,
         progressMessage: z.string(),
     }),
