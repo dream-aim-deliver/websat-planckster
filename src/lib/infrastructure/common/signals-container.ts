@@ -12,6 +12,7 @@ import { type TListMessagesForConversationViewModel } from "~/lib/core/view-mode
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import type { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 import type { TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
+import { type TSendMessageToConversationViewModel } from "~/lib/core/view-models/send-message-to-conversation-view-model";
 
 const signalsContainer = new Container();
 
@@ -71,6 +72,12 @@ signalsContainer
   .bind<interfaces.Factory<Signal<TListResearchContextsViewModel>>>(SIGNAL_FACTORY.KERNEL_LIST_RESEARCH_CONTEXTS)
   .toFactory<Signal<TListResearchContextsViewModel>, [TListResearchContextsViewModel, (value: TListResearchContextsViewModel) => void]>((context: interfaces.Context) => (initialValue: TListResearchContextsViewModel, update?: (value: TListResearchContextsViewModel) => void) => {
     return new Signal<TListResearchContextsViewModel>("KernelListResearchContexts", "Display the status of the List Research Contexts feature", initialValue, update);
+  });
+
+signalsContainer
+  .bind<interfaces.Factory<Signal<TSendMessageToConversationViewModel>>>(SIGNAL_FACTORY.SEND_MESSAGE_TO_CONVERSATION)
+  .toFactory<Signal<TSendMessageToConversationViewModel>, [TSendMessageToConversationViewModel, (value: TSendMessageToConversationViewModel) => void]>((context: interfaces.Context) => (initialValue: TSendMessageToConversationViewModel, update?: (value: TSendMessageToConversationViewModel) => void) => {
+    return new Signal<TSendMessageToConversationViewModel>("SendMessageToConversation", "Display the status of the Send Message to Conversation feature", initialValue, update);
   });
 
 export default signalsContainer;
