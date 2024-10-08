@@ -1,5 +1,5 @@
 "use client";
-import { ChatPage, type MessageViewModel, type ChatPageViewModel } from "@maany_shr/rage-ui-kit";
+import { ChatPage, type MessageViewModel } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { type Signal } from "~/lib/core/entity/signals";
@@ -15,7 +15,14 @@ import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 
 export function ChatClientPageSkeleton() {
-  return <ChatPage messages={[]} onSendMessage={(messsage: string) => {console.log("Loading, please wait...")}} />;
+  return (
+    <ChatPage
+      messages={[]}
+      onSendMessage={(messsage: string) => {
+        console.log("Loading, please wait...");
+      }}
+    />
+  );
 }
 
 export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForConversationViewModel; researchContextID: number; conversationID: number }) {
@@ -120,7 +127,7 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
       <ChatPage
         messages={listMessagesViewModel.messages.map((message) => {
           return {
-            role: message.id % 2 === 0 ? "agent" : "user", // TODO: fix this after KP has been refactored
+            role: message.senderType,
             content: message.content,
             type: "text", // TODO: fix this after KP has been refactored
             timestamp: Number(message.timestamp),
