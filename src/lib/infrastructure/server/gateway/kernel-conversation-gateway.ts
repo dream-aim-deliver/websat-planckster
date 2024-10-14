@@ -7,6 +7,7 @@ import { Logger } from "pino";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import { type TKernelSDK } from "../config/kernel/kernel-sdk";
 import { TBaseErrorDTOData } from "~/sdk/core/dto";
+import { ListMessagesViewModel_Input, MessageBase as KernelPlancksterMessageBase, NewMessageViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
 
 
 @injectable()
@@ -128,8 +129,76 @@ export default class KernelConversationGateway implements ConversationGatewayOut
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async sendMessageToConversation(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
-    throw new Error("Method not implemented.");
+  async sendMessageToConversation(conversationID: number, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
+    try {
+      const kpCredentialsDTO = await this.authGateway.extractKPCredentials();
+
+      if (!kpCredentialsDTO.success) {
+        this.logger.error(`Failed to get KP credentials: ${kpCredentialsDTO.data.message}`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#conversation#send-message",
+            message: "Failed to get KP credentials",
+          } as TBaseErrorDTOData,
+        };
+      }
+
+      // TODO: refasctor this once the kernel SDK is updated
+      const createMessageViewModel: NewMessageViewModel = await this.kernelSDK.createMessage({
+        xAuthToken: kpCredentialsDTO.data.xAuthToken,
+        id: conversationID,
+        messageContent: message.content,
+        unixTimestamp: message.timestamp,
+        senderType: message.sender
+      })
+
+      if (!createMessageViewModel.status) {
+        this.logger.error({createMessageViewModel}, `Failed to send message to conversation with ID ${conversationID}`);
+        return {
+          success: false,
+          data: {
+            operation: "kernel#conversation#send-message",
+            message: `Failed to send message to conversation with ID ${conversationID}`,
+          } as TBaseErrorDTOData,
+        };
+      }
+       
+      this.logger.debug({createMessageViewModel}, `Successfully sent message to conversation with ID ${conversationID}`);
+
+      return {
+        success: true,
+        data: {
+          message: {
+            id: createMessageViewModel.message_id,
+            content: message.content,
+            timestamp: message.timestamp,
+            sender: message.sender,
+            senderType: message.senderType,
+          },
+          type: "success",
+          conversationID: conversationID,
+          response: {  // TODO: this shouldn't be needed here, so is doing this OK?
+            id: -1,
+            content: "",
+            timestamp: message.timestamp,
+            sender: message.sender,
+            senderType: message.senderType,
+          }
+        },
+      };
+
+    } catch (error) {
+      const err = error as Error;
+      this.logger.error({err}, `An error occurred while sending message to conversation: ${err.message}`);
+      return {
+        success: false,
+        data: {
+          message: err.message,
+          operation: "kernel#conversation#send-message",
+        },
+      };
+    }
   }
 
   async listMessagesForConversation(conversationID: number): Promise<ListMessagesForConversationDTO> {
@@ -147,7 +216,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
         };
       }
 
-      const listMessagesViewModel = await this.kernelSDK.listMessages({
+      const listMessagesViewModel: ListMessagesViewModel_Input = await this.kernelSDK.listMessages({
         id: conversationID,
         xAuthToken: kpCredentialsDTO.data.xAuthToken,
       });
@@ -155,13 +224,13 @@ export default class KernelConversationGateway implements ConversationGatewayOut
       if (listMessagesViewModel.status) {
         this.logger.debug({listMessagesViewModel}, `Successfully listed messages for conversation with ID ${conversationID}`);
 
-        const kpMessages = listMessagesViewModel.message_list;
+        const kpMessages: KernelPlancksterMessageBase[] = listMessagesViewModel.message_list;
 
         const messages: TMessage[] = kpMessages.map((kpMessage) => {
           return {
             id: kpMessage.id,
-            content: kpMessage.content,
-            timestamp: kpMessage.timestamp,
+            content: kpMessage.content,  // TODO: coordinate this once the new KP client is ready, how to handle content?
+            timestamp: parseInt(kpMessage.timestamp),  // TODO: coordinate this, should it be a string or a number?
             sender: kpMessage.sender,
             senderType: kpMessage.sender_type,
           };

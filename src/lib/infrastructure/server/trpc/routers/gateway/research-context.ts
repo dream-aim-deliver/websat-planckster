@@ -13,7 +13,7 @@ export const researchContextGatewayRouter = createTRPCRouter({
     const logger = loggerFactory("ListResearchContext TRPC Router");
 
     try {
-      const gateway = serverContainer.get<KernelResearchContextGateway>(GATEWAYS.RESEARCH_CONTEXT_GATEWAY);
+      const gateway = serverContainer.get<KernelResearchContextGateway>(GATEWAYS.KERNEL_RESEARCH_CONTEXT_GATEWAY);
       const dto = await gateway.list();
       return dto;
     } catch (error) {

@@ -5,6 +5,6 @@ import { type TBaseDTO } from "~/sdk/core/dto";
 
 export default interface AgentGatewayOutputPort<TPrepareContext extends TBaseDTO<any,any>> {
     createAgent(researchContextID: number, researchContextName: string, researchContextDesciption: string, vectorStoreID: string ): Promise<TCreateAgentDTO>;
-    prepareMessageContext(researchContextID: string, conversationID: string, message: TMessage): Promise<TPrepareContext>;
+    prepareMessageContext(researchContextID: number, conversationID: number, message: TMessage): Promise<TPrepareContext>;
     sendMessage(context: TPrepareContext["data"], message: TMessage): Promise<TSendMessageDTO>;
 }

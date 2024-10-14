@@ -36,8 +36,26 @@ export default class BrowserConversationGateway implements ConversationGatewayOu
     };
   }
 
-  async sendMessageToConversation(conversationID: string, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
-    throw new Error("Method not implemented.");
+  async sendMessageToConversation(conversationID: number, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
+    try {
+      const dto = await this.api.gateways.conversation.sendMessageToConversation.mutate({
+        conversationID,
+        message,
+      });
+      this.logger.debug({ dto }, `Successfully retrieved response from server for sending message to conversation`);
+
+      return dto;
+    } catch (error) {
+      this.logger.error({ error }, "Could not invoke the server side feature to send message to conversation");
+
+      return {
+        success: false,
+        data: {
+          operation: "browser#conversation#send-message-to-conversation",
+          message: "Could not invoke the server side feature to send message to conversation",
+        },
+      };
+    }
   }
 
   async listMessagesForConversation(conversationID: number): Promise<ListMessagesForConversationDTO> {
