@@ -1,10 +1,27 @@
 import { z } from "zod";
 
-export const ResearchContextSchema = z.object({
-  id: z.number(),
-  title: z.string(),
-  description: z.string(),
+export const ActiveResearchContextSchema = z.object({
+    id: z.number(),
+    title: z.string(),
+    status: z.enum(["active"]),
+    message: z.string().optional(),
+    description: z.string(),
+    context: z.string().optional(),
+  });
+  
+export const ProgressingOrErrorResearchContextSchema = z.object({
+    id: z.number(),
+    title: z.string(),
+    status: z.enum(["progressing", "error"]),
+    message: z.string(),
+    description: z.string(),
+    context: z.string().optional(),
 });
+  
+export const ResearchContextSchema = z.discriminatedUnion(
+    "status",
+    [ActiveResearchContextSchema, ProgressingOrErrorResearchContextSchema]
+);
 export type TResearchContext = z.infer<typeof ResearchContextSchema>;
 
 export const ConversationSchema = z.object({

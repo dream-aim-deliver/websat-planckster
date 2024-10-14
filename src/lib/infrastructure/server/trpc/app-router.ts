@@ -3,10 +3,6 @@ import { researchContextRouter } from "~/lib/infrastructure/server/trpc/routers/
 import { kernelPlancksterHealthCheckRouter } from "./routers/kernel/health-check";
 import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/server/trpc/server";
 import { createResearchContextsRouter } from "./routers/research-contexts/create-research-contexts-router";
-import serverContainer from "../config/ioc/server-container";
-import { CONTROLLERS } from "../config/ioc/server-ioc-symbols";
-import type ListResearchContextsController from "../controller/list-research-contexts-controller";
-import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 import { z } from "zod";
 import { serverFileRouter } from "./routers/server/server-file-router";
 import { conversationRouter } from "./routers/controller/conversation-router";
@@ -14,6 +10,7 @@ import { messageRouter } from "./routers/controller/message-router";
 import { sourceDataRouter as sourceDataControllerRouter } from "./routers/controller/source-data";
 import { sourceDataRouter as sourceDataGatewayRouter } from "./routers/gateway/source-data";
 import { researchContextGatewayRouter } from "./routers/gateway/research-context";
+import { listResearchContextsRouter } from "./routers/research-contexts/list-research-contexts-router";
 
 /**
  * This is the primary router for your server.
@@ -46,15 +43,7 @@ export const appRouter = createTRPCRouter({
   // },
   researchContexts: {
     create: createResearchContextsRouter,
-    list: protectedProcedure.query(async () => {
-      // call a server controller and usecase to fetch research contexts, try to fix any errors
-      const response: TListResearchContextsViewModel = {
-        status: "request"
-      }
-      const controller = serverContainer.get<ListResearchContextsController>(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER)
-      // await controller.execute({ response: response, clientID: "1234" })
-      return response;
-    }),
+    list: listResearchContextsRouter,
   },
   agent: {
     create: protectedProcedure

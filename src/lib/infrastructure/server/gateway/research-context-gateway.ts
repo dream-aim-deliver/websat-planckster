@@ -81,6 +81,7 @@ export default class ResearchContextGateway implements ResearchContextGatewayOut
                         id: newResearchContextViewModel.research_context_id,
                         title: researchContextTitle,
                         description: researchContextDescription,
+                        status: "active",
                     }
                 };
             }

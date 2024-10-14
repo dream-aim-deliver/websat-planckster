@@ -4,7 +4,7 @@ import { type ListResearchContextsOutputPort } from "~/lib/core/ports/primary/li
 import { type TListResearchContextsSuccessResponse, type TListResearchContextsErrorResponse } from "~/lib/core/usecase-models/list-research-contexts-usecase-models";
 import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 
-export default class BrowserListResearchContextsPresenter implements ListResearchContextsOutputPort<Signal<TListResearchContextsViewModel>> {
+export default class BrowserListResearchContextsPresenter implements ListResearchContextsOutputPort {
     response: Signal<TListResearchContextsViewModel>;
     constructor(response: Signal<TListResearchContextsViewModel>) {
         this.response = response;
