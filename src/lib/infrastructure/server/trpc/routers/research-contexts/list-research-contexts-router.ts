@@ -6,6 +6,7 @@ import { TListResearchContextsViewModel } from "~/lib/core/view-models/list-rese
 import { Signal } from "~/lib/core/entity/signals";
 import ListResearchContextsController from "../../../controller/list-research-contexts-controller";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
+import signalsContainer from "~/lib/infrastructure/common/signals-container";
 
 const getLogger = () => {
     const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
@@ -19,7 +20,7 @@ export const listResearchContextsRouter = createTRPCRouter({
         const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
         const logger = loggerFactory("List Research Contexts TRPC Router");
 
-        const signalFactory = serverContainer.get<(initialValue: TListResearchContextsViewModel, update?: (value: TListResearchContextsViewModel) => void) => Signal<TListResearchContextsViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_RESEARCH_CONTEXTS);
+        const signalFactory = signalsContainer.get<(initialValue: TListResearchContextsViewModel, update?: (value: TListResearchContextsViewModel) => void) => Signal<TListResearchContextsViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_RESEARCH_CONTEXTS);
         // call a server controller and usecase to fetch research contexts, try to fix any errors
         const response: Signal<TListResearchContextsViewModel> =signalFactory({
           status: "request"

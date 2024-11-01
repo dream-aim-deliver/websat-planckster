@@ -40,6 +40,10 @@ import ListMessagesForConversationUsecase from "~/lib/core/usecase/list-messages
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import ListSourceDataPresenter from "../../presenter/list-source-data-presenter";
 import KernelResearchContextGateway from "../../gateway/kernel-research-context-gateway";
+import {ListResearchContextsInputPort} from "~/lib/core/ports/primary/list-research-contexts-primary-ports";
+import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
+import BrowserListResearchContextsPresenter from "~/lib/infrastructure/client/presenter/browser-list-research-contexts-presenter";
+import ListResearchContextsUsecase from "~/lib/core/usecase/list-research-context-usecase";
 
 const serverContainer = new Container();
 
@@ -127,5 +131,14 @@ serverContainer
     const usecase = new ListSourceDataUsecase(presenter, sourceDataGateway);
     return usecase;
   });
+
+serverContainer
+    .bind<interfaces.Factory<ListResearchContextsInputPort>>(USECASE_FACTORY.LIST_RESEARCH_CONTEXTS)
+    .toFactory<ListResearchContextsInputPort, [Signal<TListResearchContextsViewModel>]>((context: interfaces.Context) => (response: Signal<TListResearchContextsViewModel>) => {
+        const sourceDataGateway = context.container.get<KernelResearchContextGateway>(GATEWAYS.KERNEL_RESEARCH_CONTEXT_GATEWAY);
+        const presenter = new BrowserListResearchContextsPresenter(response);
+        const usecase = new ListResearchContextsUsecase(presenter, sourceDataGateway);
+        return usecase;
+    });
 
 export default serverContainer;
