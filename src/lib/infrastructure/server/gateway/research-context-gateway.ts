@@ -17,7 +17,7 @@ export default class ResearchContextGateway implements ResearchContextGatewayOut
     @inject(KERNEL.KERNEL_SDK) private kernelSDK: TKernelSDK,
     @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger
     ) {
-    this.logger = this.loggerFactory("ConversationGateway")
+    this.logger = this.loggerFactory("ResearchContextGateway")
     }
 
     list(): Promise<TListResearchContextDTO> {
