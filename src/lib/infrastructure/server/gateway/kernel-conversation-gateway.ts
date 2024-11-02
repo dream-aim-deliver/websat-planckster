@@ -95,23 +95,23 @@ export default class KernelConversationGateway implements ConversationGatewayOut
         xAuthToken: kpCredentialsDTO.data.xAuthToken,
       });
 
-      if (listConversationsViewModel.status) {
-        this.logger.debug({ listConversationsViewModel }, `Successfully listed conversations for Research Context with ID ${researchContextID}.`);
+      if (!listConversationsViewModel.status) {
+        this.logger.error({ listConversationsViewModel }, `Failed to list conversations for Research Context with ID ${researchContextID}`);
 
         return {
-          success: true,
-          data: listConversationsViewModel.conversations,
+          success: false,
+          data: {
+            operation: "kernel#conversation#list",
+            message: `Failed to list messages for Research Context with ID ${researchContextID}`,
+          } as TBaseErrorDTOData,
         };
       }
 
-      this.logger.error({ listConversationsViewModel }, `Failed to list conversations for Research Context with ID ${researchContextID}`);
+      this.logger.debug({ listConversationsViewModel }, `Successfully listed conversations for Research Context with ID ${researchContextID}.`);
 
       return {
-        success: false,
-        data: {
-          operation: "kernel#conversation#list",
-          message: `Failed to list messages for Research Context with ID ${researchContextID}`,
-        } as TBaseErrorDTOData,
+        success: true,
+        data: listConversationsViewModel.conversations,
       };
     } catch (error) {
       const err = error as Error;
@@ -209,35 +209,40 @@ export default class KernelConversationGateway implements ConversationGatewayOut
         xAuthToken: kpCredentialsDTO.data.xAuthToken,
       });
 
-      if (listMessagesViewModel.status) {
-        this.logger.debug({ listMessagesViewModel }, `Successfully listed messages for conversation with ID ${conversationID}`);
-
-        const kpMessages: KernelPlancksterMessageBase[] = listMessagesViewModel.message_list;
-
-        const messages: TMessage[] = kpMessages.map((kpMessage) => {
-          return {
-            id: kpMessage.id,
-            message_contents: kpMessage.message_contents,
-            created_at: kpMessage.created_at,
-            sender: kpMessage.sender,
-            sender_type: kpMessage.sender_type,
-          };
-        });
+      if (!listMessagesViewModel.status) {
+        this.logger.error({ listMessagesViewModel }, `Failed to list messages for conversation with ID ${conversationID}`);
 
         return {
-          success: true,
-          data: messages,
+          success: false,
+          data: {
+            operation: "kernel#conversation#get-messages",
+            message: `Failed to list messages for conversation with ID ${conversationID}`,
+          } as TBaseErrorDTOData,
         };
       }
 
-      this.logger.error({ listMessagesViewModel }, `Failed to list messages for conversation with ID ${conversationID}`);
+
+      const kpMessages: KernelPlancksterMessageBase[] = listMessagesViewModel.message_list;
+
+      const messages: TMessage[] = kpMessages.map((kpMessage) => {
+        // TODO: kernel should return a Unix timestamp, not a formatted string
+        const kpDate = new Date(kpMessage.created_at);
+        const unixTimestamp = `${Math.floor(kpDate.getTime())}`;
+
+        return {
+          id: kpMessage.id,
+          message_contents: kpMessage.message_contents,
+          created_at: unixTimestamp,
+          sender: kpMessage.sender,
+          sender_type: kpMessage.sender_type,
+        };
+      });
+
+      this.logger.debug({ messages }, `Successfully listed messages for conversation with ID ${conversationID}`);
 
       return {
-        success: false,
-        data: {
-          operation: "kernel#conversation#get-messages",
-          message: `Failed to list messages for conversation with ID ${conversationID}`,
-        } as TBaseErrorDTOData,
+        success: true,
+        data: messages,
       };
     } catch (error) {
       const err = error as Error;

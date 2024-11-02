@@ -229,6 +229,9 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
             }
           }
         }
+      } else {
+          // Add text to conversation file content
+          conversationFileContent.push(`This conversation has no previous messages, please just ignore this file.`);
       }
 
       // 3. Save the message context file to OpenAI
@@ -290,7 +293,7 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
           const openAIMessages = await this.openai.beta.threads.messages.list(openaiThreadUpdate.id);
 
           // Grab all but the first message
-          this.logger.info({ openAIMessages }, "OpenAI messages");
+          this.logger.debug({ openAIMessages }, "OpenAI messages");
           const newOpenAIMessages: OpenAIMessage[] = openAIMessages.data.slice(0, -1);
 
           if (!newOpenAIMessages) {

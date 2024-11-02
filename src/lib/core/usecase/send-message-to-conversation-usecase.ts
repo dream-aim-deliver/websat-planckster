@@ -47,10 +47,6 @@ export default class BrowserSendMessageToConversationUseCase implements SendMess
       created_at: messageToSendTimestamp,
     };
 
-    // TODO: finish secondary side, then come back here
-    // TODO: check if conversation exists?
-    // send incoming message to the conversation
-
     const registerIncomingMessageDTO = await this.conversationGateway.sendMessageToConversation(conversationID, messageToSend);
 
     if (!registerIncomingMessageDTO.success) {
@@ -66,7 +62,6 @@ export default class BrowserSendMessageToConversationUseCase implements SendMess
     const messageToSendRegistered = registerIncomingMessageDTO.data.message;
 
     // TODO: handle the case in which the message by the user is registered in kernel, but then something fails and we never get a response. E.g., show a 'retry' message in the UI, or put the message in a "failed" state (maybe with the signal.value.operation)
-
 
     await this.presenter.presentProgress({
       status: "progress",
