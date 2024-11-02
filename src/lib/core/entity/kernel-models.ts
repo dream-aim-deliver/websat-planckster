@@ -4,9 +4,9 @@ export const ActiveResearchContextSchema = z.object({
     id: z.number(),
     title: z.string(),
     status: z.enum(["active"]),
-    message: z.string().optional(),
+    //message: z.string().optional(),
     description: z.string(),
-    context: z.string().optional(),
+    //context: z.string().optional(),
   });
   
 export const ProgressingOrErrorResearchContextSchema = z.object({
