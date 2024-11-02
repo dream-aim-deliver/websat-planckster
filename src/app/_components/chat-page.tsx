@@ -28,16 +28,6 @@ export function ChatClientPageSkeleton() {
 export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForConversationViewModel; researchContextID: number; conversationID: number }) {
   const [listMessagesViewModel, setListMessagesViewModel] = useState<TListMessagesForConversationViewModel>(props.listMessagesViewModel);
 
-  const [messageToSend, setMessageToSend] = useState<ChatPageViewModel>({
-    onSendMessage: (message: string) => {console.log("")},
-    messages: [
-      {
-        sender: "",
-        sender_type: "user",
-      }
-    ],
-  });
-
   const [sendMessageViewModel, setSendMessaageViewModel] = useState<TSendMessageToConversationViewModel>({
     status: "request",
     researchContextID: props.researchContextID,
@@ -127,12 +117,7 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
   } else if (listMessagesViewModel.status === "error") {
     throw new Error(listMessagesViewModel.message);
   } else if (listMessagesViewModel.status === "success") {
-    return (
-      <ChatPage
-        messages={listMessagesViewModel.messages}
-        onSendMessage={handleSendMessage}
-      />
-    );
+    return <ChatPage messages={listMessagesViewModel.messages} onSendMessage={handleSendMessage} />;
   }
 
   throw new Error("Invalid state");

@@ -57,7 +57,7 @@ export default class NextAuthGateway implements AuthGatewayOutputPort {
 
     async extractKPCredentials(): Promise<ExtractKPCredentialsDTO> {
         const sessionDTO = await this.getSession();
-        this.logger.info({sessionDTO}, "Session DTO");
+        this.logger.debug({sessionDTO}, "Session DTO");
         if (!sessionDTO.success) {
             return {
                 success: false,
