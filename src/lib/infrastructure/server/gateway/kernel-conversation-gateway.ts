@@ -7,8 +7,7 @@ import { Logger } from "pino";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import { type TKernelSDK } from "../config/kernel/kernel-sdk";
 import { TBaseErrorDTOData } from "~/sdk/core/dto";
-import { ListMessagesViewModel_Input, MessageBase as KernelPlancksterMessageBase, NewMessageViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
-
+import { ListMessagesViewModel_Input, MessageBase_Input as KernelPlancksterMessageBase, NewMessageViewModel } from "@maany_shr/kernel-planckster-sdk-ts";
 
 @injectable()
 export default class KernelConversationGateway implements ConversationGatewayOutputPort {
@@ -43,7 +42,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
       });
 
       if (newConversationViewModel.status) {
-        this.logger.debug({newConversationViewModel}, `Successfully created conversation '${conversationTitle}' for Research Context with ID ${researchContextID}`);
+        this.logger.debug({ newConversationViewModel }, `Successfully created conversation '${conversationTitle}' for Research Context with ID ${researchContextID}`);
 
         return {
           success: true,
@@ -54,7 +53,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
         };
       }
 
-      this.logger.error({newConversationViewModel}, `Failed to create conversation for Research Context with ID ${researchContextID}`);
+      this.logger.error({ newConversationViewModel }, `Failed to create conversation for Research Context with ID ${researchContextID}`);
 
       return {
         success: false,
@@ -65,7 +64,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
       };
     } catch (error) {
       const err = error as Error;
-      this.logger.error({err}, `An error occurred while creating a conversation: ${err.message}`);
+      this.logger.error({ err }, `An error occurred while creating a conversation: ${err.message}`);
       return {
         success: false,
         data: {
@@ -97,7 +96,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
       });
 
       if (listConversationsViewModel.status) {
-        this.logger.debug({listConversationsViewModel},`Successfully listed conversations for Research Context with ID ${researchContextID}.`);
+        this.logger.debug({ listConversationsViewModel }, `Successfully listed conversations for Research Context with ID ${researchContextID}.`);
 
         return {
           success: true,
@@ -105,7 +104,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
         };
       }
 
-      this.logger.error({listConversationsViewModel}, `Failed to list conversations for Research Context with ID ${researchContextID}`);
+      this.logger.error({ listConversationsViewModel }, `Failed to list conversations for Research Context with ID ${researchContextID}`);
 
       return {
         success: false,
@@ -114,10 +113,9 @@ export default class KernelConversationGateway implements ConversationGatewayOut
           message: `Failed to list messages for Research Context with ID ${researchContextID}`,
         } as TBaseErrorDTOData,
       };
-
     } catch (error) {
       const err = error as Error;
-      this.logger.error({err}, `An error occurred while listing conversations: ${err.message}`);
+      this.logger.error({ err }, `An error occurred while listing conversations: ${err.message}`);
       return {
         success: false,
         data: {
@@ -144,17 +142,15 @@ export default class KernelConversationGateway implements ConversationGatewayOut
         };
       }
 
-      // TODO: refasctor this once the kernel SDK is updated
       const createMessageViewModel: NewMessageViewModel = await this.kernelSDK.createMessage({
-        xAuthToken: kpCredentialsDTO.data.xAuthToken,
         id: conversationID,
-        messageContent: message.content,
-        unixTimestamp: message.timestamp,
-        senderType: message.sender
-      })
+        xAuthToken: kpCredentialsDTO.data.xAuthToken,
+        requestBody: message.message_contents,
+        senderType: message.sender_type,
+      });
 
       if (!createMessageViewModel.status) {
-        this.logger.error({createMessageViewModel}, `Failed to send message to conversation with ID ${conversationID}`);
+        this.logger.error({ createMessageViewModel }, `Failed to send message to conversation with ID ${conversationID}`);
         return {
           success: false,
           data: {
@@ -163,34 +159,26 @@ export default class KernelConversationGateway implements ConversationGatewayOut
           } as TBaseErrorDTOData,
         };
       }
-       
-      this.logger.debug({createMessageViewModel}, `Successfully sent message to conversation with ID ${conversationID}`);
+
+      this.logger.debug({ createMessageViewModel }, `Successfully sent message to conversation with ID ${conversationID}`);
 
       return {
         success: true,
         data: {
           message: {
             id: createMessageViewModel.message_id,
-            content: message.content,
-            timestamp: message.timestamp,
+            message_contents: message.message_contents,
+            created_at: message.created_at,
             sender: message.sender,
-            senderType: message.senderType,
+            sender_type: message.sender_type,
           },
           type: "success",
           conversationID: conversationID,
-          response: {  // TODO: this shouldn't be needed here, so is doing this OK?
-            id: -1,
-            content: "",
-            timestamp: message.timestamp,
-            sender: message.sender,
-            senderType: message.senderType,
-          }
         },
       };
-
     } catch (error) {
       const err = error as Error;
-      this.logger.error({err}, `An error occurred while sending message to conversation: ${err.message}`);
+      this.logger.error({ err }, `An error occurred while sending message to conversation: ${err.message}`);
       return {
         success: false,
         data: {
@@ -222,17 +210,17 @@ export default class KernelConversationGateway implements ConversationGatewayOut
       });
 
       if (listMessagesViewModel.status) {
-        this.logger.debug({listMessagesViewModel}, `Successfully listed messages for conversation with ID ${conversationID}`);
+        this.logger.debug({ listMessagesViewModel }, `Successfully listed messages for conversation with ID ${conversationID}`);
 
         const kpMessages: KernelPlancksterMessageBase[] = listMessagesViewModel.message_list;
 
         const messages: TMessage[] = kpMessages.map((kpMessage) => {
           return {
             id: kpMessage.id,
-            content: kpMessage.content,  // TODO: coordinate this once the new KP client is ready, how to handle content?
-            timestamp: parseInt(kpMessage.timestamp),  // TODO: coordinate this, should it be a string or a number?
+            message_contents: kpMessage.message_contents,
+            created_at: kpMessage.created_at,
             sender: kpMessage.sender,
-            senderType: kpMessage.sender_type,
+            sender_type: kpMessage.sender_type,
           };
         });
 
@@ -242,7 +230,7 @@ export default class KernelConversationGateway implements ConversationGatewayOut
         };
       }
 
-      this.logger.error({listMessagesViewModel}, `Failed to list messages for conversation with ID ${conversationID}`);
+      this.logger.error({ listMessagesViewModel }, `Failed to list messages for conversation with ID ${conversationID}`);
 
       return {
         success: false,
@@ -251,10 +239,9 @@ export default class KernelConversationGateway implements ConversationGatewayOut
           message: `Failed to list messages for conversation with ID ${conversationID}`,
         } as TBaseErrorDTOData,
       };
-
     } catch (error) {
       const err = error as Error;
-      this.logger.error({err}, `An error occurred while listing messages for conversation: ${err.message}`);
+      this.logger.error({ err }, `An error occurred while listing messages for conversation: ${err.message}`);
       return {
         success: false,
         data: {

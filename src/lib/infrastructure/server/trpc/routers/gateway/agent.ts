@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../server";
-import { MessageSchema } from "~/lib/core/entity/kernel-models";
+import { MessageSchema, type TMessage } from "~/lib/core/entity/kernel-models";
 import serverContainer from "../../../config/ioc/server-container";
 import { type Logger } from "pino";
 import { GATEWAYS, UTILS } from "../../../config/ioc/server-ioc-symbols";
@@ -13,17 +13,16 @@ export const agentGatewayRouter = createTRPCRouter({
       z.object({
         researchContextID: z.number(),
         conversationID: z.number(),
-        message: MessageSchema,
       }),
     )
-    .query(async ({ input }): Promise<{ data: { threadID: string }; success: true } | { data: { message: string; operation: string }; success: false }> => {
+    .query(async ({ input }): Promise<{ data: { assistantID: string, messagesToSend: TMessage[] }; success: true } | { data: { message: string; operation: string }; success: false }> => {
       const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
       const logger = loggerFactory("PrepareMessageContext TRPC Router");
 
       try {
         const agentGateway = serverContainer.get<OpenAIAgentGateway>(GATEWAYS.AGENT_GATEWAY);
 
-        const dto = await agentGateway.prepareMessageContext(input.researchContextID, input.conversationID, input.message);
+        const dto = await agentGateway.prepareMessageContext(input.researchContextID, input.conversationID);
 
         return dto;
       } catch (error) {
@@ -41,15 +40,11 @@ export const agentGatewayRouter = createTRPCRouter({
   sendMessage: protectedProcedure
     .input(
       z.object({
-        context: z.union([
+        context:
           z.object({
-            threadID: z.string(),
-          }),
-          z.object({
-            message: z.string(),
-            operation: z.string(),
-          }),
-        ]),
+            assistantID: z.string(),
+            messagesToSend: z.array(MessageSchema),
+        }),
         message: MessageSchema,
       }),
     )

@@ -67,7 +67,6 @@ clientContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(BrowserVectorStoreGateway
 clientContainer.bind(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY).to(BrowserKernelSourceDataGateway).inSingletonScope();
 
 clientContainer.bind(GATEWAYS.CONVERSATION_GATEWAY).to(BrowserConversationGateway).inSingletonScope();
-clientContainer.bind(GATEWAYS.AGENT_GATEWAY).to(BrowserAgentGateway).inSingletonScope();
 
 
 /** CONTROLLER */

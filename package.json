@@ -13,7 +13,7 @@
     "test:client": "jest --projects tests/client"
   },
   "dependencies": {
-    "@maany_shr/kernel-planckster-sdk-ts": "^1.0.0-alpha",
+    "@maany_shr/kernel-planckster-sdk-ts": "^2.0.0-alpha",
     "@maany_shr/planckster-ui-kit": "^1.0.0-alpha",
     "@maany_shr/rage-ui-kit": "^1.1.1",
     "@preact/signals-react": "^2.1.0",

@@ -12,7 +12,7 @@ const rootLogger: Logger =
                     colorize: true,
                 },
             },
-            level: "debug",
+            level: "info",
         });
 
 export default rootLogger;
