@@ -1,9 +1,9 @@
 import "~/styles/globals.css";
 import "@maany_shr/rage-ui-kit/ag-grid-theme.css";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
-
 import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/lib/infrastructure/client/trpc/react-provider";
+import { PageLayout } from "./_components/layouts/page-layout";
 
 // Explicitly load the container to ensure all dependencies are loaded, else the optimization of the build will fail
 serverContainer.load();
@@ -27,7 +27,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${inter.variable}`}>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+
+        <TRPCReactProvider>
+          <PageLayout>
+              {children}
+          </PageLayout>
+       
+        </TRPCReactProvider>
       </body>
     </html>
   );

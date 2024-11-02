@@ -214,7 +214,7 @@ export default class KernelSourceDataGateway implements KernelPlancksterSourceDa
           success: false,
           data: {
             operation: "kernel#source-data#list",
-            message: `Failed to get source data list. Error: ${listSourceDataViewModel.errorMessage}`,
+            message: `Failed to get source data list. Errorssss: ${listSourceDataViewModel.errorMessage}`,
           },
         };
       }
@@ -243,7 +243,7 @@ export default class KernelSourceDataGateway implements KernelPlancksterSourceDa
         success: false,
         data: {
           operation: "kernel#source-data#list",
-          message: `Failed to get source data list. Error: ${err.message}`,
+          message: `Failed to get source data list.` + `${err.message? 'Error: ' + err.message: ''}`,
         },
       };
     }
