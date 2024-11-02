@@ -15,15 +15,15 @@ export type TCreateResearchContextSuccessViewModel = z.infer<typeof CreateResear
 
 export const CreateResearchContextErrorViewModelSchema = z.object({
     status: z.enum(["error"]),
-    message: z.string(),
-    context: z.any()
+    message: z.string().optional(),
+    context: z.string().optional(),
 });
 export type TCreateResearchContextErrorViewModel = z.infer<typeof CreateResearchContextErrorViewModelSchema>;
 
 export const CreateResearchContextProgressViewModelSchema = z.object({
-    status: z.string(),
-    message: z.string(),
-    context: z.any()
+    status: z.enum(["progress"]),
+    message: z.string().optional(),
+    context: z.string().optional(),
 });
 export type TCreateResearchContextProgressViewModel = z.infer<typeof CreateResearchContextProgressViewModelSchema>;
 
