@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { type TMessage } from "../entity/kernel-models";
+import { type TMessageContent, type TMessage } from "../entity/kernel-models";
 import { type SendMessageToConversationInputPort, type SendMessageToConversationOutputPort } from "../ports/primary/send-message-to-conversation-primary-ports";
 import type AgentGatewayOutputPort from "../ports/secondary/agent-gateway-output-port";
 import type ConversationGatewayOutputPort from "../ports/secondary/conversation-gateway-output-port";
@@ -16,19 +16,42 @@ export default class BrowserSendMessageToConversationUseCase implements SendMess
   }
 
   async execute(request: TSendMessageToConversationRequest): Promise<void> {
+
+    const { researchContextID, conversationID, messageToSendContent, messageToSendTimestamp } = request;
+
+    // 1. Prepare message context to send to agent
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const prepareMessageDTO = await this.agentGateway.prepareMessageContext(researchContextID, conversationID);
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (!prepareMessageDTO.success) {
+      await this.presenter.presentError({
+        status: "error",
+        operation: "usecase#send-message-to-conversation",
+        message: "Could not prepare message context to send to agent",
+        context: {},
+      });
+      return;
+    }
+
+    // 2. Register incoming message
+    const contentToSend: TMessageContent = {
+      content: messageToSendContent,
+      content_type: "text",
+    }
+
     const messageToSend: TMessage = {
-      id: -1, // TODO: this should be assigned by KP at some point
-      content: request.messageToSendContent,
-      sender: "", // TODO: this should be obtained from the auth gateway at some point
-      timestamp: request.messageToSendTimestamp,
-      senderType: "user"
+      message_contents: [contentToSend],
+      sender: "", // TODO: this should be obtained from the auth gateway at some point, once kernel is refactored and the UI kit handles the 'sender' field
+      sender_type: "user",
+      created_at: messageToSendTimestamp,
     };
 
     // TODO: finish secondary side, then come back here
     // TODO: check if conversation exists?
     // send incoming message to the conversation
 
-    const registerIncomingMessageDTO = await this.conversationGateway.sendMessageToConversation(request.conversationID, messageToSend);
+    const registerIncomingMessageDTO = await this.conversationGateway.sendMessageToConversation(conversationID, messageToSend);
 
     if (!registerIncomingMessageDTO.success) {
       await this.presenter.presentError({
@@ -42,21 +65,8 @@ export default class BrowserSendMessageToConversationUseCase implements SendMess
 
     const messageToSendRegistered = registerIncomingMessageDTO.data.message;
 
-    // TODO: what happens if we arrive here, but then something fails and we never get a response? How can we tell the UI to show a 'retry' message, or put the message in a "failed" state? Maybe with the signal.value.operation?
+    // TODO: handle the case in which the message by the user is registered in kernel, but then something fails and we never get a response. E.g., show a 'retry' message in the UI, or put the message in a "failed" state (maybe with the signal.value.operation)
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const prepareMessageDTO = await this.agentGateway.prepareMessageContext(request.researchContextID, request.conversationID, messageToSendRegistered);
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    if (!prepareMessageDTO.success) {
-      await this.presenter.presentError({
-        status: "error",
-        operation: "usecase#send-message-to-conversation",
-        message: "Could not prepare message context to send to agent",
-        context: {},
-      });
-      return;
-    }
 
     await this.presenter.presentProgress({
       status: "progress",
@@ -87,7 +97,7 @@ export default class BrowserSendMessageToConversationUseCase implements SendMess
 
     const responseMessage = sendMessageToAgentDTO.data;
 
-    const registerOutgoingMessageDTO = await this.conversationGateway.sendMessageToConversation(request.conversationID, responseMessage);
+    const registerOutgoingMessageDTO = await this.conversationGateway.sendMessageToConversation(conversationID, responseMessage);
     if (!registerOutgoingMessageDTO.success) {
       await this.presenter.presentError({
         status: "error",

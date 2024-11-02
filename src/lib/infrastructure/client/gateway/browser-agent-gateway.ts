@@ -22,12 +22,11 @@ export default class BrowserAgentGateway implements AgentGatewayOutputPort<TOpen
     throw new Error("Method not implemented.");
   }
 
-  async prepareMessageContext(researchContextID: number, conversationID: number, message: TMessage): Promise<{ data: { threadID: string }; success: true } | { data: { message: string; operation: string }; success: false }> {
+  async prepareMessageContext(researchContextID: number, conversationID: number): Promise<{ data: { assistantID: string; messagesToSend: TMessage[] }; success: true } | { data: { message: string; operation: string }; success: false }> {
     try {
       const dto = await this.api.gateways.agent.prepareMessageContext.query({
         researchContextID,
         conversationID,
-        message,
       });
 
       return dto;
@@ -43,7 +42,7 @@ export default class BrowserAgentGateway implements AgentGatewayOutputPort<TOpen
       };
     }
   }
-  async sendMessage(context: { threadID: string } | { message: string; operation: string }, message: TMessage): Promise<TSendMessageDTO> {
+  async sendMessage(context: { assistantID: string; messagesToSend: TMessage[] }, message: TMessage): Promise<TSendMessageDTO> {
     try {
       const dto = await this.api.gateways.agent.sendMessage.mutate({
         context,

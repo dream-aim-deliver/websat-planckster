@@ -1,5 +1,5 @@
 "use client";
-import { ChatPage, type MessageViewModel } from "@maany_shr/rage-ui-kit";
+import { ChatPage, type ChatPageViewModel } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { type Signal } from "~/lib/core/entity/signals";
@@ -28,19 +28,21 @@ export function ChatClientPageSkeleton() {
 export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForConversationViewModel; researchContextID: number; conversationID: number }) {
   const [listMessagesViewModel, setListMessagesViewModel] = useState<TListMessagesForConversationViewModel>(props.listMessagesViewModel);
 
-  const [messageToSend, setMessageToSend] = useState<MessageViewModel>({
-    role: "agent",
-    content: "",
-    type: "text",
-    timestamp: -1,
-    isLoading: true,
+  const [messageToSend, setMessageToSend] = useState<ChatPageViewModel>({
+    onSendMessage: (message: string) => {console.log("")},
+    messages: [
+      {
+        sender: "",
+        sender_type: "user",
+      }
+    ],
   });
 
   const [sendMessageViewModel, setSendMessaageViewModel] = useState<TSendMessageToConversationViewModel>({
     status: "request",
     researchContextID: props.researchContextID,
     conversationID: props.conversationID,
-    messageContent: messageToSend.content,
+    messageContent: "",
   });
 
   const queryClient = useQueryClient();
@@ -99,10 +101,12 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
         researchContextID: props.researchContextID,
         conversationID: props.conversationID,
         messageToSendContent: message,
-        messageToSendTimestamp: Date.now(),
+        messageToSendTimestamp: `${Math.floor(Date.now() / 1000)}`,
       };
 
       await controller.execute(controllerParameters);
+
+      await queryClient.invalidateQueries({ queryKey: [`list-messages-for-conversation#${props.conversationID}`] });
     },
   });
 
@@ -125,15 +129,7 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
   } else if (listMessagesViewModel.status === "success") {
     return (
       <ChatPage
-        messages={listMessagesViewModel.messages.map((message) => {
-          return {
-            role: message.senderType,
-            content: message.content,
-            type: "text", // TODO: fix this after KP has been refactored
-            timestamp: Number(message.timestamp),
-            isLoading: false,
-          };
-        })}
+        messages={listMessagesViewModel.messages}
         onSendMessage={handleSendMessage}
       />
     );

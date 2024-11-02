@@ -118,3 +118,19 @@ export const getClientIDAndResearchContextIDFromAgentName = (agent_name: string)
         research_context_id: parseInt(researchContextID),
     }
 }
+
+/**
+ * Converts Uint8Array to a base64 string
+ * @param uint8Array - The Uint8Array to convert
+ * @returns { string } - The base64 string
+ */
+export const uint8ArrayToBase64 = (uint8Array: Uint8Array): string => {
+    // Convert the Uint8Array to a binary string
+    let binaryString = '';
+    uint8Array.forEach((byte) => {
+      binaryString += String.fromCharCode(byte);
+    });
+  
+    // Use btoa to convert the binary string to base64
+    return btoa(binaryString);
+  }
