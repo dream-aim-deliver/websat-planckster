@@ -5,6 +5,7 @@ export default {
     "node_modules/@maany_shr/rage-ui-kit/dist/**/*.js",
     "./src/**/*.tsx"
   ],
+  darkMode: "class",
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   theme: {
     extend: {
