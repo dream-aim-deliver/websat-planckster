@@ -10,17 +10,18 @@ import { TFileUploadRequest } from "~/lib/core/usecase-models/file-upload-usecas
 export interface TBrowserFileUploadControllerParameters {
   response: Signal<TFileUploadViewModel>;
   file: File;
+  clientID: string;
 }
 
 @injectable()
 export default class BrowserFileUploadController {
   async execute(controllerParameters: TBrowserFileUploadControllerParameters): Promise<void> {
-    const { response, file } = controllerParameters;
+    const { response, file, clientID } = controllerParameters;
 
     const localFile: LocalFile = {
       type: "local",
       raw: file,
-      relativePath: file.name,
+      relativePath: `user-uploads/${clientID}/${file.name}`,
       name: file.name,
     };
 

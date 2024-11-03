@@ -18,6 +18,8 @@ export default async function ListSourceDataForClientServerPage() {
     redirect("/auth/login");
   }
 
+  const clientID = sessionDTO.data.user.id
+
   // Initialize the source data to show
   const controller = serverContainer.get<ListSourceDataController>(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER);
 
@@ -34,9 +36,9 @@ export default async function ListSourceDataForClientServerPage() {
   await controller.execute(controllerParameters);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 w-full">
       <Suspense fallback={<div>AG GRID SKELETON...</div>}>
-        <ListSourceDataForClientClientPage viewModel={response.value} />
+        <ListSourceDataForClientClientPage viewModel={response.value} clientID={clientID} />
       </Suspense>
     </div>
   );
