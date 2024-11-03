@@ -1,10 +1,15 @@
 import { Logger } from "pino";
 import { Signal } from "~/lib/core/entity/signals";
 import { CreateResearchContextOutputPort } from "~/lib/core/ports/primary/create-research-context-primary-ports";
-import { TCreateResearchContextErrorResponse, TCreateResearchContextProgressResponse, TCreateResearchContextSuccessResponse } from "~/lib/core/usecase-models/create-research-context-usecase-models";
+import {
+    TCreateResearchContextErrorResponse,
+    TCreateResearchContextProgressResponse,
+    TCreateResearchContextResponse,
+    TCreateResearchContextSuccessResponse
+} from "~/lib/core/usecase-models/create-research-context-usecase-models";
 import { TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
 
-export default class CreateResearchContextPresenter implements CreateResearchContextOutputPort<any> {
+export default class CreateResearchContextPresenter implements CreateResearchContextOutputPort<Signal<TCreateResearchContextViewModel>> {
     logger: Logger;
     response: Signal<TCreateResearchContextViewModel>;
     constructor(response: Signal<TCreateResearchContextViewModel>, loggerFactory: (module: string) => Logger) {
@@ -23,8 +28,9 @@ export default class CreateResearchContextPresenter implements CreateResearchCon
     async presentProgress(usecaseProgressResponse: TCreateResearchContextProgressResponse): Promise<void> {
         this.logger.debug({ usecaseProgressResponse }, `Progress creating research context: ${usecaseProgressResponse.message}`);
         this.response.update({
-            status: usecaseProgressResponse.status,
+            status: "progress",
             message: usecaseProgressResponse.message,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             context: usecaseProgressResponse.context,
         });
     }
@@ -34,6 +40,7 @@ export default class CreateResearchContextPresenter implements CreateResearchCon
         this.response.update({
             status: "error",
             message: usecaseErrorResponse.message,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             context: usecaseErrorResponse.context,
         });
     }
