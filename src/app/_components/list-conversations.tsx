@@ -86,30 +86,25 @@ export function ListConversationsClientPage(props: { viewModel: TListConversatio
     router.push(`${props.researchContextID}/conversations/${conversationID}`);
   }
 
-  return (
-      <div className="w-screen">
-        {listConversationsViewModel.status === "success" && (
-          <ConversationAGGrid 
-            isLoading={isFetching || isLoading}
-            rowData={listConversationsViewModel.conversations as ConversationRow[]}
-            handleGoToConversation={handleGoToConversation}
-            handleNewConversation={handleCreateConversation}
-            newConversationIsEnabled={enableCreateConversation}
-            />
-        )}
-        {listConversationsViewModel.status === "error" && (
-          <ConversationAGGrid
-            isLoading={false}
-            rowData={[]}
-            handleGoToConversation={handleGoToConversation}
-            handleNewConversation={handleCreateConversation}
-            newConversationIsEnabled={enableCreateConversation}
-            errorOverlayProps={{
-              errorStatus: true,
-              overlayText: `Error: ${JSON.stringify(listConversationsViewModel)}`,
-            }}
-          />
-          )}
-      </div>
-  );
+  if (listConversationsViewModel.status === "success") {
+    return <ConversationAGGrid
+        isLoading={isFetching || isLoading}
+        rowData={listConversationsViewModel.conversations as ConversationRow[]}
+        handleGoToConversation={handleGoToConversation}
+        handleNewConversation={handleCreateConversation}
+        newConversationIsEnabled={enableCreateConversation}
+    />;
+  } else {
+    return <ConversationAGGrid
+        isLoading={false}
+        rowData={[]}
+        handleGoToConversation={handleGoToConversation}
+        handleNewConversation={handleCreateConversation}
+        newConversationIsEnabled={enableCreateConversation}
+        errorOverlayProps={{
+          errorStatus: true,
+          overlayText: `Error: ${JSON.stringify(listConversationsViewModel)}`,
+        }}
+    />;
+  }
 }
