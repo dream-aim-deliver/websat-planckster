@@ -78,7 +78,7 @@ export function ListSourceDataForResearchContextClientPage(
   const handleUploadSourceData: () => void = () => {console.log("")};
 
   const isSourceDataLoading = listSourceDataViewModel.status === "request";
-  const sourceData = isLoading ? [] : listSourceDataViewModel.sourceData;
+  const sourceData = listSourceDataViewModel.status === "success" ? listSourceDataViewModel.sourceData : [];
   return (
       <SourceDataAGGrid isLoading={isSourceDataLoading} isUploading={false} enableUpload={false} rowData={sourceData} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
   );
