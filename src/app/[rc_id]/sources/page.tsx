@@ -33,6 +33,7 @@ export default async function ListSourceDataForResearchContextServerPage(
 
   const controllerParameters: TListSourceDataControllerParameters = {
     response: response,
+    researchContextID: researchContextID,
   };
 
   await controller.execute(controllerParameters);
