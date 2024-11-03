@@ -1,7 +1,7 @@
 'use client' // Error boundaries must be Client Components
  
 import { useEffect } from 'react'
-import {ErrorPage, ErrorPageProps } from "@maany_shr/rage-ui-kit"
+import {ErrorPage } from "@maany_shr/rage-ui-kit"
 
 export default function Error(props: {
   error: Error & { digest?: string }

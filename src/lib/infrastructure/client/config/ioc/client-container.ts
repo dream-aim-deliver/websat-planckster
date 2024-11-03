@@ -36,11 +36,12 @@ import { type FileUploadInputPort } from "~/lib/core/ports/primary/file-upload-p
 import { type TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 import BrowserFileUploadPresenter from "../../presenter/browser-file-upload-presenter";
-import FileUploadUsecase from "~/lib/core/usecase/file-upload-usecase";
+import BrowserFileUploadUsecase from "~/lib/core/usecase/file-upload-usecase";
 import { type FileDownloadInputPort } from "~/lib/core/ports/primary/file-download-primary-ports";
-import FileDownloadUsecase from "~/lib/core/usecase/file-download-usecase";
+import BrowserFileDownloadUsecase from "~/lib/core/usecase/file-download-usecase";
 import BrowserFileDownloadPresenter from "../../presenter/browser-file-download-presenter";
 import BrowserConversationGateway from "../../gateway/browser-conversation-gateway";
+import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 
 const clientContainer = new Container();
 
@@ -67,7 +68,6 @@ clientContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(BrowserVectorStoreGateway
 clientContainer.bind(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY).to(BrowserKernelSourceDataGateway).inSingletonScope();
 
 clientContainer.bind(GATEWAYS.CONVERSATION_GATEWAY).to(BrowserConversationGateway).inSingletonScope();
-
 
 /** CONTROLLER */
 clientContainer.bind(CONTROLLERS.KERNEL_FILE_UPLOAD_CONTROLLER).to(BrowserFileUploadController);
@@ -107,16 +107,16 @@ clientContainer
 clientContainer.bind<interfaces.Factory<FileUploadInputPort>>(USECASE_FACTORY.FILE_UPLOAD).toFactory<FileUploadInputPort, [Signal<TFileUploadViewModel>]>((context: interfaces.Context) => (response: Signal<TFileUploadViewModel>) => {
   const loggerFactory = context.container.get<(module: string) => Logger<ILogObj>>(UTILS.LOGGER_FACTORY);
   const presenter = new BrowserFileUploadPresenter(response, loggerFactory);
-  const sourceDataGateway = context.container.get<BrowserKernelSourceDataGateway>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
-  const usecase = new FileUploadUsecase(presenter, sourceDataGateway);
+  const sourceDataGateway = context.container.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
+  const usecase = new BrowserFileUploadUsecase(presenter, sourceDataGateway);
   return usecase;
 });
 
 clientContainer.bind<interfaces.Factory<FileDownloadInputPort>>(USECASE_FACTORY.FILE_DOWNLOAD).toFactory<FileDownloadInputPort, [Signal<TFileDownloadViewModel>]>((context: interfaces.Context) => (response: Signal<TFileDownloadViewModel>) => {
   const loggerFactory = context.container.get<(module: string) => Logger<ILogObj>>(UTILS.LOGGER_FACTORY);
   const presenter = new BrowserFileDownloadPresenter(response, loggerFactory);
-  const sourceDataGateway = context.container.get<BrowserKernelSourceDataGateway>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
-  const usecase = new FileDownloadUsecase(presenter, sourceDataGateway);
+  const sourceDataGateway = context.container.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
+  const usecase = new BrowserFileDownloadUsecase(presenter, sourceDataGateway);
   return usecase;
 });
 

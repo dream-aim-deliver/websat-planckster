@@ -188,8 +188,6 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
       this.logger.info({ message }, "Sending message to OpenAI");
       const { assistantID, messagesToSend: contextMessagesToSend } = context;
 
-      const openaiAssistant = await this.openai.beta.assistants.retrieve(assistantID);
-
       // 1. Create thread
       const openaiThread = await this.openai.beta.threads.create();
       const openaiThreadID = openaiThread.id;

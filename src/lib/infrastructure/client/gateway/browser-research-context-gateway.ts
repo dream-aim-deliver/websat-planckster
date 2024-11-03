@@ -8,50 +8,37 @@ import type { TVanillaAPI } from "../trpc/vanilla-api";
 
 @injectable()
 export default class BrowserResearchContextGateway implements ResearchContextGatewayOutputPort {
-    private logger: Logger<ILogObj>;
-    constructor(
-        @inject(TRPC.VANILLA_CLIENT) private api: TVanillaAPI,
-        @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger<ILogObj>,
-    ) {
-        this.logger = this.loggerFactory("BrowserSourceDataRepository");
-    }
-    async list(): Promise<TListResearchContextDTO> {
-        try {
-            const dto = await this.api.gateways.researchContext.list.query({});
-            this.logger.debug({ dto }, `Successfully fetched client data for download for relative path`);
-            return dto;
-        } catch (error) {
-            this.logger.error({ error }, "Could not invoke the server side feature to get client data for download");
-            return {
-                success: false,
-                data: {
-                    operation: "researchContextRouter#list",
-                    message: "Could not invoke the server side feature to get client data for download",
-                },
-            };
-        }
-    }
-    async get(researchContextID: string): Promise<TGetResearchContextDTO> {
-        throw new Error("Method not implemented.");
-    }
+  private logger: Logger<ILogObj>;
+  constructor(
+    @inject(TRPC.VANILLA_CLIENT) private api: TVanillaAPI,
+    @inject(UTILS.LOGGER_FACTORY) private loggerFactory: (module: string) => Logger<ILogObj>,
+  ) {
+    this.logger = this.loggerFactory("BrowserSourceDataRepository");
+  }
+  async list(): Promise<TListResearchContextDTO> {
+    throw new Error("Method not implemented.");
+  }
+  async get(researchContextID: string): Promise<TGetResearchContextDTO> {
+    throw new Error("Method not implemented.");
+  }
 
-    async create(researchContextName: string, researchContextDescription: string, sourceData: RemoteFile[]): Promise<TCreateResearchContextDTO> {
-        try {
-            const dto = this.api.gateways.researchContext.create.mutate({
-                title: researchContextName,
-                description: researchContextDescription,
-                sourceData: sourceData
-            });
-            return dto;
-        } catch (error) {
-            this.logger.error({ error }, "Could not invoke the server side feature to get client data for download");
-            return {
-                success: false,
-                data: {
-                    operation: "researchContextRouter#create",
-                    message: "Could not invoke the server side feature to get client data for download",
-                },
-            };
-        }
+  async create(researchContextName: string, researchContextDescription: string, sourceData: RemoteFile[]): Promise<TCreateResearchContextDTO> {
+    try {
+      const dto = this.api.gateways.researchContext.create.mutate({
+        title: researchContextName,
+        description: researchContextDescription,
+        sourceData: sourceData,
+      });
+      return dto;
+    } catch (error) {
+      this.logger.error({ error }, "Could not invoke the server side feature to get client data for download");
+      return {
+        success: false,
+        data: {
+          operation: "researchContextRouter#create",
+          message: "Could not invoke the server side feature to get client data for download",
+        },
+      };
     }
+  }
 }

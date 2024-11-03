@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
 import { Container, type interfaces } from "inversify";
-import { CONSTANTS, GATEWAYS, KERNEL, OPENAI, TRPC, REPOSITORY, UTILS, CONTROLLERS, USECASE_FACTORY } from "./server-ioc-symbols";
+import { CONSTANTS, GATEWAYS, KERNEL, OPENAI, TRPC, UTILS, CONTROLLERS, USECASE_FACTORY } from "./server-ioc-symbols";
 import { authOptions } from "~/lib/infrastructure/server/config/auth/next-auth-config";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import NextAuthGateway from "~/lib/infrastructure/server/gateway/next-auth-gateway";
@@ -40,10 +40,10 @@ import ListMessagesForConversationUsecase from "~/lib/core/usecase/list-messages
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import ListSourceDataPresenter from "../../presenter/list-source-data-presenter";
 import KernelResearchContextGateway from "../../gateway/kernel-research-context-gateway";
-import {type ListResearchContextsInputPort} from "~/lib/core/ports/primary/list-research-contexts-primary-ports";
+import { type ListResearchContextsInputPort } from "~/lib/core/ports/primary/list-research-contexts-primary-ports";
 import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
-import BrowserListResearchContextsPresenter from "~/lib/infrastructure/client/presenter/browser-list-research-contexts-presenter";
 import ListResearchContextsUsecase from "~/lib/core/usecase/list-research-context-usecase";
+import ListResearchContextsPresenter from "../../presenter/list-research-contexts-presenter";
 
 const serverContainer = new Container();
 
@@ -132,13 +132,14 @@ serverContainer
     return usecase;
   });
 
+// ListResearchContextsUsecase
 serverContainer
-    .bind<interfaces.Factory<ListResearchContextsInputPort>>(USECASE_FACTORY.LIST_RESEARCH_CONTEXTS)
-    .toFactory<ListResearchContextsInputPort, [Signal<TListResearchContextsViewModel>]>((context: interfaces.Context) => (response: Signal<TListResearchContextsViewModel>) => {
-        const sourceDataGateway = context.container.get<KernelResearchContextGateway>(GATEWAYS.KERNEL_RESEARCH_CONTEXT_GATEWAY);
-        const presenter = new BrowserListResearchContextsPresenter(response);
-        const usecase = new ListResearchContextsUsecase(presenter, sourceDataGateway);
-        return usecase;
-    });
+  .bind<interfaces.Factory<ListResearchContextsInputPort>>(USECASE_FACTORY.LIST_RESEARCH_CONTEXTS)
+  .toFactory<ListResearchContextsInputPort, [Signal<TListResearchContextsViewModel>]>((context: interfaces.Context) => (response: Signal<TListResearchContextsViewModel>) => {
+    const sourceDataGateway = context.container.get<KernelResearchContextGateway>(GATEWAYS.KERNEL_RESEARCH_CONTEXT_GATEWAY);
+    const presenter = new ListResearchContextsPresenter(response);
+    const usecase = new ListResearchContextsUsecase(presenter, sourceDataGateway);
+    return usecase;
+  });
 
 export default serverContainer;

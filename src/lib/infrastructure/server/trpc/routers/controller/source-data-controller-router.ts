@@ -9,7 +9,7 @@ import { type Signal } from "~/lib/core/entity/signals";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 import type ListSourceDataController from "../../../controller/list-source-data-controller";
 
-export const sourceDataRouter = createTRPCRouter({
+export const sourceDataControllerRouter = createTRPCRouter({
   list: protectedProcedure
     .input(
       z.object({
