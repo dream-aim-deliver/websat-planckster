@@ -1,5 +1,5 @@
 "use client";
-import { ChatPage, type ChatPageViewModel } from "@maany_shr/rage-ui-kit";
+import { ChatPage } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { type Signal } from "~/lib/core/entity/signals";

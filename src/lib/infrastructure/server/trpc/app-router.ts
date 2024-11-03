@@ -1,18 +1,16 @@
-import { postRouter } from "~/lib/infrastructure/server/trpc/routers/post";
-import { researchContextRouter } from "~/lib/infrastructure/server/trpc/routers/kernel/research-contexts";
+import { createTRPCRouter } from "~/lib/infrastructure/server/trpc/server";
+
+import { conversationControllerRouter } from "./routers/controller/conversation-controller-router";
+import { messageControllerRouter } from "./routers/controller/message-controller-router";
+import { sourceDataControllerRouter } from "./routers/controller/source-data-controller-router";
+import { researchContextControllerRouter } from "./routers/controller/research-context-controller-router";
+
+import { agentGatewayRouter } from "./routers/gateway/agent-gateway-router";
+import { conversationGatewayRouter } from "./routers/gateway/conversation-gateway-router";
+import { researchContextGatewayRouter } from "./routers/gateway/research-context-gateway-router";
+import { sourceDataGatewayRouter } from "./routers/gateway/source-data-gateway-router";
+
 import { kernelPlancksterHealthCheckRouter } from "./routers/kernel/health-check";
-import { createTRPCRouter, protectedProcedure } from "~/lib/infrastructure/server/trpc/server";
-import { createResearchContextsRouter } from "./routers/research-contexts/create-research-contexts-router";
-import { z } from "zod";
-import { serverFileRouter } from "./routers/server/server-file-router";
-import { conversationRouter } from "./routers/controller/conversation-router";
-import { messageRouter } from "./routers/controller/message-router";
-import { sourceDataRouter as sourceDataControllerRouter } from "./routers/controller/source-data";
-import { sourceDataRouter as sourceDataGatewayRouter } from "./routers/gateway/source-data";
-import { researchContextGatewayRouter } from "./routers/gateway/research-context";
-import { listResearchContextsRouter } from "./routers/research-contexts/list-research-contexts-router";
-import { conversationGatewayRouter } from "./routers/gateway/conversation";
-import { agentGatewayRouter } from "./routers/gateway/agent";
 
 /**
  * This is the primary router for your server.
@@ -21,67 +19,21 @@ import { agentGatewayRouter } from "./routers/gateway/agent";
  */
 export const appRouter = createTRPCRouter({
   controllers: {
-    conversation: conversationRouter,
-    message: messageRouter,
+    conversation: conversationControllerRouter,
+    message: messageControllerRouter,
+    researchContext: researchContextControllerRouter,
     sourceData: sourceDataControllerRouter,
   },
-  gateways : {
-    sourceData: sourceDataGatewayRouter,
-    researchContext: researchContextGatewayRouter,
-    conversation: conversationGatewayRouter,
+  gateways: {
     agent: agentGatewayRouter,
-
+    conversation: conversationGatewayRouter,
+    researchContext: researchContextGatewayRouter,
+    sourceData: sourceDataGatewayRouter,
   },
   kernel: {
-    researchContext: researchContextRouter,
     healthCheck: kernelPlancksterHealthCheckRouter,
   },
-  post: postRouter,
-  server: {
-    file: serverFileRouter,
-  },
-  // openai: {
-  //   file: openAIFileRouter,
-  //   vector: openAIVectorStoreRouter,
-  //   assistant: openAIAssistantRouter,
-  // },
-  researchContexts: {
-    create: createResearchContextsRouter,
-    list: listResearchContextsRouter,
-  },
-  agent: {
-    create: protectedProcedure
-      .input(z.object({
-
-      })
-      ).mutation(async ({ input }) => {
-        // call a server controller and usecase to create an agent, try to fix any errors
-        return { status: "request" }
-      }),
-    vectorStores: {
-      list: protectedProcedure.query(async () => {
-        // call a server controller and usecase to fetch vector stores, try to fix any errors
-        return { status: "request" }
-      }),
-      create: protectedProcedure
-        .input(z.object({
-
-        })
-        ).mutation(async ({ input }) => {
-          // call a server controller and usecase to create a vector store, try to fix any errors
-          return { status: "request" }
-        }),
-    },
-    list: protectedProcedure.query(async () => {
-      return { status: "request" }
-    }),
-    sendMessage: protectedProcedure.mutation(async ({ input }) => {
-      // call a server controller and usecase to send a message, try to fix any errors
-      return { status: "request" }
-    }),
-  }
 });
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
-

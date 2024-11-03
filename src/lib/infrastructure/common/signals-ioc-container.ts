@@ -1,4 +1,3 @@
-import { KERNEL } from "../server/config/ioc/server-ioc-symbols";
 
 export const SIGNAL_FACTORY = {
     CREATE_RESEARCH_CONTEXT: Symbol("CREATE_RESEARCH_CONTEXT"),

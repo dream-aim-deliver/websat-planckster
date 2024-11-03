@@ -3,7 +3,7 @@ import { GetSourceDataDTO, ListSourceDataDTO, DeleteSourceDataDTO } from "~/lib/
 import SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import { GATEWAYS, OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
 import OpenAI from "openai";
-import { File, LocalFile } from "~/lib/core/entity/file";
+import { LocalFile } from "~/lib/core/entity/file";
 import { Logger } from "pino";
 import { RemoteFile } from "~/lib/core/entity/file";
 import { generateSystemFilename, generateOpenAIFilename } from "../config/openai/openai-utils";

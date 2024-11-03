@@ -2,7 +2,7 @@ import { type FileUploadInputPort, type FileUploadOutputPort } from "../ports/pr
 import type SourceDataGatewayOutputPort from "../ports/secondary/source-data-gateway-output-port";
 import { type TFileUploadRequest, type TFileUploadResponse } from "../usecase-models/file-upload-usecase-models";
 
-export default class FileUploadUsecase implements FileUploadInputPort {
+export default class BrowserFileUploadUsecase implements FileUploadInputPort {
   presenter: FileUploadOutputPort;
   sourceDataGateway: SourceDataGatewayOutputPort;
 

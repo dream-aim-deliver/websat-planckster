@@ -10,7 +10,6 @@ import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 import type { TListConversationsControllerParameters } from "~/lib/infrastructure/server/controller/list-conversations-controller";
 import { Suspense } from "react";
-import { Header, SiteFooter } from "@maany_shr/rage-ui-kit";
 
 export default async function ListConversationsServerPage({ params }: { params: { rc_id: string } }) {
   const researchContextID = parseInt(params.rc_id);

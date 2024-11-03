@@ -6,7 +6,7 @@ import { GATEWAYS, UTILS } from "../../../config/ioc/server-ioc-symbols";
 import type KernelSourceDataGateway from "../../../gateway/kernel-source-data-gateway";
 import { type GetClientDataForDownloadDTO, type GetClientDataForUploadDTO, type NewSourceDataDTO } from "~/lib/infrastructure/common/dto/kernel-planckster-source-data-gateway-dto";
 
-export const sourceDataRouter = createTRPCRouter({
+export const sourceDataGatewayRouter = createTRPCRouter({
   getClientDataForUpload: protectedProcedure
     .input(
       z.object({
@@ -30,7 +30,7 @@ export const sourceDataRouter = createTRPCRouter({
         return {
           success: false,
           data: {
-            operation: "sourceDataRouter#getClientDataForUpload",
+            operation: "sourceDataGatewayRouter#getClientDataForUpload",
             message: "Could not invoke the server side feature to get client data for upload",
           },
         };
@@ -60,7 +60,7 @@ export const sourceDataRouter = createTRPCRouter({
         return {
           success: false,
           data: {
-            operation: "sourceDataRouter#getClientDataForDownload",
+            operation: "sourceDataGatewayRouter#getClientDataForDownload",
             message: "Could not invoke the server side feature to get client data for download",
           },
         };
@@ -91,7 +91,7 @@ export const sourceDataRouter = createTRPCRouter({
         return {
           success: false,
           data: {
-            operation: "sourceDataRouter#newSourceData",
+            operation: "sourceDataGatewayRouter#newSourceData",
             message: "Could not invoke the server side feature to create new source data",
           },
         };

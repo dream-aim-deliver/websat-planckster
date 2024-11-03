@@ -6,29 +6,28 @@ import { TVanillaAPI } from "../trpc/vanilla-api";
 import { TRPC } from "../config/ioc/client-ioc-symbols";
 
 export interface TBrowserListResearchContextsControllerParameters {
-    response: Signal<TListResearchContextsViewModel>;
+  response: Signal<TListResearchContextsViewModel>;
 }
 
 @injectable()
 export default class BrowserListResearchContextsController {
-    async execute(params: TBrowserListResearchContextsControllerParameters): Promise<void> {
-        try {
-            const { response } = params;
+  async execute(params: TBrowserListResearchContextsControllerParameters): Promise<void> {
+    try {
+      const { response } = params;
 
-            const api = clientContainer.get<TVanillaAPI>(TRPC.VANILLA_CLIENT);
+      const api = clientContainer.get<TVanillaAPI>(TRPC.VANILLA_CLIENT);
 
-            const serverResponse: Signal<TListResearchContextsViewModel> = await api.researchContexts.list.listAll.query();
+      const serverResponse: Signal<TListResearchContextsViewModel> = await api.controllers.researchContext.list.query();
 
-            response.update(serverResponse.value);
-        } catch (error) {
-            const err = error as Error;
-      
-            const viewModel: TListResearchContextsViewModel = {
-              status: "error",
-              message: err.message,
-            };
-      
-            params.response.update(viewModel);
-        }
+      response.update(serverResponse.value);
+    } catch (error) {
+      const err = error as Error;
+      const viewModel: TListResearchContextsViewModel = {
+        status: "error",
+        message: err.message,
+      };
+
+      params.response.update(viewModel);
     }
+  }
 }

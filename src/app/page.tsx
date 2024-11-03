@@ -12,8 +12,6 @@ import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-containe
 import { Suspense } from "react";
 import type ListSourceDataController from "~/lib/infrastructure/server/controller/list-source-data-controller";
 import type { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
-import { ResearchContextCard, ResearchContextCardProps, ListResearchContextCard, ErrorPage, ErrorPageProps } from "@maany_shr/rage-ui-kit";
-import { ErrorPageClientPage } from "./_components/error-page";
 
 export default async function ListResearchContextsServerPage() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);

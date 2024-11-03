@@ -3,7 +3,7 @@ import { type FileDownloadInputPort, type FileDownloadOutputPort } from "../port
 import type SourceDataGatewayOutputPort from "../ports/secondary/source-data-gateway-output-port";
 import { type TFileDownloadRequest, type TFileDownloadResponse } from "../usecase-models/file-download-usecase-models";
 
-export default class FileDownloadUsecase implements FileDownloadInputPort {
+export default class BrowserFileDownloadUsecase implements FileDownloadInputPort {
   presenter: FileDownloadOutputPort;
   sourceDataGateway: SourceDataGatewayOutputPort;
 
