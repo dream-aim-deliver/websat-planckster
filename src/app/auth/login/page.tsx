@@ -3,7 +3,7 @@ import React, { Suspense, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { LoginCard } from "@maany_shr/rage-ui-kit";
-import { buttonActionInputValues } from "node_modules/@maany_shr/rage-ui-kit/dist/components/card/LoginCard";
+import { type buttonActionInputValues } from "node_modules/@maany_shr/rage-ui-kit/dist/components/card/LoginCard";
 
 
 const LoginPage: React.FC = () => {

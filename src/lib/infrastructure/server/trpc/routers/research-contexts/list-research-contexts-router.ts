@@ -1,10 +1,10 @@
-import { Logger } from "pino";
+import { type Logger } from "pino";
 import serverContainer from "../../../config/ioc/server-container";
 import { createTRPCRouter, protectedProcedure } from "../../server";
 import { CONTROLLERS, UTILS } from "../../../config/ioc/server-ioc-symbols";
-import { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
-import { Signal } from "~/lib/core/entity/signals";
-import ListResearchContextsController from "../../../controller/list-research-contexts-controller";
+import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
+import { type Signal } from "~/lib/core/entity/signals";
+import type ListResearchContextsController from "../../../controller/list-research-contexts-controller";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 
