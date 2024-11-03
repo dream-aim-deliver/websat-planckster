@@ -14,13 +14,10 @@ export default class ListResearchContextsUsecase implements ListResearchContexts
     
     async execute(): Promise<void> {
         try {
-    
-            let dto: TListResearchContextDTO;
-        
-            dto = await this.researchContextGateway.list();
-    
+            const dto: TListResearchContextDTO = await this.researchContextGateway.list();
+
             if (!dto.success) {
-                    await this.presenter.presentError({
+                this.presenter.presentError({
                     status: "error",
                     message: dto.data.message,
                     operation: "usecase#list-research-context",
@@ -35,11 +32,11 @@ export default class ListResearchContextsUsecase implements ListResearchContexts
                 researchContexts: researchContextList,
             };
         
-            await this.presenter.presentSuccess(successResponse);
+            this.presenter.presentSuccess(successResponse);
         } catch (error) {
             const err = error as Error;
         
-            await this.presenter.presentError({
+            this.presenter.presentError({
                 status: "error",
                 message: err.message,
                 operation: "usecase#list-research-context",
