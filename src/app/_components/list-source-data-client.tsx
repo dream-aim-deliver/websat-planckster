@@ -18,7 +18,7 @@ import type BrowserListSourceDataController from "~/lib/infrastructure/client/co
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 
-export function ListSourceDataForClientClientPage(props: { viewModel: TListSourceDataViewModel }) {
+export function ListSourceDataForClientClientPage(props: { viewModel: TListSourceDataViewModel; clientID: string }) {
   const [uploadSourceDataViewModel, setUploadSourceDataViewModel] = useState<TFileUploadViewModel>({
     status: "request",
   } as TFileUploadViewModel);
@@ -91,6 +91,7 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
       const controllerParameters: TBrowserFileUploadControllerParameters = {
         response: response,
         file: file,
+        clientID: props.clientID,
       };
       const controller = clientContainer.get<BrowserFileUploadController>(CONTROLLERS.KERNEL_FILE_UPLOAD_CONTROLLER);
       await controller.execute(controllerParameters);
