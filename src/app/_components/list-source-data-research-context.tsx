@@ -2,16 +2,14 @@
 
 import { SourceDataAGGrid } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { type Signal } from "~/lib/core/entity/signals";
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
-import { TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import clientContainer from "~/lib/infrastructure/client/config/ioc/client-container";
 import { CONTROLLERS } from "~/lib/infrastructure/client/config/ioc/client-ioc-symbols";
 import {type TBrowserFileDownloadControllerParameters} from "~/lib/infrastructure/client/controller/browser-file-download-controller";
 import type BrowserFileDownloadController from "~/lib/infrastructure/client/controller/browser-file-download-controller";
-import BrowserFileUploadController, { TBrowserFileUploadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
 import {type TBrowserListSourceDataControllerParameters} from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
 import type BrowserListSourceDataController from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
@@ -79,19 +77,9 @@ export function ListSourceDataForResearchContextClientPage(
 
   const handleUploadSourceData: () => void = () => {console.log("")};
 
-
-  if (listSourceDataViewModel.status === "request") {
-    return (
-      <div>
-        <SourceDataAGGrid isLoading={true} isUploading={false} enableUpload={false} rowData={[]} handleDownloadSourceData={handleDownloadSourceData} 
-        handleUploadSourceData={handleUploadSourceData} />
-      </div>
-    );
-  } else if (listSourceDataViewModel.status === "success") {
-    return (
-      <div>
-        <SourceDataAGGrid isLoading={false} isUploading={false} enableUpload={false} rowData={listSourceDataViewModel.sourceData} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
-      </div>
-    );
-  }
+  const isSourceDataLoading = listSourceDataViewModel.status === "request";
+  const sourceData = isLoading ? [] : listSourceDataViewModel.sourceData;
+  return (
+      <SourceDataAGGrid isLoading={isSourceDataLoading} isUploading={false} enableUpload={false} rowData={sourceData} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
+  );
 }

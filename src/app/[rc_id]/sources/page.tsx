@@ -39,13 +39,13 @@ export default async function ListSourceDataForResearchContextServerPage(
   await controller.execute(controllerParameters);
 
   return (
-    <div className="flex flex-col gap-4">
+    <>
       <Suspense fallback={<div>AG GRID SKELETON...</div>}>
         <ListSourceDataForResearchContextClientPage
           viewModel={response.value}
           researchContextID={researchContextID}
         />
       </Suspense>
-    </div>
+    </>
   );
 }

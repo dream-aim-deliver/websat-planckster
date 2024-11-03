@@ -37,27 +37,8 @@ export default async function ListConversationsServerPage({ params }: { params: 
   await controller.execute(controllerParameters);
 
   return (
-    <div id="page-layout" className="flex flex-col items-center justify-between gap-4 p-4">
-      <div id="header" className="flex w-full flex-row items-center justify-between">
-        <div id="title" className="text-2xl font-bold">
-          Satellite Data Augmentation{" "}
-        </div>
-        <div id="menu" className="flex flex-row items-center justify-between gap-4">
-          <div id="new-conversation" className="flex flex-row items-center justify-between gap-4">
-            <button id="new-conversation-button" className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
-              Home
-            </button>
-          </div>
-          <div id="upload" className="flex flex-row items-center justify-between gap-4">
-            <button id="upload-button" className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700">
-              Docs
-            </button>
-          </div>
-        </div>
-      </div>
       <Suspense fallback={<div>AG GRID SKELETON...</div>}>
         <ListConversationsClientPage viewModel={response.value} researchContextID={researchContextID}/>
       </Suspense>
-    </div>
   );
 }
