@@ -36,7 +36,7 @@ export default async function ListSourceDataForClientServerPage() {
   await controller.execute(controllerParameters);
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className="flex flex-col gap-4 w-full grow">
       <Suspense fallback={<div>AG GRID SKELETON...</div>}>
         <ListSourceDataForClientClientPage viewModel={response.value} clientID={clientID} />
       </Suspense>

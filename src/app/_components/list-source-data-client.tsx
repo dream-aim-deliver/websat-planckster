@@ -127,19 +127,20 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
 
   const isUploading = uploadMutation.isPending;
 
+  // TODO: decompose without if statements
   if (listSourceDataViewModel.status === "request") {
     return (
-      <div>
+      <>
         <SourceDataAGGrid isLoading={true} isUploading={false} enableUpload={true} rowData={[]} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
-      </div>
+      </>
     );
   } else if (listSourceDataViewModel.status === "success") {
     return (
-      <div>
+      <>
         <SourceDataAGGrid isLoading={false} enableUpload={true} isUploading={isUploading} rowData={listSourceDataViewModel.sourceData} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
 
         <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileChange} />
-      </div>
+      </>
     );
   }
 }
