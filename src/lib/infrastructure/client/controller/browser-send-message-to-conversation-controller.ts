@@ -8,7 +8,7 @@ import { USECASE_FACTORY } from "../config/ioc/client-ioc-symbols";
 
 export interface TBrowserSendMessageToConversationControllerParameters {
   response: Signal<TSendMessageToConversationViewModel>;
-  researchContextID: number;
+  researchContextExternalID: string;
   conversationID: number;
   messageToSendContent: string;
   messageToSendTimestamp: string;
@@ -17,11 +17,11 @@ export interface TBrowserSendMessageToConversationControllerParameters {
 @injectable()
 export default class BrowserSendMessageToConversationController {
   async execute(controllerParameters: TBrowserSendMessageToConversationControllerParameters): Promise<void> {
-    const { response, researchContextID, conversationID, messageToSendContent, messageToSendTimestamp } = controllerParameters;
+    const { response, researchContextExternalID: researchContextID, conversationID, messageToSendContent, messageToSendTimestamp } = controllerParameters;
 
     const request: TSendMessageToConversationRequest = {
       status: "request",
-      researchContextID: researchContextID,
+      researchContextExternalID: researchContextID,
       conversationID: conversationID,
       messageToSendContent: messageToSendContent,
       messageToSendTimestamp: messageToSendTimestamp,

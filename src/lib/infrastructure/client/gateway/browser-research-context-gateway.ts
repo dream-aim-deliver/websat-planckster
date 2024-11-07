@@ -22,10 +22,11 @@ export default class BrowserResearchContextGateway implements ResearchContextGat
     throw new Error("Method not implemented.");
   }
 
-  async create(researchContextName: string, researchContextDescription: string, sourceData: RemoteFile[]): Promise<TCreateResearchContextDTO> {
+  async create(researchContextExternalID: string, researchContextTitle: string, researchContextDescription: string, sourceData: RemoteFile[]): Promise<TCreateResearchContextDTO> {
     try {
       const dto = this.api.gateways.researchContext.create.mutate({
-        title: researchContextName,
+        externalID: researchContextExternalID,
+        title: researchContextTitle,
         description: researchContextDescription,
         sourceData: sourceData,
       });

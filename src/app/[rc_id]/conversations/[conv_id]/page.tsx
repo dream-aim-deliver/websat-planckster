@@ -10,12 +10,10 @@ import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { CONTROLLERS, GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
-import {type TListMessagesForConversationControllerParameters} from "~/lib/infrastructure/server/controller/list-messages-for-conversation-controller";
+import { type TListMessagesForConversationControllerParameters } from "~/lib/infrastructure/server/controller/list-messages-for-conversation-controller";
 import type ListMessagesForConversationController from "~/lib/infrastructure/server/controller/list-messages-for-conversation-controller";
 
-
 export default async function ChatServerPage({ params }: { params: { rc_id: string; conv_id: string } }) {
-
   // Auth check
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
   const sessionDTO = await authGateway.getSession();
@@ -27,19 +25,20 @@ export default async function ChatServerPage({ params }: { params: { rc_id: stri
   const researchContextID = parseInt(params.rc_id);
   const conversationID = parseInt(params.conv_id);
 
-
   const researchContextGateway = serverContainer.get<ResearchContextGatewayOutputPort>(GATEWAYS.KERNEL_RESEARCH_CONTEXT_GATEWAY);
 
-  const listResearchContextsDTO = await researchContextGateway.list()
+  const listResearchContextsDTO = await researchContextGateway.list();
   if (!listResearchContextsDTO.success) {
     throw new Error(`Server error: Could not list research contexts. Please try again later.`);
   }
 
   const researchContextsDTOs = listResearchContextsDTO.data;
-  const researchContextIDs = researchContextsDTOs.map((rcDTO) => rcDTO.status == "active" ? rcDTO.id : -1);
-  if (!researchContextIDs.includes(researchContextID)) {
+  const researchContextDTO_result = researchContextsDTOs.find((rcDTO) => rcDTO.id == researchContextID);
+  if (!researchContextDTO_result || researchContextDTO_result.status != "active") {
     notFound();
   }
+
+  const researchContextExternalID = researchContextDTO_result.externalID;
 
   const conversationGateway = serverContainer.get<ConversationGatewayOutputPort>(GATEWAYS.KERNEL_CONVERSATION_GATEWAY);
 
@@ -53,7 +52,6 @@ export default async function ChatServerPage({ params }: { params: { rc_id: stri
   if (!conversationIDs.includes(conversationID)) {
     notFound();
   }
-
 
   // Initialize the messages to show on page load
   const listMessagesController = serverContainer.get<ListMessagesForConversationController>(CONTROLLERS.LIST_MESSAGES_CONTROLLER);
@@ -74,10 +72,9 @@ export default async function ChatServerPage({ params }: { params: { rc_id: stri
 
   await listMessagesController.execute(controllerParameters);
 
-
   return (
-    <Suspense fallback={<ChatClientPageSkeleton/>}>
-        <ChatClientPage listMessagesViewModel={response.value} researchContextID={researchContextID} conversationID={conversationID} />
+    <Suspense fallback={<ChatClientPageSkeleton />}>
+      <ChatClientPage listMessagesViewModel={response.value} researchContextExternalID={researchContextExternalID} researchContextID={researchContextID} conversationID={conversationID} />
     </Suspense>
   );
 }

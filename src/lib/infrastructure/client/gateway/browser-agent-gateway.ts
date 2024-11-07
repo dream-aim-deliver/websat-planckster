@@ -18,14 +18,14 @@ export default class BrowserAgentGateway implements AgentGatewayOutputPort<TOpen
     this.logger = this.loggerFactory("AgentGateway");
   }
 
-  async createAgent(researchContextID: number): Promise<TCreateAgentDTO> {
+  async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string): Promise<TCreateAgentDTO> {
     throw new Error("Method not implemented.");
   }
 
-  async prepareMessageContext(researchContextID: number, conversationID: number): Promise<{ data: { assistantID: string; messagesToSend: TMessage[] }; success: true } | { data: { message: string; operation: string }; success: false }> {
+  async prepareMessageContext(researchContextExternalID: string, conversationID: number): Promise<{ data: { assistantID: string; messagesToSend: TMessage[] }; success: true } | { data: { message: string; operation: string }; success: false }> {
     try {
       const dto = await this.api.gateways.agent.prepareMessageContext.query({
-        researchContextID,
+        researchContextExternalID,
         conversationID,
       });
 

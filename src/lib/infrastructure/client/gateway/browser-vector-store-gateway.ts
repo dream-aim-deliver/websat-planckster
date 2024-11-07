@@ -5,13 +5,13 @@ import VectorStoreOutputPort from "~/lib/core/ports/secondary/vector-store-outpu
 
 @injectable()
 export default class BrowserVectorStoreGateway  implements VectorStoreOutputPort {
-    createVectorStore(research_context_id: number, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
+    createVectorStore(files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
         throw new Error("Method not implemented.");
     }
-    getVectorStore(research_context_id: number): Promise<TGetVectorStoreDTO> {
+    getVectorStore(researchContextExternalID: string): Promise<TGetVectorStoreDTO> {
         throw new Error("Method not implemented.");
     }
-    deleteVectorStore(research_context_id: number): Promise<TDeleteVectorStoreDTO> {
+    deleteVectorStore(researchContextExternalID: string): Promise<TDeleteVectorStoreDTO> {
         throw new Error("Method not implemented.");
     }
 

@@ -25,7 +25,7 @@ export function ChatClientPageSkeleton() {
   );
 }
 
-export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForConversationViewModel; researchContextID: number; conversationID: number }) {
+export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForConversationViewModel; researchContextExternalID: string; researchContextID: number; conversationID: number }) {
   const [listMessagesViewModel, setListMessagesViewModel] = useState<TListMessagesForConversationViewModel>(props.listMessagesViewModel);
 
   const [sendMessageViewModel, setSendMessaageViewModel] = useState<TSendMessageToConversationViewModel>({
@@ -88,7 +88,7 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
 
       const controllerParameters: TBrowserSendMessageToConversationControllerParameters = {
         response: response,
-        researchContextID: props.researchContextID,
+        researchContextExternalID: props.researchContextExternalID,
         conversationID: props.conversationID,
         messageToSendContent: message,
         messageToSendTimestamp: `${Math.floor(Date.now() / 1000)}`,
