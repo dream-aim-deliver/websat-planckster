@@ -19,7 +19,24 @@ export default class BrowserAgentGateway implements AgentGatewayOutputPort<TOpen
   }
 
   async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string): Promise<TCreateAgentDTO> {
-    throw new Error("Method not implemented.");
+    try {
+      const dto = this.api.gateways.agent.create.mutate({
+        researchContextTitle,
+        researchContextDescription,
+        vectorStoreID,
+      });
+      return dto;
+    } catch (error) {
+      this.logger.error({ error }, "Could not invoke the server side feature to create agent");
+
+      return {
+        success: false,
+        data: {
+          operation: "browser#agent#create",
+          message: "Could not invoke the server side feature to create agent",
+        },
+      };
+    }
   }
 
   async prepareMessageContext(researchContextExternalID: string, conversationID: number): Promise<{ data: { assistantID: string; messagesToSend: TMessage[] }; success: true } | { data: { message: string; operation: string }; success: false }> {
