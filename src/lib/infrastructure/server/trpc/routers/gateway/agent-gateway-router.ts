@@ -5,9 +5,39 @@ import serverContainer from "../../../config/ioc/server-container";
 import { type Logger } from "pino";
 import { GATEWAYS, UTILS } from "../../../config/ioc/server-ioc-symbols";
 import type OpenAIAgentGateway from "../../../gateway/openai-agent-gateway";
-import { type TSendMessageDTO } from "~/lib/core/dto/agent-dto";
+import { type TCreateAgentDTO, type TSendMessageDTO } from "~/lib/core/dto/agent-dto";
 
 export const agentGatewayRouter = createTRPCRouter({
+  create: protectedProcedure
+    .input(
+      z.object({
+        researchContextTitle: z.string(),
+        researchContextDescription: z.string(),
+        vectorStoreID: z.string(),
+      }),
+    )
+    .mutation(async ({ input }): Promise<TCreateAgentDTO> => {
+      const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
+      const logger = loggerFactory("CreateAgent TRPC Router");
+
+      try {
+        const agentGateway = serverContainer.get<OpenAIAgentGateway>(GATEWAYS.AGENT_GATEWAY);
+
+        const dto = await agentGateway.createAgent(input.researchContextTitle, input.researchContextDescription, input.vectorStoreID);
+
+        return dto;
+      } catch (error) {
+        logger.error({ error }, "Could not invoke the server side feature to create agent");
+        return {
+          success: false,
+          data: {
+            operation: "agentGatewayRouter#create",
+            message: "Could not invoke the server side feature to create agent",
+          },
+        };
+      }
+    }),
+
   prepareMessageContext: protectedProcedure
     .input(
       z.object({
@@ -15,7 +45,7 @@ export const agentGatewayRouter = createTRPCRouter({
         conversationID: z.number(),
       }),
     )
-    .query(async ({ input }): Promise<{ data: { assistantID: string, messagesToSend: TMessage[] }; success: true } | { data: { message: string; operation: string }; success: false }> => {
+    .query(async ({ input }): Promise<{ data: { assistantID: string; messagesToSend: TMessage[] }; success: true } | { data: { message: string; operation: string }; success: false }> => {
       const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
       const logger = loggerFactory("PrepareMessageContext TRPC Router");
 
@@ -40,10 +70,9 @@ export const agentGatewayRouter = createTRPCRouter({
   sendMessage: protectedProcedure
     .input(
       z.object({
-        context:
-          z.object({
-            assistantID: z.string(),
-            messagesToSend: z.array(MessageSchema),
+        context: z.object({
+          assistantID: z.string(),
+          messagesToSend: z.array(MessageSchema),
         }),
         message: MessageSchema,
       }),

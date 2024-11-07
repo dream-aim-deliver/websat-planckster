@@ -9,6 +9,7 @@ import { agentGatewayRouter } from "./routers/gateway/agent-gateway-router";
 import { conversationGatewayRouter } from "./routers/gateway/conversation-gateway-router";
 import { researchContextGatewayRouter } from "./routers/gateway/research-context-gateway-router";
 import { sourceDataGatewayRouter } from "./routers/gateway/source-data-gateway-router";
+import { vectorStoreGatewayRouter } from "./routers/gateway/vector-store-gateway-router";
 
 import { kernelPlancksterHealthCheckRouter } from "./routers/kernel/health-check";
 
@@ -29,6 +30,7 @@ export const appRouter = createTRPCRouter({
     conversation: conversationGatewayRouter,
     researchContext: researchContextGatewayRouter,
     sourceData: sourceDataGatewayRouter,
+    vectorStore: vectorStoreGatewayRouter,
   },
   kernel: {
     healthCheck: kernelPlancksterHealthCheckRouter,

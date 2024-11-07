@@ -8,6 +8,7 @@ import OpenAI from "openai";
 import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import { generateOpenAIVectorStoreName } from "../config/openai/openai-utils";
+import fs from "fs";
 
 @injectable()
 export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
@@ -21,26 +22,110 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
     this.logger = loggerFactory("OpenAIVectorStoreGateway");
   }
 
-  async createVectorStore(files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
-    // verify files have provider:openai
-    const filesWithOpenAIProvider = files.filter((file) => file.provider === "openai");
-    if (filesWithOpenAIProvider.length === 0) {
-      this.logger.error({ files }, "No files with provider:openai found");
+  async uploadFilesToOpenAI(files: RemoteFile[]): Promise<
+    | {
+        status: "success";
+        data: RemoteFile[];
+      }
+    | {
+        status: "error";
+        message: string;
+        operation: string;
+      }
+  > {
+    try {
+      this.logger.info({ files }, "Uploading files to OpenAI");
+      const uploadedFiles: RemoteFile[] = [];
+
+      for (const file of files) {
+        // 1. Download file from Kernel
+        const downloadDTO = await this.KernelSourceDataGateway.download(file);
+
+        if (!downloadDTO.success) {
+          this.logger.error({ file }, "Failed to download file from Kernel");
+          return {
+            status: "error",
+            message: "Failed to download file from Kernel",
+            operation: "openai:upload-files",
+          };
+        }
+
+        const localFile = downloadDTO.data;
+
+        // 2. Upload file to OpenAI
+        const openaiFile = await this.openai.files.create({
+          file: fs.createReadStream(localFile.relativePath),
+          purpose: "assistants",
+        });
+
+        const remoteFile: RemoteFile = {
+          id: openaiFile.id,
+          type: "remote",
+          provider: "openai",
+          name: file.name,
+          relativePath: file.relativePath,
+          createdAt: `${new Date().toISOString()}`,
+        };
+
+        uploadedFiles.push(remoteFile);
+        fs.unlinkSync(localFile.relativePath);
+      }
+
+      // 3. Return uploaded files
       return {
-        success: false,
-        data: {
-          message: "No files with provider:openai found",
-          operation: "openai:create-vector-store",
-        },
+        status: "success",
+        data: uploadedFiles,
+      };
+    } catch (error) {
+      this.logger.error({ error }, "Failed to upload files to OpenAI");
+      return {
+        status: "error",
+        message: "Failed to upload files to OpenAI",
+        operation: "openai:upload-files",
       };
     }
+  }
 
-    const vectorStoreName = generateOpenAIVectorStoreName();
+  async createVectorStore(files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
     try {
+      // 1. Upload files to OpenAI
+      const uploadFilesDTO = await this.uploadFilesToOpenAI(files);
+
+      if (uploadFilesDTO.status === "error") {
+        this.logger.error({ uploadFilesDTO }, "Failed to upload files to OpenAI");
+        return {
+          success: false,
+          data: {
+            message: uploadFilesDTO.message,
+            operation: uploadFilesDTO.operation,
+          },
+        };
+      }
+
+      const openaiFiles = uploadFilesDTO.data;
+
+      this.logger.info({ openaiFiles }, "Uploaded files to OpenAI");
+
+      // 2. Verify that files have provider == "openai"
+      const filesWithOpenAIProvider = openaiFiles.filter((file) => file.provider === "openai");
+      if (filesWithOpenAIProvider.length === 0) {
+        this.logger.error({ files }, "No files with provider:openai found");
+        return {
+          success: false,
+          data: {
+            message: "No files with provider:openai found",
+            operation: "openai:create-vector-store",
+          },
+        };
+      }
+
+      // 3. Create vector store with OpenAI
+      const vectorStoreName = generateOpenAIVectorStoreName();
       const openaiVectorStore = await this.openai.beta.vectorStores.create({
         name: vectorStoreName,
         file_ids: filesWithOpenAIProvider.map((file) => file.id),
       });
+
       const openaiVectorStoreID = openaiVectorStore.id;
       return {
         success: true,
@@ -50,7 +135,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
         },
       };
     } catch (error) {
-      this.logger.error({ error }, `Failed to create vector store with name: ${vectorStoreName}`);
+      this.logger.error({ error }, `Failed to create vector store`);
       return {
         success: false,
         data: {
