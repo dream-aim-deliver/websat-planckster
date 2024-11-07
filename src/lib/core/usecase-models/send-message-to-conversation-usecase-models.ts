@@ -3,7 +3,7 @@ import { MessageSchema } from "../entity/kernel-models";
 
 export const SendMessageToConversationRequestSchema = z.object({
   status: z.literal("request"),
-  researchContextID: z.number(),
+  researchContextExternalID: z.string(),
   conversationID: z.number(),
   messageToSendContent: z.string(),
   messageToSendTimestamp: z.string(),

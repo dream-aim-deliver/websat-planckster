@@ -11,6 +11,7 @@ export const researchContextGatewayRouter = createTRPCRouter({
   create: protectedProcedure
     .input(
       z.object({
+        externalID: z.string(),
         title: z.string(),
         description: z.string(),
         sourceData: z.array(RemoteFileSchema),
@@ -22,7 +23,7 @@ export const researchContextGatewayRouter = createTRPCRouter({
 
       try {
         const gateway = serverContainer.get<KernelResearchContextGateway>(GATEWAYS.RESEARCH_CONTEXT_GATEWAY);
-        const dto = await gateway.create(input.title, input.description, input.sourceData);
+        const dto = await gateway.create(input.externalID, input.title, input.description, input.sourceData);
         return dto;
       } catch (error) {
         logger.error({ error }, "Could not invoke the server side feature to create research context");

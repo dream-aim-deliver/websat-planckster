@@ -11,7 +11,7 @@ export const agentGatewayRouter = createTRPCRouter({
   prepareMessageContext: protectedProcedure
     .input(
       z.object({
-        researchContextID: z.number(),
+        researchContextExternalID: z.string(),
         conversationID: z.number(),
       }),
     )
@@ -22,7 +22,7 @@ export const agentGatewayRouter = createTRPCRouter({
       try {
         const agentGateway = serverContainer.get<OpenAIAgentGateway>(GATEWAYS.AGENT_GATEWAY);
 
-        const dto = await agentGateway.prepareMessageContext(input.researchContextID, input.conversationID);
+        const dto = await agentGateway.prepareMessageContext(input.researchContextExternalID, input.conversationID);
 
         return dto;
       } catch (error) {

@@ -1,4 +1,5 @@
 import type { File } from "~/lib/core/entity/file";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Generates a filename for OpenAI based on the client ID and file information.
@@ -9,10 +10,10 @@ import type { File } from "~/lib/core/entity/file";
  * @returns The generated OpenAI filename.
  */
 export const generateOpenAIFilename = (clientID: string, file: File): string => {
-    const formattedRelativePath = file.relativePath.replace(/\//g, "_");
-    const separator = "<>";
-    return `${clientID}${separator}${formattedRelativePath}${separator}${file.name}`;
-}
+  const formattedRelativePath = file.relativePath.replace(/\//g, "_");
+  const separator = "<>";
+  return `${clientID}${separator}${formattedRelativePath}${separator}${file.name}`;
+};
 
 /**
  * Generates a local filename object from an OpenAI filename.
@@ -22,42 +23,31 @@ export const generateOpenAIFilename = (clientID: string, file: File): string => 
  * @returns An object containing the client_id, path, and name extracted from the OpenAI filename.
  * @throws Error if the OpenAI filename is invalid.
  */
-export const generateSystemFilename = (openAIFilename: string): { client_id: string, relativePath: string, name: string } => {
-    const separator = "<>";
-    const parts = openAIFilename.split(separator);
-    if (parts.length !== 3) {
-        throw new Error(`Invalid OpenAI filename: ${openAIFilename}`);
-    }
-    const client_id = parts[0];
-    const relative_path = parts[1];
-    const name = parts[2];
-    if (!client_id) {
-        throw new Error(`Invalid OpenAI filename: ${openAIFilename}. Missing client_id.`);
-    }
-    if (!relative_path) {
-        throw new Error(`Invalid OpenAI filename: ${openAIFilename}. Missing relative path.`);
-    }
-    if (!name) {
-        throw new Error(`Invalid OpenAI filename: ${openAIFilename}. Missing name.`);
-    }
-    const formattedPath = relative_path.replace(/_/g, "/");
-    return {
-        client_id: client_id,
-        relativePath: formattedPath,
-        name: name,
-    }
-}
-
-/**
- * Generates a vector store name based on the client ID and research context ID.
- * The format is: client_{client_id}_research_context_{research_context_id}.
- * @param client_id 
- * @param research_context_id 
- * @returns 
- */
-export const generateVectorStoreName = (client_id: number, research_context_id: number): string => {
-    return `client_${client_id}_research_context_${research_context_id}`;
-}
+export const generateSystemFilename = (openAIFilename: string): { client_id: string; relativePath: string; name: string } => {
+  const separator = "<>";
+  const parts = openAIFilename.split(separator);
+  if (parts.length !== 3) {
+    throw new Error(`Invalid OpenAI filename: ${openAIFilename}`);
+  }
+  const client_id = parts[0];
+  const relative_path = parts[1];
+  const name = parts[2];
+  if (!client_id) {
+    throw new Error(`Invalid OpenAI filename: ${openAIFilename}. Missing client_id.`);
+  }
+  if (!relative_path) {
+    throw new Error(`Invalid OpenAI filename: ${openAIFilename}. Missing relative path.`);
+  }
+  if (!name) {
+    throw new Error(`Invalid OpenAI filename: ${openAIFilename}. Missing name.`);
+  }
+  const formattedPath = relative_path.replace(/_/g, "/");
+  return {
+    client_id: client_id,
+    relativePath: formattedPath,
+    name: name,
+  };
+};
 
 /**
  * Extracts the client ID and research context ID from a vector store name.
@@ -66,34 +56,22 @@ export const generateVectorStoreName = (client_id: number, research_context_id: 
  * @returns An object containing the client_id and research_context_id extracted from the vector store name.
  * @throws Error if the vector store name is invalid.
  */
-export const getClientIDAndResearchContextIDFromVectorStoreName = (vector_store_name: string): { client_id: number, research_context_id: number } => {
-    const regex = /client_(\d+)_research_context_(\d+)/;
-    const match = vector_store_name.match(regex);
-    if (!match) {
-        throw new Error(`Failed to extract client_id and research_context_id from vector_store_name: ${vector_store_name}`);
-    }
-    const clientID = match[1];
-    const researchContextID = match[2];
-    if(!clientID || !researchContextID) {
-        throw new Error(`Failed to extract client_id and research_context_id from vector_store_name: ${vector_store_name}`);
-    }
-    return {
-        client_id: parseInt(clientID),
-        research_context_id: parseInt(researchContextID),
-    }
-}
-
-
-/**
- * Generates an agent name based on the client ID and research context ID.
- * The format is: client_{client_id}_research_context_{research_context_id}.
- * @param client_id 
- * @param research_context_id 
- * @returns 
- */
-export const generateAgentName = (client_id: number, research_context_id: number): string => {
-    return `client_${client_id}_research_context_${research_context_id}`;
-}
+export const getClientIDAndResearchContextIDFromVectorStoreName = (vector_store_name: string): { client_id: number; research_context_id: number } => {
+  const regex = /client_(\d+)_research_context_(\d+)/;
+  const match = vector_store_name.match(regex);
+  if (!match) {
+    throw new Error(`Failed to extract client_id and research_context_id from vector_store_name: ${vector_store_name}`);
+  }
+  const clientID = match[1];
+  const researchContextID = match[2];
+  if (!clientID || !researchContextID) {
+    throw new Error(`Failed to extract client_id and research_context_id from vector_store_name: ${vector_store_name}`);
+  }
+  return {
+    client_id: parseInt(clientID),
+    research_context_id: parseInt(researchContextID),
+  };
+};
 
 /**
  * Extracts the client ID and research context ID from an agent name.
@@ -102,22 +80,22 @@ export const generateAgentName = (client_id: number, research_context_id: number
  * @returns { client_id, research_context_id } - An object containing the client_id and research_context_id extracted from the agent name.
  * @throws Error if the agent name is invalid.
  */
-export const getClientIDAndResearchContextIDFromAgentName = (agent_name: string): { client_id: number, research_context_id: number } => {
-    const regex = /client_(\d+)_research_context_(\d+)/;
-    const match = agent_name.match(regex);
-    if (!match) {
-        throw new Error(`Failed to extract client_id and research_context_id from agent_name: ${agent_name}`);
-    }
-    const clientID = match[1];
-    const researchContextID = match[2];
-    if(!clientID || !researchContextID) {
-        throw new Error(`Failed to extract client_id and research_context_id from agent_name: ${agent_name}`);
-    }
-    return {
-        client_id: parseInt(clientID),
-        research_context_id: parseInt(researchContextID),
-    }
-}
+export const getClientIDAndResearchContextIDFromAgentName = (agent_name: string): { client_id: number; research_context_id: number } => {
+  const regex = /client_(\d+)_research_context_(\d+)/;
+  const match = agent_name.match(regex);
+  if (!match) {
+    throw new Error(`Failed to extract client_id and research_context_id from agent_name: ${agent_name}`);
+  }
+  const clientID = match[1];
+  const researchContextID = match[2];
+  if (!clientID || !researchContextID) {
+    throw new Error(`Failed to extract client_id and research_context_id from agent_name: ${agent_name}`);
+  }
+  return {
+    client_id: parseInt(clientID),
+    research_context_id: parseInt(researchContextID),
+  };
+};
 
 /**
  * Converts Uint8Array to a base64 string
@@ -125,12 +103,46 @@ export const getClientIDAndResearchContextIDFromAgentName = (agent_name: string)
  * @returns { string } - The base64 string
  */
 export const uint8ArrayToBase64 = (uint8Array: Uint8Array): string => {
-    // Convert the Uint8Array to a binary string
-    let binaryString = '';
-    uint8Array.forEach((byte) => {
-      binaryString += String.fromCharCode(byte);
-    });
-  
-    // Use btoa to convert the binary string to base64
-    return btoa(binaryString);
-  }
+  // Convert the Uint8Array to a binary string
+  let binaryString = "";
+  uint8Array.forEach((byte) => {
+    binaryString += String.fromCharCode(byte);
+  });
+
+  // Use btoa to convert the binary string to base64
+  return btoa(binaryString);
+};
+
+/**
+ * Generates a Research Context External ID from an OpenAI Assistant ID.
+ * @param openAIAssistantID
+ * @returns
+ */
+export const generateRCExternalIDFromOpenAIAssistantID = (openAIAssistantID: string): string => {
+  return `websat-openai-${openAIAssistantID}`;
+};
+
+/**
+ * Generates an OpenAI Assistant ID from a Research Context External ID.
+ * @param researchContextExternalID
+ * @returns
+ */
+export const generateOpenAIAssistantIDFromRCExternalID = (researchContextExternalID: string): string => {
+  return researchContextExternalID.replace("websat-openai-", "");
+};
+
+/**
+ *  Generates a unique OpenAI Assistant name, using a UUID.
+ * @returns { string } - The generated OpenAI Assistant name.
+ */
+export const generateOpenAIAssistantName = (): string => {
+  return `websat-${uuidv4()}`;
+};
+
+/**
+ * Generates a unique OpenAI Vector Store name, using a UUID.
+ * @returns { string } - The generated OpenAI Vector Store name.
+ */
+export const generateOpenAIVectorStoreName = (): string => {
+  return `websat-${uuidv4()}`;
+};

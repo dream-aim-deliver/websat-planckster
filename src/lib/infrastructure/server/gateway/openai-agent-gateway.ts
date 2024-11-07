@@ -7,7 +7,7 @@ import { TMessage, TMessageContent } from "~/lib/core/entity/kernel-models";
 import { Logger } from "pino";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import type { TKernelSDK } from "../config/kernel/kernel-sdk";
-import { generateAgentName, uint8ArrayToBase64 } from "../config/openai/openai-utils";
+import { generateOpenAIAssistantIDFromRCExternalID, generateOpenAIAssistantName, generateRCExternalIDFromOpenAIAssistantID, uint8ArrayToBase64 } from "../config/openai/openai-utils";
 import { TOpenAIMessageContext } from "../../common/dto/openai-agent-gateway-dto";
 import { ListMessagesViewModel_Input, MessageBase_Input } from "@maany_shr/kernel-planckster-sdk-ts";
 import { kernelMessageToWebsatMessage } from "../config/kernel/kernel-utils";
@@ -26,27 +26,15 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
   ) {
     this.logger = loggerFactory("OpenAIAgentGateway");
   }
-  async createAgent(researchContextID: number, researchContextName: string, researchContextDesciption: string, vectorStoreID: string): Promise<TCreateAgentDTO> {
-    const kpCredentialsDTO = await this.AuthGateway.extractKPCredentials();
-    if (!kpCredentialsDTO.success) {
-      this.logger.error({ kpCredentialsDTO }, "Failed to extract KP credentials from session");
-      return {
-        success: false,
-        data: {
-          message: "Failed to extract KP credentials from session",
-          operation: "openai:create-agent",
-        },
-      };
-    }
-    const clientID = kpCredentialsDTO.data.clientID;
-    const agentName = generateAgentName(clientID, researchContextID);
-    const instructions = `You are an expert data analyst specialized in ${researchContextName}. Your research context can be best described by ${researchContextDesciption}. You will help me and my team explore and analize some datasets that we have augmented, by combining data from satellites, twitter, and telegram, regarding the occurrence of disaster events related to ${researchContextName} at different locations. You have access to a code interpreter to generate insights from the data, and a file search tool to find relevant datasets.`;
+  async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string): Promise<TCreateAgentDTO> {
+    const instructions = `You are an expert data analyst specialized in ${researchContextTitle}. Your research context can be best described by ${researchContextDescription}. You will help me and my team explore and analize some datasets that we have augmented, by combining data from satellites, twitter, and telegram, regarding the occurrence of disaster events related to ${researchContextTitle} at different locations. You have access to a code interpreter to generate insights from the data, and a file search tool to find relevant datasets.`;
     const model = "gpt-4o";
+    const agentName = generateOpenAIAssistantName();
     try {
       const openaiAgent = await this.openai.beta.assistants.create({
         model: model,
         name: agentName,
-        description: researchContextDesciption,
+        description: researchContextDescription,
         instructions: instructions,
         tools: [{ type: "code_interpreter" }, { type: "file_search" }],
         tool_resources: {
@@ -55,15 +43,15 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
           },
         },
       });
-      const openaiAgentID = openaiAgent.id;
+      const researchContextExternalID = generateRCExternalIDFromOpenAIAssistantID(openaiAgent.id);
+
       this.logger.info({ openaiAgent }, "Agent created");
       return {
         success: true,
         data: {
-          id: openaiAgentID,
+          externalID: researchContextExternalID,
           provider: "openai",
           model: model,
-          researchContextID: researchContextID.toString(),
           vectorStoreID: vectorStoreID,
           tools: ["code_interpreter", "file_search"],
           resources: {
@@ -84,10 +72,7 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
     }
   }
 
-  async prepareMessageContext(
-    researchContextID: number,
-    conversationID: number,
-  ): Promise<{ data: { assistantID: string; messagesToSend: TMessage[] }; success: true } | { data: { message: string; operation: string }; success: false }> {
+  async prepareMessageContext(researchContextExternalID: string, conversationID: number): Promise<{ data: { assistantID: string; messagesToSend: TMessage[] }; success: true } | { data: { message: string; operation: string }; success: false }> {
     try {
       const kpCredentialsDTO = await this.AuthGateway.extractKPCredentials();
       if (!kpCredentialsDTO.success) {
@@ -101,15 +86,12 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
         };
       }
 
-      const clientID = kpCredentialsDTO.data.clientID;
-
-      // 1. Get OpenAI Agent ID
-      const openaiAgentName = generateAgentName(clientID, researchContextID);
-      const openaiAgents = (await this.openai.beta.assistants.list()).data;
-      const openaiAgent = openaiAgents.find((agent) => agent.name === openaiAgentName);
+      // 1. Get OpenAI Agent via research context external ID
+      const openaiAssistantID = generateOpenAIAssistantIDFromRCExternalID(researchContextExternalID);
+      const openaiAgent = await this.openai.beta.assistants.retrieve(openaiAssistantID);
 
       if (!openaiAgent) {
-        this.logger.error({ openaiAgentName }, "Agent not found");
+        this.logger.error({ researchContextExternalID }, "Agent not found");
         return {
           success: false,
           data: {
@@ -228,8 +210,8 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
           }
         }
       } else {
-          // Add text to conversation file content
-          conversationFileContent.push(`This conversation has no previous messages, please just ignore this file.`);
+        // Add text to conversation file content
+        conversationFileContent.push(`This conversation has no previous messages, please just ignore this file.`);
       }
 
       // 3. Save the message context file to OpenAI

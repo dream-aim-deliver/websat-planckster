@@ -1,27 +1,24 @@
 import { z } from "zod";
 
 export const ActiveResearchContextSchema = z.object({
-    id: z.number(),
-    title: z.string(),
-    status: z.enum(["active"]),
-    //message: z.string().optional(),
-    description: z.string(),
-    //context: z.string().optional(),
-  });
-  
-export const ProgressingOrErrorResearchContextSchema = z.object({
-    id: z.number(),
-    title: z.string(),
-    status: z.enum(["progressing", "error"]),
-    message: z.string(),
-    description: z.string(),
-    context: z.string().optional(),
+  id: z.number(),
+  title: z.string(),
+  description: z.string(),
+  externalID: z.string(),
+  status: z.enum(["active"]),
 });
-  
-export const ResearchContextSchema = z.discriminatedUnion(
-    "status",
-    [ActiveResearchContextSchema, ProgressingOrErrorResearchContextSchema]
-);
+
+export const ProgressingOrErrorResearchContextSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  description: z.string(),
+  externalID: z.string(),
+  status: z.enum(["progressing", "error"]),
+  message: z.string(),
+  context: z.string().optional(),
+});
+
+export const ResearchContextSchema = z.discriminatedUnion("status", [ActiveResearchContextSchema, ProgressingOrErrorResearchContextSchema]);
 export type TResearchContext = z.infer<typeof ResearchContextSchema>;
 
 export const ConversationSchema = z.object({
@@ -44,7 +41,7 @@ export const MessageSchema = z.object({
   sender: z.string(),
   sender_type: z.union([z.literal("user"), z.literal("agent")]),
   created_at: z.string().optional(),
-  thread_id: z.number().optional(),  // TODO: threads (for replies) to be implemented
+  thread_id: z.number().optional(), // TODO: threads (for replies) to be implemented
 });
 
 export type TMessage = z.infer<typeof MessageSchema>;
