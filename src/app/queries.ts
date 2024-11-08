@@ -14,6 +14,11 @@ import type { TListConversationsViewModel } from "~/lib/core/view-models/list-co
 import BrowserListConversationsController, { TBrowserListConversationsControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-conversations-controller";
 import type { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
 import BrowserCreateConversationController, { TBrowserCreateConversationControllerParameters } from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
+import type { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
+import BrowserListResearchContextsController, { TBrowserListResearchContextsControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-research-contexts-controller";
+import { TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
+import type { SelectableSourceDataRow } from "node_modules/@maany_shr/rage-ui-kit/dist/components/table/SelectableSourceDataAGGrid";
+import type BrowserCreateResearchContextController from "~/lib/infrastructure/client/controller/browser-create-research-context-controller";
 
 export const DEFAULT_RETRIES = 3;
 export const DEFAULT_RETRY_DELAY = 3000;
@@ -120,4 +125,56 @@ const createConversationMutation = (setCreateConversationViewModel: Dispatch<Set
   await controller.execute(controllerParameters);
 };
 
-export { querySources, downloadSourceMutation, uploadSourceMutation, queryConversations, createConversationMutation };
+const queryResearchContexts = (setListResearchContextsViewModel: Dispatch<SetStateAction<TListResearchContextsViewModel>>) => async () => {
+  const signalFactory = signalsContainer.get<(initialValue: TListResearchContextsViewModel, update?: (value: TListResearchContextsViewModel) => void) => Signal<TListResearchContextsViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_RESEARCH_CONTEXTS);
+  const response: Signal<TListResearchContextsViewModel> = signalFactory(
+    {
+      status: "request",
+    },
+    setListResearchContextsViewModel,
+  );
+  const controllerParameters: TBrowserListResearchContextsControllerParameters = {
+    response: response,
+  };
+  const controller = clientContainer.get<BrowserListResearchContextsController>(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER);
+  await controller.execute(controllerParameters);
+  return response;
+};
+
+type CreateResearchContextMutationParams = {
+  title: string;
+  description: string;
+  // TODO: fix typing
+  sources: SelectableSourceDataRow[];
+};
+
+const createResearchContextMutation = (setCreateResearchContextViewModel: Dispatch<SetStateAction<TCreateResearchContextViewModel>>) => async (request: CreateResearchContextMutationParams) => {
+  const createResearchContextController = clientContainer.get<BrowserCreateResearchContextController>(CONTROLLERS.CREATE_RESEARCH_CONTEXT_CONTROLLER);
+  const signalFactory = signalsContainer.get<(initialValue: TCreateResearchContextViewModel, update?: (value: TCreateResearchContextViewModel) => void) => Signal<TCreateResearchContextViewModel>>(SIGNAL_FACTORY.CREATE_RESEARCH_CONTEXT);
+  const response = signalFactory(
+    {
+      status: "request",
+      researchContextName: request.title,
+    } as TCreateResearchContextViewModel,
+    setCreateResearchContextViewModel,
+  );
+
+  const controllerParameters = {
+    response: response,
+    title: request.title,
+    description: request.description,
+    sourceDataList: request.sources.map((sourceData) => {
+      return {
+        id: sourceData.id,
+        name: sourceData.name,
+        relativePath: sourceData.relativePath,
+        createdAt: sourceData.createdAt,
+        provider: "kernel#s3",
+        type: "remote" as const,
+      };
+    }),
+  };
+  await createResearchContextController.execute(controllerParameters);
+};
+
+export { querySources, downloadSourceMutation, uploadSourceMutation, queryConversations, createConversationMutation, queryResearchContexts, createResearchContextMutation };
