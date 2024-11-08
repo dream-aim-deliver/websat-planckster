@@ -136,6 +136,16 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
     }
   }, [uploadSourceDataViewModel]);
 
+  useEffect(() => {
+    if (downloadSourceDataViewModel.status === "error") {
+      toast({
+        title: "Error downloading the file",
+        description: downloadSourceDataViewModel.message,
+        variant: "error",
+      });
+    }
+  }, [downloadSourceDataViewModel]);
+
   const isUploading = uploadMutation.isPending;
   const rowData = listSourceDataViewModel.status === "success" ? listSourceDataViewModel.sourceData : [];
   return (
