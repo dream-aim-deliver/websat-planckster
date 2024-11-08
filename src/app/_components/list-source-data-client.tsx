@@ -114,14 +114,12 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
     });
 
     const handleDownloadSourceData = (name: string, relativePath: string) => {
-        console.log("Download source data", relativePath, name);
         downloadMutation.mutate({relativePath: relativePath, sourceDataName: name});
     };
 
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleUploadSourceData = () => {
-        console.log("Upload source data");
         if (fileInputRef.current) {
             fileInputRef.current.click();
         }
