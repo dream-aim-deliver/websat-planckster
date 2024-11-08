@@ -89,25 +89,28 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
     }
   }, [downloadSourceDataViewModel]);
 
-  useEffect(() => {
-    if (listSourceDataViewModel.status === "error") {
-      // The timeout makes sure the toast provider is initialized
-      setTimeout(() => {
-        toast({
-          title: "Error fetching sources",
-          description: listSourceDataViewModel.message,
-          variant: "error",
-        });
-      }, 500);
-    }
-  }, [downloadSourceDataViewModel]);
-
   const isUploading = uploadMutation.isPending;
   const areSourcesLoading = listSourceDataViewModel.status === "request";
   const rowData = listSourceDataViewModel.status === "success" ? listSourceDataViewModel.sourceData : [];
+  const errorOverlayProperties =
+    listSourceDataViewModel.status === "error"
+      ? {
+          errorStatus: true,
+          overlayText: listSourceDataViewModel.message,
+        }
+      : undefined;
+
   return (
     <>
-      <SourceDataAGGrid rowData={rowData} isLoading={areSourcesLoading} isUploading={isUploading} enableUpload={true} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
+      <SourceDataAGGrid
+        rowData={rowData}
+        isLoading={areSourcesLoading}
+        isUploading={isUploading}
+        enableUpload={true}
+        handleDownloadSourceData={handleDownloadSourceData}
+        handleUploadSourceData={handleUploadSourceData}
+        errorOverlayProps={errorOverlayProperties}
+      />
       <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
     </>
   );

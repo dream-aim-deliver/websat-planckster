@@ -45,20 +45,17 @@ export function ListSourceDataForResearchContextClientPage(props: { viewModel: T
     }
   }, [downloadSourceDataViewModel]);
 
-  useEffect(() => {
-    if (listSourceDataViewModel.status === "error") {
-      // The timeout makes sure the toast provider is initialized
-      setTimeout(() => {
-        toast({
-          title: `Error fetching sources for research context #${props.researchContextID}`,
-          description: listSourceDataViewModel.message,
-          variant: "error",
-        });
-      }, 500);
-    }
-  }, [downloadSourceDataViewModel]);
-
   const isSourceDataLoading = listSourceDataViewModel.status === "request";
   const sourceData = listSourceDataViewModel.status === "success" ? listSourceDataViewModel.sourceData : [];
-  return <SourceDataAGGrid isLoading={isSourceDataLoading} isUploading={false} enableUpload={false} rowData={sourceData} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={() => {}} />;
+  const errorOverlayProperties =
+    listSourceDataViewModel.status === "error"
+      ? {
+          errorStatus: true,
+          overlayText: listSourceDataViewModel.message,
+        }
+      : undefined;
+
+  return (
+    <SourceDataAGGrid isLoading={isSourceDataLoading} isUploading={false} enableUpload={false} rowData={sourceData} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={() => {}} errorOverlayProps={errorOverlayProperties} />
+  );
 }
