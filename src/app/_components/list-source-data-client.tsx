@@ -1,8 +1,8 @@
 "use client";
 
-import { SourceDataAGGrid } from "@maany_shr/rage-ui-kit";
+import { SourceDataAGGrid, useToast } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type Signal } from "~/lib/core/entity/signals";
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 import { type TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
@@ -123,6 +123,18 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
       uploadMutation.mutate(file);
     }
   };
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (uploadSourceDataViewModel.status === "error") {
+      toast({
+        title: "Error uploading the file",
+        description: uploadSourceDataViewModel.message,
+        variant: "error",
+      });
+    }
+  }, [uploadSourceDataViewModel]);
 
   const isUploading = uploadMutation.isPending;
   const rowData = listSourceDataViewModel.status === "success" ? listSourceDataViewModel.sourceData : [];
