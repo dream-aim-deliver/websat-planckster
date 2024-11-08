@@ -10,6 +10,10 @@ import { Dispatch, SetStateAction } from "react";
 import BrowserListSourceDataController, { TBrowserListSourceDataControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
 import BrowserFileDownloadController, { TBrowserFileDownloadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-download-controller";
 import BrowserFileUploadController, { TBrowserFileUploadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
+import type { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
+import BrowserListConversationsController, { TBrowserListConversationsControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-conversations-controller";
+import type { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
+import BrowserCreateConversationController, { TBrowserCreateConversationControllerParameters } from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
 
 export const DEFAULT_RETRIES = 3;
 export const DEFAULT_RETRY_DELAY = 3000;
@@ -77,4 +81,43 @@ const uploadSourceMutation = (setUploadSourceDataViewModel: Dispatch<SetStateAct
   return response;
 };
 
-export { querySources, downloadSourceMutation, uploadSourceMutation };
+const queryConversations = (setListConversationsViewModel: Dispatch<SetStateAction<TListConversationsViewModel>>, researchContextID: number) => async () => {
+  const signalFactory = signalsContainer.get<(initialValue: TListConversationsViewModel, update?: (value: TListConversationsViewModel) => void) => Signal<TListConversationsViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_CONVERSATIONS);
+  const response: Signal<TListConversationsViewModel> = signalFactory(
+    {
+      status: "request",
+    },
+    setListConversationsViewModel,
+  );
+  const controllerParameters: TBrowserListConversationsControllerParameters = {
+    response: response,
+    researchContextID: researchContextID,
+  };
+  const controller = clientContainer.get<BrowserListConversationsController>(CONTROLLERS.LIST_CONVERSATIONS_CONTROLLER);
+  await controller.execute(controllerParameters);
+  return response;
+};
+
+type CreateConversationMutationParams = {
+  title: string;
+  researchContextID: number;
+};
+
+const createConversationMutation = (setCreateConversationViewModel: Dispatch<SetStateAction<TCreateConversationViewModel>>) => async (params: CreateConversationMutationParams) => {
+  const signalFactory = signalsContainer.get<(initialValue: TCreateConversationViewModel, update?: (value: TCreateConversationViewModel) => void) => Signal<TCreateConversationViewModel>>(SIGNAL_FACTORY.KERNEL_CREATE_CONVERSATION);
+  const response: Signal<TCreateConversationViewModel> = signalFactory(
+    {
+      status: "request",
+    } as TCreateConversationViewModel,
+    setCreateConversationViewModel,
+  );
+  const controller = clientContainer.get<BrowserCreateConversationController>(CONTROLLERS.CREATE_CONVERSATION_CONTROLLER);
+  const controllerParameters: TBrowserCreateConversationControllerParameters = {
+    response: response,
+    researchContextID: params.researchContextID,
+    title: params.title,
+  };
+  await controller.execute(controllerParameters);
+};
+
+export { querySources, downloadSourceMutation, uploadSourceMutation, queryConversations, createConversationMutation };
