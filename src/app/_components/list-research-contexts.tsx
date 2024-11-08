@@ -28,7 +28,7 @@ export function ListResearchContextsClientPage(props: {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const listResearchContextsQuery = useQuery<Signal<TListResearchContextsViewModel>>({
+  useQuery<Signal<TListResearchContextsViewModel>>({
     queryKey: ["list-research-contexts"],
     queryFn: async () => {
       const signalFactory = signalsContainer.get<(initialValue: TListResearchContextsViewModel, update?: (value: TListResearchContextsViewModel) => void) => Signal<TListResearchContextsViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_RESEARCH_CONTEXTS);
@@ -85,7 +85,7 @@ export function ListResearchContextsClientPage(props: {
   });
 
   let cards: ResearchContextCardProps[] = [];
-  if (listResearchContextsViewModel.status === "success" && listResearchContextsViewModel.status === "success") {
+  if (listResearchContextsViewModel.status === "success") {
     cards = listResearchContextsViewModel.researchContexts.map((researchContext) => {
       return {
         callbacks: {

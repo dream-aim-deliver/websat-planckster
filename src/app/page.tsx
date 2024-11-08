@@ -54,7 +54,6 @@ export default async function ListResearchContextsServerPage() {
   if(listSourceDataForClientResponse.value.status !== "success") {
     switch(listSourceDataForClientResponse.value.status){
       case "error":
-        // return <ErrorPageClientPage error={{message: listSourceDataForClientResponse.value.message, code: 500, digest: "adasd"}} />
         throw new Error(listSourceDataForClientResponse.value.message)
       case "request":
         return <div>Loading...</div>
@@ -63,12 +62,10 @@ export default async function ListResearchContextsServerPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Suspense fallback={<div>AG GRID SKELETON...</div>}>
         <ListResearchContextsClientPage
           viewModel={response.value}
           clientSourceData={listSourceDataForClientResponse.value.sourceData}
         />
-      </Suspense>
     </div>
   );
 }
