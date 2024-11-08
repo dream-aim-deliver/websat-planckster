@@ -53,16 +53,18 @@ export function ListResearchContextsClientPage(props: { viewModel: TListResearch
     });
   }
 
-  if (listResearchContextsViewModel.status === "request") {
-    return <div>Loading...</div>;
-  }
+  let listComponent;
+
   if (cards.length === 0) {
-    return <div>No research contexts found</div>;
+    const isLoading = listResearchContextsViewModel.status === "request";
+    listComponent = <div className="flex w-full grow items-center justify-center">{isLoading ? "Loading..." : "No research contexts found"}</div>;
+  } else {
+    listComponent = <ListResearchContextCard items={cards} />;
   }
 
   return (
     <>
-      <ListResearchContextCard items={cards} />
+      {listComponent}
       <div className="fixed bottom-0 right-0">
         <CreateResearchContextDialog
           clientFiles={props.clientSourceData}
