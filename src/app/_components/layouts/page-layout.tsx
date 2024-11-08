@@ -1,6 +1,5 @@
 "use client"
-import { Header } from "@maany_shr/rage-ui-kit"
-import { SiteFooter } from "@maany_shr/rage-ui-kit"
+import {Header, Toaster, SiteFooter} from "@maany_shr/rage-ui-kit"
 import Link from "next/link";
 
 export const PageLayout = (props: {children: React.ReactNode}) =>{
@@ -19,6 +18,8 @@ export const PageLayout = (props: {children: React.ReactNode}) =>{
             <main className="flex flex-grow container mx-auto p-4">
                 {props.children}
             </main>
+
+            <Toaster/>
 
             {/* Footer */}
             <SiteFooter />
