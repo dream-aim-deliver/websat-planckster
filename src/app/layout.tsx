@@ -4,7 +4,6 @@ import serverContainer from "~/lib/infrastructure/server/config/ioc/server-conta
 import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/lib/infrastructure/client/trpc/react-provider";
 import { PageLayout } from "./_components/layouts/page-layout";
-import { ToastProvider } from "../../../../IdeaProjects/rage-ui-kit";
 
 // Explicitly load the container to ensure all dependencies are loaded, else the optimization of the build will fail
 serverContainer.load();
@@ -25,9 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className={`font-sans ${inter.variable}`}>
         <TRPCReactProvider>
-          <ToastProvider>
-            <PageLayout>{children}</PageLayout>
-          </ToastProvider>
+          <PageLayout>{children}</PageLayout>
         </TRPCReactProvider>
       </body>
     </html>
