@@ -11,6 +11,9 @@ import BrowserListSourceDataController, { TBrowserListSourceDataControllerParame
 import BrowserFileDownloadController, { TBrowserFileDownloadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-download-controller";
 import BrowserFileUploadController, { TBrowserFileUploadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
 
+export const DEFAULT_RETRIES = 3;
+export const DEFAULT_RETRY_DELAY = 3000;
+
 const querySources = (setListSourceDataViewModel: Dispatch<SetStateAction<TListSourceDataViewModel>>, researchContextID?: number) => async () => {
   const signalFactory = signalsContainer.get<(initialValue: TListSourceDataViewModel, update?: (value: TListSourceDataViewModel) => void) => Signal<TListSourceDataViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_SOURCE_DATA);
   const response: Signal<TListSourceDataViewModel> = signalFactory(
