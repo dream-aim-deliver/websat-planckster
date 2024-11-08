@@ -35,14 +35,12 @@ export function ListConversationsClientPage(props: { viewModel: TListConversatio
   });
 
   const handleCreateConversation = (title: string) => {
-    console.log("Creating conversation with title: ", title);
     mutation.mutate({ title, researchContextID: props.researchContextID });
   };
 
   const router = useRouter();
 
   const handleGoToConversation = (conversationID: number) => {
-    console.log("Going to conversation with ID: ", conversationID);
     router.push(`conversations/${conversationID}`);
   };
 
