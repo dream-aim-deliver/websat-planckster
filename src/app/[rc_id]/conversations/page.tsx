@@ -9,7 +9,6 @@ import type { Signal } from "~/lib/core/entity/signals";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 import type { TListConversationsControllerParameters } from "~/lib/infrastructure/server/controller/list-conversations-controller";
-import { Suspense } from "react";
 
 export default async function ListConversationsServerPage({ params }: { params: { rc_id: string } }) {
   const researchContextID = parseInt(params.rc_id);
@@ -36,9 +35,5 @@ export default async function ListConversationsServerPage({ params }: { params: 
 
   await controller.execute(controllerParameters);
 
-  return (
-      <Suspense fallback={<div>AG GRID SKELETON...</div>}>
-        <ListConversationsClientPage viewModel={response.value} researchContextID={researchContextID}/>
-      </Suspense>
-  );
+  return <ListConversationsClientPage viewModel={response.value} researchContextID={researchContextID} />;
 }
