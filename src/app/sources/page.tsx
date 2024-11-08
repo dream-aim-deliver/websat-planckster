@@ -3,7 +3,7 @@ import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { CONTROLLERS, GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 import { ListSourceDataForClientClientPage } from "../_components/list-source-data-client";
-import {type TListSourceDataControllerParameters} from "~/lib/infrastructure/server/controller/list-source-data-controller";
+import { type TListSourceDataControllerParameters } from "~/lib/infrastructure/server/controller/list-source-data-controller";
 import type ListSourceDataController from "~/lib/infrastructure/server/controller/list-source-data-controller";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
@@ -17,7 +17,7 @@ export default async function ListSourceDataForClientServerPage() {
     redirect("/auth/login");
   }
 
-  const clientID = sessionDTO.data.user.id
+  const clientID = sessionDTO.data.user.id;
 
   // Initialize the source data to show
   const controller = serverContainer.get<ListSourceDataController>(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER);
@@ -34,9 +34,5 @@ export default async function ListSourceDataForClientServerPage() {
 
   await controller.execute(controllerParameters);
 
-  return (
-    <div className="flex flex-col gap-4 w-full grow">
-        <ListSourceDataForClientClientPage viewModel={response.value} clientID={clientID} />
-    </div>
-  );
+  return <ListSourceDataForClientClientPage viewModel={response.value} clientID={clientID} />;
 }
