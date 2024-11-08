@@ -65,19 +65,17 @@ export function ListResearchContextsClientPage(props: { viewModel: TListResearch
   return (
     <>
       {listComponent}
-      <div className="fixed bottom-0 right-0">
-        <CreateResearchContextDialog
-          clientFiles={props.clientSourceData}
-          onSubmit={(researchContextName: string, researchContextDescription: string, sourceData: SelectableSourceDataRow[]) => {
-            createMutation.mutate({
-              title: researchContextName,
-              description: researchContextDescription,
-              sources: sourceData,
-            });
-          }}
-          viewModel={createResearchContextViewModel}
-        />
-      </div>
+      <CreateResearchContextDialog
+        clientFiles={props.clientSourceData}
+        onSubmit={(researchContextName: string, researchContextDescription: string, sourceData: SelectableSourceDataRow[]) => {
+          createMutation.mutate({
+            title: researchContextName,
+            description: researchContextDescription,
+            sources: sourceData,
+          });
+        }}
+        viewModel={createResearchContextViewModel}
+      />
     </>
   );
 }
