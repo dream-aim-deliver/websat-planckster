@@ -3,7 +3,7 @@ import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { CONTROLLERS, GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 import { ListResearchContextsClientPage } from "../app/_components/list-research-contexts";
-import {type TListResearchContextsControllerParameters} from "~/lib/infrastructure/server/controller/list-research-contexts-controller";
+import { type TListResearchContextsControllerParameters } from "~/lib/infrastructure/server/controller/list-research-contexts-controller";
 import type ListResearchContextsController from "~/lib/infrastructure/server/controller/list-research-contexts-controller";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
@@ -47,25 +47,20 @@ export default async function ListResearchContextsServerPage() {
     clientID: `${clientID}`,
   };
 
-  
   await listSourceDataForClientController.execute(listSourceDataForClientControllerParameters);
 
-  
-  if(listSourceDataForClientResponse.value.status !== "success") {
-    switch(listSourceDataForClientResponse.value.status){
+  if (listSourceDataForClientResponse.value.status !== "success") {
+    switch (listSourceDataForClientResponse.value.status) {
       case "error":
-        throw new Error(listSourceDataForClientResponse.value.message)
+        throw new Error(listSourceDataForClientResponse.value.message);
       case "request":
-        return <div>Loading...</div>
+        return <div>Loading...</div>;
     }
   }
 
   return (
-    <div className="flex flex-col gap-4">
-        <ListResearchContextsClientPage
-          viewModel={response.value}
-          clientSourceData={listSourceDataForClientResponse.value.sourceData}
-        />
+    <div className="flex grow flex-col gap-4">
+      <ListResearchContextsClientPage viewModel={response.value} clientSourceData={listSourceDataForClientResponse.value.sourceData} />
     </div>
   );
 }
