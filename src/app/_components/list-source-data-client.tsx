@@ -120,6 +120,10 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Reset the input's state to enable repeated upload
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       uploadMutation.mutate(file);
     }
   };
