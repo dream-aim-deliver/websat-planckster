@@ -1,10 +1,10 @@
 "use client";
 import { type TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Signal } from "~/lib/core/entity/signals";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
-import { ConversationAGGrid, type ConversationRow } from "@maany_shr/rage-ui-kit";
+import { ConversationAGGrid, type ConversationRow, useToast } from "@maany_shr/rage-ui-kit";
 import { useRouter } from "next/navigation";
 import { createConversationMutation, DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, queryConversations } from "~/app/queries";
 
@@ -43,6 +43,18 @@ export function ListConversationsClientPage(props: { viewModel: TListConversatio
   const handleGoToConversation = (conversationID: number) => {
     router.push(`conversations/${conversationID}`);
   };
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (createConversationViewModel.status === "error") {
+      toast({
+        title: "Error creating the conversation",
+        description: createConversationViewModel.message,
+        variant: "error",
+      });
+    }
+  }, [createConversationViewModel]);
 
   if (listConversationsViewModel.status === "success") {
     return (
