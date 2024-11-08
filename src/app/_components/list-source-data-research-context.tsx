@@ -6,7 +6,7 @@ import { useState } from "react";
 import { type Signal } from "~/lib/core/entity/signals";
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
-import { downloadSourceMutation, querySources } from "~/app/queries";
+import { DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, downloadSourceMutation, querySources } from "~/app/queries";
 
 export function ListSourceDataForResearchContextClientPage(props: { viewModel: TListSourceDataViewModel; researchContextID: number }) {
   const [downloadSourceDataViewModel, setDownloadSourceDataViewModel] = useState<TFileDownloadViewModel>({
@@ -24,8 +24,8 @@ export function ListSourceDataForResearchContextClientPage(props: { viewModel: T
 
   const downloadMutation = useMutation({
     mutationKey: ["download-source-data"],
-    retry: 3,
-    retryDelay: 3000,
+    retry: DEFAULT_RETRIES,
+    retryDelay: DEFAULT_RETRY_DELAY,
     mutationFn: downloadSourceMutation(setDownloadSourceDataViewModel),
   });
 

@@ -7,7 +7,7 @@ import { type Signal } from "~/lib/core/entity/signals";
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 import { type TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
-import { downloadSourceMutation, querySources, uploadSourceMutation } from "~/app/queries";
+import { DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, downloadSourceMutation, querySources, uploadSourceMutation } from "~/app/queries";
 
 export function ListSourceDataForClientClientPage(props: { viewModel: TListSourceDataViewModel; clientID: string }) {
   const [uploadSourceDataViewModel, setUploadSourceDataViewModel] = useState<TFileUploadViewModel>({
@@ -29,15 +29,15 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
 
   const downloadMutation = useMutation({
     mutationKey: ["download-source-data"],
-    retry: 3,
-    retryDelay: 3000,
+    retry: DEFAULT_RETRIES,
+    retryDelay: DEFAULT_RETRY_DELAY,
     mutationFn: downloadSourceMutation(setDownloadSourceDataViewModel),
   });
 
   const uploadMutation = useMutation({
     mutationKey: ["upload-source-data"],
-    retry: 3,
-    retryDelay: 3000,
+    retry: DEFAULT_RETRIES,
+    retryDelay: DEFAULT_RETRY_DELAY,
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["list-source-data"] });
     },
