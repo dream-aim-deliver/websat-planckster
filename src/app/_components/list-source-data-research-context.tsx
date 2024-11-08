@@ -1,8 +1,8 @@
 "use client";
 
-import { SourceDataAGGrid } from "@maany_shr/rage-ui-kit";
+import { SourceDataAGGrid, useToast } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type Signal } from "~/lib/core/entity/signals";
 import { type TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
@@ -32,6 +32,31 @@ export function ListSourceDataForResearchContextClientPage(props: { viewModel: T
   const handleDownloadSourceData = (name: string, relativePath: string) => {
     downloadMutation.mutate({ relativePath: relativePath, sourceFilename: name });
   };
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (downloadSourceDataViewModel.status === "error") {
+      toast({
+        title: "Error downloading the file",
+        description: downloadSourceDataViewModel.message,
+        variant: "error",
+      });
+    }
+  }, [downloadSourceDataViewModel]);
+
+  useEffect(() => {
+    if (listSourceDataViewModel.status === "error") {
+      // The timeout makes sure the toast provider is initialized
+      setTimeout(() => {
+        toast({
+          title: `Error fetching sources for research context #${props.researchContextID}`,
+          description: listSourceDataViewModel.message,
+          variant: "error",
+        });
+      }, 500);
+    }
+  }, [downloadSourceDataViewModel]);
 
   const isSourceDataLoading = listSourceDataViewModel.status === "request";
   const sourceData = listSourceDataViewModel.status === "success" ? listSourceDataViewModel.sourceData : [];
