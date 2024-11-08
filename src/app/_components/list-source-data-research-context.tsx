@@ -56,6 +56,7 @@ export function ListSourceDataForResearchContextClientPage(props: { viewModel: T
       : undefined;
 
   return (
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
     <SourceDataAGGrid isLoading={isSourceDataLoading} isUploading={false} enableUpload={false} rowData={sourceData} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={() => {}} errorOverlayProps={errorOverlayProperties} />
   );
 }
