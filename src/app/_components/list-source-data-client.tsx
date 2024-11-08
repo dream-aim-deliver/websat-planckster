@@ -31,7 +31,7 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
 
   const queryClient = useQueryClient();
 
-  const { isFetching, isLoading, isError } = useQuery<Signal<TListSourceDataViewModel>>({
+  const { isLoading: isSourceDataLoading } = useQuery<Signal<TListSourceDataViewModel>>({
     queryKey: ["list-source-data"],
     queryFn: async () => {
       const signalFactory = signalsContainer.get<(initialValue: TListSourceDataViewModel, update?: (value: TListSourceDataViewModel) => void) => Signal<TListSourceDataViewModel>>(SIGNAL_FACTORY.KERNEL_LIST_SOURCE_DATA);
@@ -126,21 +126,11 @@ export function ListSourceDataForClientClientPage(props: { viewModel: TListSourc
   };
 
   const isUploading = uploadMutation.isPending;
-
-  // TODO: decompose without if statements
-  if (listSourceDataViewModel.status === "request") {
-    return (
-      <>
-        <SourceDataAGGrid isLoading={true} isUploading={false} enableUpload={true} rowData={[]} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
-      </>
-    );
-  } else if (listSourceDataViewModel.status === "success") {
-    return (
-      <>
-        <SourceDataAGGrid isLoading={false} enableUpload={true} isUploading={isUploading} rowData={listSourceDataViewModel.sourceData} handleDownloadSourceData={handleDownloadSourceData} handleUploadSourceData={handleUploadSourceData} />
-
-        <input type="file" ref={fileInputRef} style={{ display: "none" }} onChange={handleFileChange} />
-      </>
-    );
-  }
+  const rowData = listSourceDataViewModel.status === "success" ? listSourceDataViewModel.sourceData : [];
+  return <>
+    <SourceDataAGGrid rowData={rowData} isLoading={isSourceDataLoading} isUploading={isUploading}
+                      enableUpload={true} handleDownloadSourceData={handleDownloadSourceData}
+                      handleUploadSourceData={handleUploadSourceData}/>
+    <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange}/>
+  </>
 }
