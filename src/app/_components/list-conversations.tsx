@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import type { Signal } from "~/lib/core/entity/signals";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
-import { ConversationAGGrid, type ConversationRow, useToast } from "@maany_shr/rage-ui-kit";
+import { ConversationAGGrid, useToast } from "@maany_shr/rage-ui-kit";
+import { type ConversationRow } from "node_modules/@maany_shr/rage-ui-kit/dist/components/table/ConversationAGGrid";
 import { useRouter } from "next/navigation";
 import { createConversationMutation, DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, queryConversations } from "~/app/queries";
 
@@ -17,12 +18,10 @@ export function ListConversationsClientPage(props: { viewModel: TListConversatio
 
   const queryClient = useQueryClient();
 
-  const { isFetching, isLoading, isError } = useQuery<Signal<TListConversationsViewModel>>({
+  useQuery<Signal<TListConversationsViewModel>>({
     queryKey: [`list-conversations#${props.researchContextID}`],
     queryFn: queryConversations(setListConversationsViewModel, props.researchContextID),
   });
-
-  const enableCreateConversation = !isFetching || !isLoading;
 
   const mutation = useMutation({
     mutationKey: ["create-conversation"],
@@ -56,29 +55,25 @@ export function ListConversationsClientPage(props: { viewModel: TListConversatio
     }
   }, [createConversationViewModel]);
 
-  if (listConversationsViewModel.status === "success") {
-    return (
-      <ConversationAGGrid
-        isLoading={isFetching || isLoading}
-        rowData={listConversationsViewModel.conversations as ConversationRow[]}
-        handleGoToConversation={handleGoToConversation}
-        handleNewConversation={handleCreateConversation}
-        newConversationIsEnabled={enableCreateConversation}
-      />
-    );
-  } else {
-    return (
-      <ConversationAGGrid
-        isLoading={false}
-        rowData={[]}
-        handleGoToConversation={handleGoToConversation}
-        handleNewConversation={handleCreateConversation}
-        newConversationIsEnabled={enableCreateConversation}
-        errorOverlayProps={{
+  const areConversationsLoading = listConversationsViewModel.status === "request";
+  const rowData = listConversationsViewModel.status === "success" ? listConversationsViewModel.conversations : [];
+  const errorOverlayProperties =
+    listConversationsViewModel.status === "error"
+      ? {
           errorStatus: true,
-          overlayText: `Error: ${JSON.stringify(listConversationsViewModel)}`,
-        }}
-      />
-    );
-  }
+          overlayText: listConversationsViewModel.message,
+        }
+      : undefined;
+
+  // TODO: fix the typing issue without additional imports
+  return (
+    <ConversationAGGrid
+      rowData={rowData as ConversationRow[]}
+      isLoading={areConversationsLoading}
+      newConversationIsEnabled={!areConversationsLoading}
+      handleGoToConversation={handleGoToConversation}
+      handleNewConversation={handleCreateConversation}
+      errorOverlayProps={errorOverlayProperties}
+    />
+  );
 }
