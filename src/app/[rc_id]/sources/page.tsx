@@ -3,7 +3,7 @@ import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { CONTROLLERS, GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 import { ListSourceDataForResearchContextClientPage } from "../../_components/list-source-data-research-context";
-import {type TListSourceDataControllerParameters} from "~/lib/infrastructure/server/controller/list-source-data-controller";
+import { type TListSourceDataControllerParameters } from "~/lib/infrastructure/server/controller/list-source-data-controller";
 import type ListSourceDataController from "~/lib/infrastructure/server/controller/list-source-data-controller";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
@@ -11,10 +11,7 @@ import type { Signal } from "~/lib/core/entity/signals";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 import { Suspense } from "react";
 
-
-export default async function ListSourceDataForResearchContextServerPage(
-  { params }: { params: { rc_id: string } }
-) {
+export default async function ListSourceDataForResearchContextServerPage({ params }: { params: { rc_id: string } }) {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
   const sessionDTO = await authGateway.getSession();
   if (!sessionDTO.success) {
@@ -38,14 +35,5 @@ export default async function ListSourceDataForResearchContextServerPage(
 
   await controller.execute(controllerParameters);
 
-  return (
-    <>
-      <Suspense fallback={<div>AG GRID SKELETON...</div>}>
-        <ListSourceDataForResearchContextClientPage
-          viewModel={response.value}
-          researchContextID={researchContextID}
-        />
-      </Suspense>
-    </>
-  );
+  return <ListSourceDataForResearchContextClientPage viewModel={response.value} researchContextID={researchContextID} />;
 }
