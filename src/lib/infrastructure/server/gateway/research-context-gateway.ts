@@ -59,7 +59,8 @@ export default class ResearchContextGateway implements ResearchContextGatewayOut
       const sourceDataIDs = sourceData.map((file) => parseInt(file.id));
 
       const newResearchContextViewModel = await this.kernelSDK.createResearchContext({
-        clientSub: email,
+        clientSub: "SDA", // TODO: was 'email', but Kernel has a single hardcoded value called "SDA"
+        llmName: "gpt4", // TODO: this is optional in the Kernel API, but if you don't provide it, the request fails
         requestBody: sourceDataIDs,
         externalId: researchContextExternalID,
         researchContextTitle: researchContextTitle,
@@ -93,7 +94,7 @@ export default class ResearchContextGateway implements ResearchContextGatewayOut
       };
     } catch (error) {
       const err = error as Error;
-      this.logger.error(`An error occurred while trying to create a Research Context: ${err.message}`);
+      this.logger.error({ err }, `An error occurred while trying to create a Research Context.`);
       return {
         success: false,
         data: {

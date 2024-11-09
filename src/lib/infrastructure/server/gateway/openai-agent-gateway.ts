@@ -14,6 +14,7 @@ import { kernelMessageToWebsatMessage } from "../config/kernel/kernel-utils";
 import path from "path";
 import fs from "fs";
 import { Message as OpenAIMessage } from "openai/resources/beta/threads/messages.mjs";
+import { RemoteFile } from "~/lib/core/entity/file";
 
 @injectable()
 export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenAIMessageContext> {
@@ -26,10 +27,13 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
   ) {
     this.logger = loggerFactory("OpenAIAgentGateway");
   }
-  async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string): Promise<TCreateAgentDTO> {
-    const instructions = `You are an expert data analyst specialized in ${researchContextTitle}. Your research context can be best described by ${researchContextDescription}. You will help me and my team explore and analize some datasets that we have augmented, by combining data from satellites, twitter, and telegram, regarding the occurrence of disaster events related to ${researchContextTitle} at different locations. You have access to a code interpreter to generate insights from the data, and a file search tool to find relevant datasets.`;
+
+  async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string, additionalFiles?: RemoteFile[]): Promise<TCreateAgentDTO> {
+    const instructions = `You are an expert data analyst specialized working in the research context with title '${researchContextTitle}'. This research context has the following description '${researchContextDescription}'. You have also been assigned some files. Some of these are images in different formats (e.g., JPG, JPEG, PNG, etc.), assigned to you via normal code interpreter. Other files have been assigned to you via a vector store. So please consider this anytime the user asks you about files you have access to.
+    You will help me and my team explore and analize some datasets that we have augmented, by combining data from satellites, twitter, and telegram, regarding the occurrence of disaster events related to '${researchContextTitle}' at different locations. You have access to a code interpreter to generate insights from the data, and a file search tool to find relevant datasets.`; // TODO: discuss this
     const model = "gpt-4o";
     const agentName = generateOpenAIAssistantName();
+    this.logger.info({ additionalFiles }, "DEBUG: Agent creation -- additional files");
     try {
       const openaiAgent = await this.openai.beta.assistants.create({
         model: model,
@@ -41,9 +45,20 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
           file_search: {
             vector_store_ids: [vectorStoreID],
           },
+          code_interpreter: {
+            file_ids: additionalFiles?.map((file) => file.id) ?? [],
+          },
         },
       });
       const researchContextExternalID = generateRCExternalIDFromOpenAIAssistantID(openaiAgent.id);
+
+      await this.openai.beta.assistants.update(openaiAgent.id, {
+        tool_resources: {
+          file_search: {
+            
+          }
+        }
+      })
 
       this.logger.info({ openaiAgent }, "Agent created");
       return {

@@ -12,6 +12,7 @@ import { promisify } from "util";
 import { TBaseErrorDTOData } from "~/sdk/core/dto";
 import KernelPlancksterSourceDataOutputPort from "../../common/ports/secondary/kernel-planckster-source-data-output-port";
 import { GetClientDataForDownloadDTO, GetClientDataForUploadDTO, NewSourceDataDTO } from "../../common/dto/kernel-planckster-source-data-gateway-dto";
+import path from "path";
 
 @injectable()
 export default class KernelSourceDataGateway implements KernelPlancksterSourceDataOutputPort {
@@ -21,7 +22,7 @@ export default class KernelSourceDataGateway implements KernelPlancksterSourceDa
     @inject(KERNEL.KERNEL_SDK) private kernelSDK: TKernelSDK,
     @inject(GATEWAYS.AUTH_GATEWAY) private authGateway: AuthGatewayOutputPort,
   ) {
-    this.logger = this.loggerFactory("KernelSourceDataRepository");
+    this.logger = this.loggerFactory("KernelSourceDataGateway");
   }
 
   async getClientDataForUpload(relativePath: string): Promise<GetClientDataForUploadDTO> {
@@ -243,7 +244,7 @@ export default class KernelSourceDataGateway implements KernelPlancksterSourceDa
         success: false,
         data: {
           operation: "kernel#source-data#list",
-          message: `Failed to get source data list.` + `${err.message? 'Error: ' + err.message: ''}`,
+          message: `Failed to get source data list.` + `${err.message ? "Error: " + err.message : ""}`,
         },
       };
     }
@@ -387,7 +388,7 @@ export default class KernelSourceDataGateway implements KernelPlancksterSourceDa
     }
 
     const clientDataForDownloadDTO = await this.kernelSDK.getClientDataForDownload({
-      id: fileID,
+      id: kernelCredentialsDTO.data.clientID,
       protocol: "s3",
       relativePath: file.relativePath,
       xAuthToken: kernelCredentialsDTO.data.xAuthToken,
@@ -407,6 +408,8 @@ export default class KernelSourceDataGateway implements KernelPlancksterSourceDa
     const signedUrl = clientDataForDownloadDTO.signed_url;
 
     const finished = promisify(stream.finished);
+    const dir = path.dirname(localFilePath);
+    fs.mkdirSync(dir, { recursive: true });
     const fileStream = fs.createWriteStream(localFilePath);
     let errorData: TBaseErrorDTOData | undefined;
 

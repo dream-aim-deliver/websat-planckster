@@ -20,6 +20,17 @@ export default class CreateResearchContextUsecase implements CreateResearchConte
   async execute(request: TCreateResearchContextRequest): Promise<void> {
     const { title, description, sourceDataList } = request;
 
+    // If there are no files, return an error
+    if (sourceDataList.length === 0) {
+      this.presenter.presentError({
+        status: "error",
+        operation: "usecase#create-research-context",
+        message: "No source data selected. Please retry with at least one file.",
+        context: {},
+      });
+      return;
+    }
+
     // 1. Create vector store with the Source Data
     const createVectorStoreDTO = await this.vectorStore.createVectorStore(sourceDataList);
 
@@ -39,8 +50,11 @@ export default class CreateResearchContextUsecase implements CreateResearchConte
       context: createVectorStoreDTO,
     });
 
-    // 2. Create an agent, linking it to the vector store
-    const createAgentDTO = await this.agentGateway.createAgent(title, description, vectorStoreID);
+    // Get the list of files that are not supported by the vector store, if any
+    const nonVectorStoreFiles = createVectorStoreDTO.data.unsupportedFiles;
+
+    // 2. Create an agent, linking it to the vector store, and the non-vector store files (if any)
+    const createAgentDTO = await this.agentGateway.createAgent(title, description, vectorStoreID, nonVectorStoreFiles);
     if (!createAgentDTO.success) {
       this.presenter.presentError({
         status: "error",

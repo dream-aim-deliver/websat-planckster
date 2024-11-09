@@ -146,3 +146,8 @@ export const generateOpenAIAssistantName = (): string => {
 export const generateOpenAIVectorStoreName = (): string => {
   return `websat-${uuidv4()}`;
 };
+
+/**
+ * Supported file formats for OpenAI Vector Store, taken from [OpenAI's docs](https://platform.openai.com/docs/assistants/tools/file-search/supported-files#supported-files).
+ */
+export const OPENAI_VECTOR_STORE_SUPPORTED_FILE_FORMATS = [".c", ".cpp", ".cs", ".css", ".doc", ".docx", ".go", ".html", ".java", ".js", ".json", ".md", ".pdf", ".php", ".pptx", ".py", ".rb", ".sh", ".tex", ".ts", ".txt"];

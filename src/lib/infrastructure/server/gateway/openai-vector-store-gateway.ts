@@ -7,7 +7,7 @@ import { GATEWAYS, OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
 import OpenAI from "openai";
 import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import { generateOpenAIVectorStoreName } from "../config/openai/openai-utils";
+import { generateOpenAIVectorStoreName, OPENAI_VECTOR_STORE_SUPPORTED_FILE_FORMATS, uint8ArrayToBase64 } from "../config/openai/openai-utils";
 import fs from "fs";
 
 @injectable()
@@ -58,14 +58,30 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
           purpose: "assistants",
         });
 
-        const remoteFile: RemoteFile = {
-          id: openaiFile.id,
-          type: "remote",
-          provider: "openai",
-          name: file.name,
-          relativePath: file.relativePath,
-          createdAt: `${new Date().toISOString()}`,
-        };
+        const fileExtension = `.${localFile.relativePath.split(".").pop()}`;
+        this.logger.info({ fileExtension }, `DEBUG: File extension for ${localFile.relativePath}`);
+
+        let remoteFile: RemoteFile;
+
+        if (fileExtension && OPENAI_VECTOR_STORE_SUPPORTED_FILE_FORMATS.includes(fileExtension)) {
+          remoteFile = {
+            id: openaiFile.id,
+            type: "remote",
+            provider: "openai#vector-store",
+            name: file.name,
+            relativePath: file.relativePath,
+            createdAt: `${new Date().toISOString()}`,
+          };
+        } else {
+          remoteFile = {
+            id: openaiFile.id,
+            type: "remote",
+            provider: "openai#non-vector-store",
+            name: file.name,
+            relativePath: file.relativePath,
+            createdAt: `${new Date().toISOString()}`,
+          };
+        }
 
         uploadedFiles.push(remoteFile);
         fs.unlinkSync(localFile.relativePath);
@@ -104,12 +120,12 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
 
       const openaiFiles = uploadFilesDTO.data;
 
-      this.logger.info({ openaiFiles }, "Uploaded files to OpenAI");
+      this.logger.info({ openaiFiles }, "These files were uploaded to OpenAI");
 
-      // 2. Verify that files have provider == "openai"
-      const filesWithOpenAIProvider = openaiFiles.filter((file) => file.provider === "openai");
-      if (filesWithOpenAIProvider.length === 0) {
-        this.logger.error({ files }, "No files with provider:openai found");
+      // Check that we have at least one file whose provider includes "openai"
+      const openaiFilesCount = openaiFiles.filter((file) => file.provider.includes("openai")).length;
+      if (openaiFilesCount === 0) {
+        this.logger.error({ files }, "No files with provider 'openai' found");
         return {
           success: false,
           data: {
@@ -119,19 +135,28 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
         };
       }
 
-      // 3. Create vector store with OpenAI
+      // 2. Attach to the vector store only the files that are supported by OpenAI
+      const supportedFiles = openaiFiles.filter((file) => file.provider === "openai#vector-store");
+
+      this.logger.info({ filesWithOpenAIProvider: supportedFiles }, "DEBUG: Files with provider 'openai'");
+
+      // 3. Create vector store
       const vectorStoreName = generateOpenAIVectorStoreName();
       const openaiVectorStore = await this.openai.beta.vectorStores.create({
         name: vectorStoreName,
-        file_ids: filesWithOpenAIProvider.map((file) => file.id),
+        file_ids: supportedFiles.map((file) => file.id),
       });
 
+      // 4. Return vector store ID and files that aren't supported by OpenAI's vector stores
       const openaiVectorStoreID = openaiVectorStore.id;
+      const unsupportedFiles = openaiFiles.filter((file) => file.provider === "openai#non-vector-store");
+
       return {
         success: true,
         data: {
           provider: "openai",
           id: openaiVectorStoreID,
+          unsupportedFiles: unsupportedFiles,
         },
       };
     } catch (error) {
