@@ -7,6 +7,7 @@ import type AgentGatewayOutputPort from "~/lib/core/ports/secondary/agent-gatewa
 import { TRPC, UTILS } from "../config/ioc/client-ioc-symbols";
 import { type TVanillaAPI } from "../trpc/vanilla-api";
 import { TOpenAIMessageContext } from "../../common/dto/openai-agent-gateway-dto";
+import { RemoteFile } from "~/lib/core/entity/file";
 
 @injectable()
 export default class BrowserAgentGateway implements AgentGatewayOutputPort<TOpenAIMessageContext> {
@@ -18,12 +19,13 @@ export default class BrowserAgentGateway implements AgentGatewayOutputPort<TOpen
     this.logger = this.loggerFactory("AgentGateway");
   }
 
-  async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string): Promise<TCreateAgentDTO> {
+  async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string, additionalFiles?: RemoteFile[]): Promise<TCreateAgentDTO> {
     try {
       const dto = this.api.gateways.agent.create.mutate({
         researchContextTitle,
         researchContextDescription,
         vectorStoreID,
+        additionalFiles,
       });
       return dto;
     } catch (error) {

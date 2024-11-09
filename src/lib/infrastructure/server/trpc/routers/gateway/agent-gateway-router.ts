@@ -6,6 +6,7 @@ import { type Logger } from "pino";
 import { GATEWAYS, UTILS } from "../../../config/ioc/server-ioc-symbols";
 import type OpenAIAgentGateway from "../../../gateway/openai-agent-gateway";
 import { type TCreateAgentDTO, type TSendMessageDTO } from "~/lib/core/dto/agent-dto";
+import { RemoteFileSchema } from "~/lib/core/entity/file";
 
 export const agentGatewayRouter = createTRPCRouter({
   create: protectedProcedure
@@ -14,6 +15,7 @@ export const agentGatewayRouter = createTRPCRouter({
         researchContextTitle: z.string(),
         researchContextDescription: z.string(),
         vectorStoreID: z.string(),
+        additionalFiles: z.array(RemoteFileSchema).optional(),
       }),
     )
     .mutation(async ({ input }): Promise<TCreateAgentDTO> => {
@@ -23,7 +25,7 @@ export const agentGatewayRouter = createTRPCRouter({
       try {
         const agentGateway = serverContainer.get<OpenAIAgentGateway>(GATEWAYS.AGENT_GATEWAY);
 
-        const dto = await agentGateway.createAgent(input.researchContextTitle, input.researchContextDescription, input.vectorStoreID);
+        const dto = await agentGateway.createAgent(input.researchContextTitle, input.researchContextDescription, input.vectorStoreID, input.additionalFiles);
 
         return dto;
       } catch (error) {
