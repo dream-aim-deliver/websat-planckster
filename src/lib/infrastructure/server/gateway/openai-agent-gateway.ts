@@ -176,14 +176,18 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
 
       // 2. Craft a message file with all contents
       // for images, upload to OpenAI, get file ID, and inject the file ID in the message
-      const conversationFileContent: string[] = [];
+      const conversationContext: string[] = [];
 
       if (contextMessagesToSend.length > 0) {
+        conversationContext.push(
+          `Please consider as context that this conversation has had the following messages. The first one is the first message that the user sent to the conversation, followed by up to the latest 10 messages sent in the conversation. Each message in the list starts with "=>", followed by the sender type ('user' or 'assistant'), the message type ('text', 'image', or 'citation'), and the message contents. If the message is an image, the content will be an image file ID that is already available to you. The messages are separated by two new lines, and, in the end, you'll find the message you have to respond to marked with "=> NEW MESSAGE":\n`,
+        );
+
         for (const contextMessage of contextMessagesToSend) {
           for (const content of contextMessage.message_contents) {
             if (content.content_type === "text") {
               // Add text to conversation file content
-              conversationFileContent.push(`${contextMessage.sender_type}: ${content.content}`);
+              conversationContext.push(`=> ${contextMessage.sender_type == "agent" ? "assistant" : "user"} -- text: ${content.content}`);
             } else if (content.content_type === "image") {
               // Save image to file
               const imageBase64 = content.content;
@@ -202,58 +206,37 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
               fs.unlinkSync(filePath);
 
               // Add file ID to conversation file content
-              conversationFileContent.push(`${contextMessage.sender_type}: ${openaiFile.id}`);
+              conversationContext.push(`${contextMessage.sender_type == "agent" ? "assistant" : "user"} -- image: ${openaiFile.id}`);
             } else if (content.content_type === "citation") {
               // Add citation to conversation file content
-              conversationFileContent.push(`${contextMessage.sender_type}: citations: ${content.content}`);
+              conversationContext.push(`${contextMessage.sender_type == "agent" ? "assistant" : "user"} -- citation: ${content.content}`);
             }
           }
         }
-      } else {
-        // Add text to conversation file content
-        conversationFileContent.push(`This conversation has no previous messages, please just ignore this file.`);
       }
 
-      // 3. Save the message context file to OpenAI
-      this.logger.info({ conversationFileContent }, "Conversation file content");
-      const buffer = Buffer.from(conversationFileContent.join("\n"), "utf-8");
-      const filePath = path.join(process.cwd(), "temp", `conversation-${openaiThreadID}.txt`);
-      fs.mkdirSync(path.dirname(filePath), { recursive: true });
-      fs.writeFileSync(filePath, buffer);
+      // 3. Wrap the new message with the context string
+      this.logger.info({ conversationFileContent: conversationContext }, "Conversation file content");
 
-      const openaiContextFile = await this.openai.files.create({
-        file: fs.createReadStream(filePath),
-        purpose: "assistants",
-      });
-
-      fs.unlinkSync(filePath);
-
-      // 4. Create vector store for the conversation
-      const openaiVectorStore = await this.openai.beta.vectorStores.create({
-        name: `conversation-${openaiThreadID}`,
-        file_ids: [openaiContextFile.id],
-      });
-
-      // 5. Update thread with vector store
-      const openaiThreadUpdate = await this.openai.beta.threads.update(openaiThreadID, { tool_resources: { file_search: { vector_store_ids: [openaiVectorStore.id] } } });
-
-      // 6. Post new message to the thread
       const newMessageContent = message.message_contents.map((content) => `${content.content}`).join("\n");
+      conversationContext.push(`=> NEW MESSAGE -- ${message.sender_type == "agent" ? "assistant" : "user"} -- text: ${newMessageContent}`);
 
-      const newThreadMessage = await this.openai.beta.threads.messages.create(openaiThreadUpdate.id, {
+      const messageToSend = conversationContext.join("\n\n");
+
+      const newThreadMessage = await this.openai.beta.threads.messages.create(openaiThreadID, {
         role: "user",
-        content: newMessageContent,
+        content: messageToSend,
       });
 
-      // 7. Post run to the thread and wait
-      const run = await this.openai.beta.threads.runs.create(openaiThreadUpdate.id, {
+      // 4. Post run to the thread and wait
+      const run = await this.openai.beta.threads.runs.create(openaiThreadID, {
         assistant_id: assistantID,
       });
       while (run.status === "queued" || run.status === "in_progress") {
         this.logger.info({ run }, "Waiting for run to complete\n------------------");
         await new Promise((r) => setTimeout(r, 1000));
 
-        const runStatus = await this.openai.beta.threads.runs.retrieve(openaiThreadUpdate.id, run.id);
+        const runStatus = await this.openai.beta.threads.runs.retrieve(openaiThreadID, run.id);
 
         // CANCELLED CASE
         if (runStatus.status === "cancelling" || runStatus.status == "expired" || runStatus.status == "failed" || runStatus.status == "cancelled") {
@@ -270,7 +253,7 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
         // COMPLETED CASE
         if (runStatus.status === "completed") {
           this.logger.info("Run completed");
-          const openAIMessages = await this.openai.beta.threads.messages.list(openaiThreadUpdate.id);
+          const openAIMessages = await this.openai.beta.threads.messages.list(openaiThreadID);
 
           // Grab all but the first message
           this.logger.debug({ openAIMessages }, "OpenAI messages");
@@ -287,7 +270,7 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
             };
           }
 
-          // 8. Craft new message for Kernel and return
+          // 5. Craft new message for Kernel and return
           const newMessageContents: TMessageContent[] = [];
 
           for (const newOpenAIMessage of newOpenAIMessages) {
