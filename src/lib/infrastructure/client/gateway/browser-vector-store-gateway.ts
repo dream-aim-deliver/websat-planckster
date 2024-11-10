@@ -18,7 +18,7 @@ export default class BrowserVectorStoreGateway implements VectorStoreOutputPort 
 
   async createVectorStore(files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
     try {
-      const dto = this.api.gateways.vectorStore.create.mutate({
+      const dto = await this.api.gateways.vectorStore.create.mutate({
         files,
       });
       return dto;
