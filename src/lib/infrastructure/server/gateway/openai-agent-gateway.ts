@@ -145,10 +145,11 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
       }
 
       const kpAllMessages: MessageBase_Input[] = listMessagesKPViewModel.message_list;
-
+  
       let messagesToSend: TMessage[] = [];
 
       if (kpAllMessages.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const firstKPMessage = kpAllMessages[0];
         if (firstKPMessage) {
           const firstMessage = kernelMessageToWebsatMessage(firstKPMessage);
@@ -235,13 +236,6 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
 
       const newMessageContent = message.message_contents.map((content) => `${content.content}`).join("\n");
       conversationContext.push(`=> NEW MESSAGE -- ${message.sender_type == "agent" ? "assistant" : "user"} -- text: ${newMessageContent}`);
-
-      const messageToSend = conversationContext.join("\n\n");
-
-      const newThreadMessage = await this.openai.beta.threads.messages.create(openaiThreadID, {
-        role: "user",
-        content: messageToSend,
-      });
 
       // 4. Post run to the thread and wait
       const run = await this.openai.beta.threads.runs.create(openaiThreadID, {
