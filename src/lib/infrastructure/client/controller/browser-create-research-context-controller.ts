@@ -38,6 +38,14 @@ export default class BrowserCreateResearchContextController {
         },
       };
       params.response.update(viewModel);
+    } finally {
+      if(params.response.value.status === "error") {
+        await new Promise((resolve) => setTimeout(resolve, 4000));
+        params.response.update({
+          status: "request",
+          researchContextName: "",
+        });
+      }
     }
   }
 }
