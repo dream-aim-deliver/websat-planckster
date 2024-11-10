@@ -14,6 +14,7 @@ export function ListResearchContextsClientPage(props: { viewModel: TListResearch
   const [listResearchContextsViewModel, setListResearchContextsViewModel] = useState<TListResearchContextsViewModel>(props.viewModel);
   const [createResearchContextViewModel, setCreateResearchContextViewModel] = useState<TCreateResearchContextViewModel>({
     status: "request",
+    researchContextName: "",
   } as TCreateResearchContextViewModel);
 
   const router = useRouter();
