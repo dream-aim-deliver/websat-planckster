@@ -7,7 +7,7 @@ import { GATEWAYS, OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
 import OpenAI from "openai";
 import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import { generateOpenAIVectorStoreName, OPENAI_VECTOR_STORE_SUPPORTED_FILE_FORMATS, uint8ArrayToBase64 } from "../config/openai/openai-utils";
+import { generateOpenAIVectorStoreName, OPENAI_VECTOR_STORE_SUPPORTED_FILE_FORMATS } from "../config/openai/openai-utils";
 import fs from "fs";
 
 @injectable()

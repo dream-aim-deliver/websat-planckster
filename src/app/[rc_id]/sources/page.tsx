@@ -9,7 +9,6 @@ import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 import type { Signal } from "~/lib/core/entity/signals";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
-import { Suspense } from "react";
 
 export default async function ListSourceDataForResearchContextServerPage({ params }: { params: { rc_id: string } }) {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
