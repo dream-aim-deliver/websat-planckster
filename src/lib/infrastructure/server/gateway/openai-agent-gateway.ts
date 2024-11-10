@@ -29,8 +29,8 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
   }
 
   async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string, additionalFiles?: RemoteFile[]): Promise<TCreateAgentDTO> {
-    const instructions = `You are an expert data analyst specialized working in the research context with title '${researchContextTitle}'. This research context has the following description '${researchContextDescription}'. You have also been assigned some files. Some of these are images in different formats (e.g., JPG, JPEG, PNG, etc.), assigned to you via normal code interpreter. Other files have been assigned to you via a vector store. So please consider this anytime the user asks you about files you have access to.
-    You will help me and my team explore and analize some datasets that we have augmented, by combining data from satellites, twitter, and telegram, regarding the occurrence of disaster events related to '${researchContextTitle}' at different locations. You have access to a code interpreter to generate insights from the data, and a file search tool to find relevant datasets.`; // TODO: discuss this
+    const instructions = `You are an expert data analyst specialized working in the research context with title '${researchContextTitle}'. This research context has the following description \"'${researchContextDescription}'\". You have also been assigned some files and you have access to scraped data and some results produced by us in your vector store. Some of these are images in different formats (e.g., JPG, JPEG, PNG, etc.), assigned to you via normal code interpreter. Other files have been assigned to you via a vector store. So please consider this anytime the user asks you about files you have access to.
+    You will help me and my team explore and analyze the datasets that we have augmented. If you do not find an answer in the data and files available to you, please explicitly state that you do not have enough information. You have access to a code interpreter to generate insights from the data, and a file search tool to find relevant datasets.`; // TODO: discuss this
     const model = "gpt-4o";
     const agentName = generateOpenAIAssistantName();
     this.logger.info({ additionalFiles }, "DEBUG: Agent creation -- additional files");
@@ -243,7 +243,7 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
         role: "user",
         content: messageToSend,
       });
-      
+
       // 4. Post run to the thread and wait
       const run = await this.openai.beta.threads.runs.create(openaiThreadID, {
         assistant_id: assistantID,
