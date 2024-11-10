@@ -237,6 +237,13 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
       const newMessageContent = message.message_contents.map((content) => `${content.content}`).join("\n");
       conversationContext.push(`=> NEW MESSAGE -- ${message.sender_type == "agent" ? "assistant" : "user"} -- text: ${newMessageContent}`);
 
+      const messageToSend = conversationContext.join("\n\n");
+
+      await this.openai.beta.threads.messages.create(openaiThreadID, {
+        role: "user",
+        content: messageToSend,
+      });
+      
       // 4. Post run to the thread and wait
       const run = await this.openai.beta.threads.runs.create(openaiThreadID, {
         assistant_id: assistantID,
