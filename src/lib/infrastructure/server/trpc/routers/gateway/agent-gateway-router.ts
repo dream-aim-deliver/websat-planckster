@@ -78,6 +78,7 @@ export const agentGatewayRouter = createTRPCRouter({
           messagesToSend: z.array(MessageSchema),
         }),
         message: MessageSchema,
+        messageToSendAdditionalContext: z.string().optional(),
       }),
     )
     .mutation(async ({ input }): Promise<TSendMessageDTO> => {
@@ -88,7 +89,7 @@ export const agentGatewayRouter = createTRPCRouter({
       try {
         const agentGateway = serverContainer.get<OpenAIAgentGateway>(GATEWAYS.AGENT_GATEWAY);
 
-        const dto = await agentGateway.sendMessage(input.context, input.message);
+        const dto = await agentGateway.sendMessage(input.context, input.message, input.messageToSendAdditionalContext);
 
         return dto;
       } catch (error) {

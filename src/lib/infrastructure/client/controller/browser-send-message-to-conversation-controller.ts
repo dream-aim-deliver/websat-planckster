@@ -12,19 +12,21 @@ export interface TBrowserSendMessageToConversationControllerParameters {
   conversationID: number;
   messageToSendContent: string;
   messageToSendTimestamp: string;
+  messageToSendAdditionalContext?: string;
 }
 
 @injectable()
 export default class BrowserSendMessageToConversationController {
   async execute(controllerParameters: TBrowserSendMessageToConversationControllerParameters): Promise<void> {
-    const { response, researchContextExternalID: researchContextID, conversationID, messageToSendContent, messageToSendTimestamp } = controllerParameters;
+    const { response, researchContextExternalID, conversationID, messageToSendContent, messageToSendTimestamp, messageToSendAdditionalContext } = controllerParameters;
 
     const request: TSendMessageToConversationRequest = {
       status: "request",
-      researchContextExternalID: researchContextID,
+      researchContextExternalID: researchContextExternalID,
       conversationID: conversationID,
       messageToSendContent: messageToSendContent,
       messageToSendTimestamp: messageToSendTimestamp,
+      messageToSendAdditionalContext: messageToSendAdditionalContext,
     };
 
     const usecaseFactory = clientContainer.get<(response: Signal<TSendMessageToConversationViewModel>) => SendMessageToConversationInputPort>(USECASE_FACTORY.SEND_MESSAGE_TO_CONVERSATION);

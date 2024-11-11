@@ -7,6 +7,7 @@ export const SendMessageToConversationRequestSchema = z.object({
   conversationID: z.number(),
   messageToSendContent: z.string(),
   messageToSendTimestamp: z.string(),
+  messageToSendAdditionalContext: z.string().optional(),
 });
 
 export type TSendMessageToConversationRequest = z.infer<typeof SendMessageToConversationRequestSchema>;
