@@ -185,7 +185,7 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
     }
   }
 
-  async sendMessage(context: { assistantID: string; messagesToSend: TMessage[] }, message: TMessage): Promise<TSendMessageDTO> {
+  async sendMessage(context: { assistantID: string; messagesToSend: TMessage[] }, message: TMessage, messageToSendAdditionalContext?: string): Promise<TSendMessageDTO> {
     try {
       this.logger.info({ message }, "Sending message to OpenAI");
       const { assistantID, messagesToSend: contextMessagesToSend } = context;
@@ -198,9 +198,20 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
       // for images, upload to OpenAI, get file ID, and inject the file ID in the message
       const conversationContext: string[] = [];
 
+      if (messageToSendAdditionalContext) {
+        conversationContext.push(`Please consider the following as context before answering to the new message in this conversation, marked with "=> NEW MESSAGE" below:\n${messageToSendAdditionalContext}`);
+      }
+
       if (contextMessagesToSend.length > 0) {
+        let messagesIntroduction = "";
+        if (messageToSendAdditionalContext) {
+          messagesIntroduction = `Additionally, please consider as context that this conversation has had the following messages.`;
+        } else {
+          messagesIntroduction = `Please consider as context that this conversation has had the following messages.`;
+        }
+
         conversationContext.push(
-          `Please consider as context that this conversation has had the following messages. The first one is the first message that the user sent to the conversation, followed by up to the latest 10 messages sent in the conversation. Each message in the list starts with "=>", followed by the sender type ('user' or 'assistant'), the message type ('text', 'image', or 'citation'), and the message contents. If the message is an image, the content will be an image file ID that is already available to you. The messages are separated by two new lines, and, in the end, you'll find the message you have to respond to marked with "=> NEW MESSAGE":\n`,
+          `${messagesIntroduction} The first one is the first message that the user sent to the conversation, followed by up to the latest 10 messages sent in the conversation. Each message in the list starts with "=>", followed by the sender type ('user' or 'assistant'), the message type ('text', 'image', or 'citation'), and the message contents. If the message is an image, the content will be an image file ID that is already available to you. The messages are separated by two new lines. And, at the end, you'll find the message you have to respond to marked with "=> NEW MESSAGE":\n`,
         );
 
         for (const contextMessage of contextMessagesToSend) {

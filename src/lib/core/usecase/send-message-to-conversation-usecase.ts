@@ -16,7 +16,7 @@ export default class BrowserSendMessageToConversationUseCase implements SendMess
   }
 
   async execute(request: TSendMessageToConversationRequest): Promise<void> {
-    const { researchContextExternalID, conversationID, messageToSendContent, messageToSendTimestamp } = request;
+    const { researchContextExternalID, conversationID, messageToSendContent, messageToSendTimestamp, messageToSendAdditionalContext } = request;
 
     // 1. Prepare message context to send to agent
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -71,7 +71,7 @@ export default class BrowserSendMessageToConversationUseCase implements SendMess
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const sendMessageToAgentDTO = await this.agentGateway.sendMessage(prepareMessageDTO.data, messageToSendRegistered);
+    const sendMessageToAgentDTO = await this.agentGateway.sendMessage(prepareMessageDTO.data, messageToSendRegistered, messageToSendAdditionalContext);
     if (!sendMessageToAgentDTO.success) {
       await this.presenter.presentError({
         status: "error",

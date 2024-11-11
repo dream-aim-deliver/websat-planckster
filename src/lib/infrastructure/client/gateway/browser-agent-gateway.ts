@@ -62,11 +62,12 @@ export default class BrowserAgentGateway implements AgentGatewayOutputPort<TOpen
       };
     }
   }
-  async sendMessage(context: { assistantID: string; messagesToSend: TMessage[] }, message: TMessage): Promise<TSendMessageDTO> {
+  async sendMessage(context: { assistantID: string; messagesToSend: TMessage[] }, message: TMessage, messageToSendAdditionalContext?: string): Promise<TSendMessageDTO> {
     try {
       const dto = await this.api.gateways.agent.sendMessage.mutate({
         context,
         message,
+        messageToSendAdditionalContext,
       });
       this.logger.debug({ dto }, `Successfully retrieved response from server for sending message to conversation`);
 
