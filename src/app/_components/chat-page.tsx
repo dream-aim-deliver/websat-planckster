@@ -19,7 +19,7 @@ export function ChatClientPageSkeleton() {
   return (
     <ChatPage
       messages={[]}
-      onSendMessage={(messsage: string) => {
+      onSendMessage={() => {
         console.log("Loading, please wait...");
       }}
     />
@@ -29,7 +29,7 @@ export function ChatClientPageSkeleton() {
 export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForConversationViewModel; researchContextExternalID: string; researchContextID: number; conversationID: number }) {
   const [listMessagesViewModel, setListMessagesViewModel] = useState<TListMessagesForConversationViewModel>(props.listMessagesViewModel);
 
-  const [sendMessageViewModel, setSendMessaageViewModel] = useState<TSendMessageToConversationViewModel>({
+  const [sendMessageViewModel, setSendMessageViewModel] = useState<TSendMessageToConversationViewModel>({
     status: "request",
     researchContextID: props.researchContextID,
     conversationID: props.conversationID,
@@ -82,7 +82,7 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
           conversationID: props.conversationID,
           messageContent: message,
         } as TSendMessageToConversationViewModel,
-        setSendMessaageViewModel,
+        setSendMessageViewModel,
       );
 
       const controller = clientContainer.get<BrowserSendMessageToConversationController>(CONTROLLERS.SEND_MESSAGE_TO_CONVERSATION_CONTROLLER);
@@ -122,7 +122,7 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
     return (
       <ChatPage
         messages={[]}
-        onSendMessage={(messsage: string) => {
+        onSendMessage={() => {
           console.log("Loading, please wait...");
         }}
       />
