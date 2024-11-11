@@ -18,7 +18,7 @@ export default class CreateResearchContextUsecase implements CreateResearchConte
   }
 
   async execute(request: TCreateResearchContextRequest): Promise<void> {
-    const { title, description, sourceDataList } = request;
+    const { title, description, sourceDataList, agentSystemInstructions } = request;
 
     // If there are no files, return an error
     if (sourceDataList.length === 0) {
@@ -54,7 +54,7 @@ export default class CreateResearchContextUsecase implements CreateResearchConte
     const nonVectorStoreFiles = createVectorStoreDTO.data.unsupportedFiles;
 
     // 2. Create an agent, linking it to the vector store, and the non-vector store files (if any)
-    const createAgentDTO = await this.agentGateway.createAgent(title, description, vectorStoreID, nonVectorStoreFiles);
+    const createAgentDTO = await this.agentGateway.createAgent(title, description, vectorStoreID, nonVectorStoreFiles, agentSystemInstructions);
     if (!createAgentDTO.success) {
       this.presenter.presentError({
         status: "error",

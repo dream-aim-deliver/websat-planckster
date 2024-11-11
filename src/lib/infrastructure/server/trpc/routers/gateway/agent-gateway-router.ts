@@ -16,6 +16,7 @@ export const agentGatewayRouter = createTRPCRouter({
         researchContextDescription: z.string(),
         vectorStoreID: z.string(),
         additionalFiles: z.array(RemoteFileSchema).optional(),
+        agentSystemInstructions: z.string().optional(),
       }),
     )
     .mutation(async ({ input }): Promise<TCreateAgentDTO> => {
@@ -25,7 +26,7 @@ export const agentGatewayRouter = createTRPCRouter({
       try {
         const agentGateway = serverContainer.get<OpenAIAgentGateway>(GATEWAYS.AGENT_GATEWAY);
 
-        const dto = await agentGateway.createAgent(input.researchContextTitle, input.researchContextDescription, input.vectorStoreID, input.additionalFiles);
+        const dto = await agentGateway.createAgent(input.researchContextTitle, input.researchContextDescription, input.vectorStoreID, input.additionalFiles, input.agentSystemInstructions);
 
         return dto;
       } catch (error) {

@@ -11,6 +11,7 @@ export interface TBrowserCreateResearchContextControllerParameters {
   title: string;
   description: string;
   sourceDataList: RemoteFile[];
+  agentSystemInstructions?: string;
 }
 
 @injectable()
@@ -25,6 +26,7 @@ export default class BrowserCreateResearchContextController {
         title: params.title,
         description: params.description,
         sourceDataList: params.sourceDataList,
+        agentSystemInstructions: params.agentSystemInstructions,
       });
     } catch (error) {
       const err = error as Error;
@@ -39,7 +41,7 @@ export default class BrowserCreateResearchContextController {
       };
       params.response.update(viewModel);
     } finally {
-      if(params.response.value.status === "error") {
+      if (params.response.value.status === "error") {
         await new Promise((resolve) => setTimeout(resolve, 4000));
         params.response.update({
           status: "request",
