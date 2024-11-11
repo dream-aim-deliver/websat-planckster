@@ -1,7 +1,8 @@
 "use client";
-import { ChatPage } from "@maany_shr/rage-ui-kit";
+
+import { ChatPage, useToast } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type Signal } from "~/lib/core/entity/signals";
 import { type TListMessagesForConversationViewModel } from "~/lib/core/view-models/list-messages-for-conversation-view-model";
 import { type TSendMessageToConversationViewModel } from "~/lib/core/view-models/send-message-to-conversation-view-model";
@@ -104,6 +105,18 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
     console.log("Sending message: ", message);
     mutation.mutate(message);
   };
+
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (sendMessageViewModel.status === "error") {
+      toast({
+        title: "Error sending the message",
+        description: sendMessageViewModel.message,
+        variant: "error",
+      });
+    }
+  }, [sendMessageViewModel]);
 
   if (listMessagesViewModel.status === "request") {
     return (
