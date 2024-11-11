@@ -28,9 +28,15 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
     this.logger = loggerFactory("OpenAIAgentGateway");
   }
 
-  async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string, additionalFiles?: RemoteFile[]): Promise<TCreateAgentDTO> {
-    const instructions = `You are an expert data analyst specialized working in the research context with title '${researchContextTitle}'. This research context has the following description \"'${researchContextDescription}'\". You have also been assigned some files and you have access to scraped data and some results produced by us in your vector store. Some of these are images in different formats (e.g., JPG, JPEG, PNG, etc.), assigned to you via normal code interpreter. Other files have been assigned to you via a vector store. So please consider this anytime the user asks you about files you have access to.
-    You will help me and my team explore and analyze the datasets that we have augmented. If you do not find an answer in the data and files available to you, please explicitly state that you do not have enough information. You have access to a code interpreter to generate insights from the data, and a file search tool to find relevant datasets.`; // TODO: discuss this
+  async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string, additionalFiles?: RemoteFile[], agentSystemInstructions?: string): Promise<TCreateAgentDTO> {
+    let instructions: string;
+    if (agentSystemInstructions) {
+      instructions = agentSystemInstructions;
+    } else {
+      instructions = `You are an expert data analyst specialized working in the research context with title '${researchContextTitle}'. This research context has the following description \"'${researchContextDescription}'\". You have also been assigned some files and you have access to scraped data and some results produced by us in your vector store. Some of these are images in different formats (e.g., JPG, JPEG, PNG, etc.), assigned to you via normal code interpreter. Other files have been assigned to you via a vector store. So please consider this anytime the user asks you about files you have access to.
+      You will help me and my team explore and analyze the datasets that we have augmented. If you do not find an answer in the data and files available to you, please explicitly state that you do not have enough information. You have access to a code interpreter to generate insights from the data, and a file search tool to find relevant datasets.`; // TODO: discuss this
+    }
+
     const model = "gpt-4o";
     const agentName = generateOpenAIAssistantName();
     this.logger.info({ additionalFiles }, "DEBUG: Agent creation -- additional files");
@@ -54,11 +60,9 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
 
       await this.openai.beta.assistants.update(openaiAgent.id, {
         tool_resources: {
-          file_search: {
-            
-          }
-        }
-      })
+          file_search: {},
+        },
+      });
 
       this.logger.info({ openaiAgent }, "Agent created");
       return {
@@ -145,7 +149,7 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
       }
 
       const kpAllMessages: MessageBase_Input[] = listMessagesKPViewModel.message_list;
-  
+
       let messagesToSend: TMessage[] = [];
 
       if (kpAllMessages.length > 0) {

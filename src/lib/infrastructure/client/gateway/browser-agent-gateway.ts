@@ -19,13 +19,14 @@ export default class BrowserAgentGateway implements AgentGatewayOutputPort<TOpen
     this.logger = this.loggerFactory("AgentGateway");
   }
 
-  async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string, additionalFiles?: RemoteFile[]): Promise<TCreateAgentDTO> {
+  async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string, additionalFiles?: RemoteFile[], agentSystemInstructions?: string): Promise<TCreateAgentDTO> {
     try {
       const dto = this.api.gateways.agent.create.mutate({
         researchContextTitle,
         researchContextDescription,
         vectorStoreID,
         additionalFiles,
+        agentSystemInstructions,
       });
       return dto;
     } catch (error) {
