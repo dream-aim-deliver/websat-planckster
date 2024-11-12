@@ -48,6 +48,7 @@ import type CaseStudyRepositoryOutputPort from "~/lib/core/ports/secondary/case-
 import BrowserCaseStudyUsecase from "~/lib/core/usecase/case-study-usecase";
 import BrowserCaseStudyPresenter from "../../presenter/browser-case-study-presenter";
 import BrowserSDACaseStudyRepository from "../../repository/browser-case-study-repository";
+import BrowserCaseStudyController from "../../controller/browser-case-study-controller";
 
 const clientContainer = new Container();
 
@@ -86,6 +87,7 @@ clientContainer.bind(CONTROLLERS.LIST_MESSAGES_FOR_CONVERSATION_CONTROLLER).to(B
 clientContainer.bind(CONTROLLERS.LIST_RESEARCH_CONTEXTS_CONTROLLER).to(BrowserListResearchContextsController);
 clientContainer.bind(CONTROLLERS.LIST_SOURCE_DATA_CONTROLLER).to(BrowserListSourceDataController);
 clientContainer.bind(CONTROLLERS.SEND_MESSAGE_TO_CONVERSATION_CONTROLLER).to(BrowserSendMessageToConversationController);
+clientContainer.bind(CONTROLLERS.CASE_STUDY_CONTROLLER).to(BrowserCaseStudyController);
 
 /** USECASE FACTORY */
 /* eslint-disable  */
