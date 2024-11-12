@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
 import { Container, type interfaces } from "inversify";
-import { CONTROLLERS, GATEWAYS, TRPC, USECASE_FACTORY, UTILS } from "./client-ioc-symbols";
+import { CONTROLLERS, GATEWAYS, REPOSITORY, TRPC, USECASE_FACTORY, UTILS } from "./client-ioc-symbols";
 import { api } from "~/lib/infrastructure/client/trpc/react-api";
 import { api as vanilla } from "~/lib/infrastructure/client/trpc/vanilla-api";
 import BrowserFileUploadController from "../../controller/browser-file-upload-controller";
@@ -42,6 +42,12 @@ import BrowserFileDownloadUsecase from "~/lib/core/usecase/file-download-usecase
 import BrowserFileDownloadPresenter from "../../presenter/browser-file-download-presenter";
 import BrowserConversationGateway from "../../gateway/browser-conversation-gateway";
 import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
+import { type CaseStudyInputPort } from "~/lib/core/ports/primary/case-study-primary-ports";
+import { type TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
+import type CaseStudyRepositoryOutputPort from "~/lib/core/ports/secondary/case-study-repository-output-port";
+import BrowserCaseStudyUsecase from "~/lib/core/usecase/case-study-usecase";
+import BrowserCaseStudyPresenter from "../../presenter/browser-case-study-presenter";
+import BrowserSDACaseStudyRepository from "../../repository/browser-case-study-repository";
 
 const clientContainer = new Container();
 
@@ -59,6 +65,7 @@ clientContainer.bind(TRPC.REACT_CLIENT_COMPONENTS_API).toConstantValue(api);
 clientContainer.bind(TRPC.VANILLA_CLIENT).toConstantValue(vanilla);
 
 /** REPOSITORY */
+clientContainer.bind(REPOSITORY.CASE_STUDY_REPOSITORY).to(BrowserSDACaseStudyRepository);
 
 /** GATEWAYS */
 clientContainer.bind(GATEWAYS.AGENT_GATEWAY).to(BrowserAgentGateway).inSingletonScope();
@@ -117,6 +124,21 @@ clientContainer.bind<interfaces.Factory<FileDownloadInputPort>>(USECASE_FACTORY.
   const presenter = new BrowserFileDownloadPresenter(response, loggerFactory);
   const sourceDataGateway = context.container.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
   const usecase = new BrowserFileDownloadUsecase(presenter, sourceDataGateway);
+  return usecase;
+});
+
+clientContainer.bind<interfaces.Factory<CaseStudyInputPort>>(USECASE_FACTORY.CASE_STUDY).toFactory<CaseStudyInputPort, [Signal<TCaseStudyViewModel>]>((context: interfaces.Context) => (response: Signal<TCaseStudyViewModel>) => {
+  const loggerFactory = context.container.get<(module: string) => Logger<ILogObj>>(UTILS.LOGGER_FACTORY);
+
+  const presenter = new BrowserCaseStudyPresenter(response, loggerFactory);
+
+  const researchContextGateway = context.container.get<ResearchContextGatewayOutputPort>(GATEWAYS.RESEARCH_CONTEXT_GATEWAY);
+  const agentGateway = context.container.get<AgentGatewayOutputPort<any>>(GATEWAYS.AGENT_GATEWAY);
+  const vectorStoreGateway = context.container.get<VectorStoreOutputPort>(GATEWAYS.VECTOR_STORE_GATEWAY);
+  const sourceDataGateway = context.container.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
+  const caseStudyRepository = context.container.get<CaseStudyRepositoryOutputPort>(REPOSITORY.CASE_STUDY_REPOSITORY);
+
+  const usecase = new BrowserCaseStudyUsecase(presenter, researchContextGateway, agentGateway, vectorStoreGateway, sourceDataGateway, caseStudyRepository);
   return usecase;
 });
 

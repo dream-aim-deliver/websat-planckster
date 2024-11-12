@@ -41,7 +41,8 @@ export const GATEWAYS = {
     KERNEL_RESEARCH_CONTEXT_GATEWAY: Symbol.for('KERNEL_RESEARCH_CONTEXT_GATEWAY'),
 }
 
-export const REPOSITORY = {
+export const REPOSITORIES = {
+    SDA_CASE_STUDY_REPOSITORY: Symbol.for('SDA_CASE_STUDY_REPOSITORY'),
 }
 
 export const CONTROLLERS = {
