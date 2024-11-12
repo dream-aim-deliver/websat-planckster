@@ -8,6 +8,7 @@ export const UTILS = {
 }
 
 export const USECASE_FACTORY ={
+    CASE_STUDY: Symbol("CASE_STUDY"),
     CREATE_RESEARCH_CONTEXT: Symbol("CREATE_RESEARCH_CONTEXT"),
     FILE_UPLOAD: Symbol("FILE_UPLOAD"),
     FILE_DOWNLOAD: Symbol("FILE_DOWNLOAD"),
@@ -15,6 +16,7 @@ export const USECASE_FACTORY ={
 }
 
 export const REPOSITORY = {
+    CASE_STUDY_REPOSITORY: Symbol("CASE_STUDY_REPOSITORY"),
 }
 
 export const GATEWAYS = {

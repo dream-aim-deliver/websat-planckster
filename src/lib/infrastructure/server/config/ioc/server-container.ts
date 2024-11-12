@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "reflect-metadata";
 import { Container, type interfaces } from "inversify";
-import { CONSTANTS, GATEWAYS, KERNEL, OPENAI, TRPC, UTILS, CONTROLLERS, USECASE_FACTORY } from "./server-ioc-symbols";
+import { CONSTANTS, GATEWAYS, KERNEL, OPENAI, TRPC, UTILS, CONTROLLERS, USECASE_FACTORY, REPOSITORIES } from "./server-ioc-symbols";
 import { authOptions } from "~/lib/infrastructure/server/config/auth/next-auth-config";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import NextAuthGateway from "~/lib/infrastructure/server/gateway/next-auth-gateway";
@@ -44,6 +44,7 @@ import { type ListResearchContextsInputPort } from "~/lib/core/ports/primary/lis
 import { type TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 import ListResearchContextsUsecase from "~/lib/core/usecase/list-research-context-usecase";
 import ListResearchContextsPresenter from "../../presenter/list-research-contexts-presenter";
+import SDACaseStudyRepository from "../../repository/sda-case-study-repository";
 
 const serverContainer = new Container();
 
@@ -79,6 +80,7 @@ serverContainer.bind(GATEWAYS.RESEARCH_CONTEXT_GATEWAY).to(ResearchContextGatewa
 serverContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(OpenAIVectorStoreGateway);
 
 /** REPOSITORY */
+serverContainer.bind(REPOSITORIES.SDA_CASE_STUDY_REPOSITORY).to(SDACaseStudyRepository);
 
 /** CONTROLLERS */
 serverContainer.bind(CONTROLLERS.CREATE_CONVERSATION_CONTROLLER).to(CreateConversationController);

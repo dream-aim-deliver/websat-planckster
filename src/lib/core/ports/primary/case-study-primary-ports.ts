@@ -9,7 +9,7 @@ export interface CaseStudyInputPort {
 
 export interface CaseStudyOutputPort {
   response: Signal<TCaseStudyViewModel>;
-  presentProgress(progress: TCaseStudyProgressResponse): void;
-  presentSuccess(success: TCaseStudySuccessResponse): void;
-  presentError(error: TCaseStudyErrorResponse): void;
+  presentProgress(usecaseProgressResponse: TCaseStudyProgressResponse): void;
+  presentSuccess(usecaseSuccessResponse: TCaseStudySuccessResponse): void;
+  presentError(usecaseErrorResponse: TCaseStudyErrorResponse): void;
 }

@@ -12,6 +12,7 @@ import { sourceDataGatewayRouter } from "./routers/gateway/source-data-gateway-r
 import { vectorStoreGatewayRouter } from "./routers/gateway/vector-store-gateway-router";
 
 import { kernelPlancksterHealthCheckRouter } from "./routers/kernel/health-check";
+import { caseStudyRepositoryRouter } from "./routers/repositories/case-study-repository-router";
 
 /**
  * This is the primary router for your server.
@@ -31,6 +32,9 @@ export const appRouter = createTRPCRouter({
     researchContext: researchContextGatewayRouter,
     sourceData: sourceDataGatewayRouter,
     vectorStore: vectorStoreGatewayRouter,
+  },
+  repositories: {
+    caseStudy: caseStudyRepositoryRouter,
   },
   kernel: {
     healthCheck: kernelPlancksterHealthCheckRouter,

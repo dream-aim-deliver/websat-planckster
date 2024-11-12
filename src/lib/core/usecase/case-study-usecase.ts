@@ -8,7 +8,7 @@ import type SourceDataGatewayOutputPort from "../ports/secondary/source-data-gat
 import type VectorStoreOutputPort from "../ports/secondary/vector-store-output-port";
 import { type TCaseStudyRequest } from "../usecase-models/case-study-usecase-models";
 
-export default class CaseStudyUsecase implements CaseStudyInputPort {
+export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
   presenter: CaseStudyOutputPort;
   researchContextGateway: ResearchContextGatewayOutputPort;
   agentGateway: AgentGatewayOutputPort<any>;

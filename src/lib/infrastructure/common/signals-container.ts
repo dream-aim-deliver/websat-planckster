@@ -13,15 +13,18 @@ import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-sourc
 import type { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
 import type { TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
 import { type TSendMessageToConversationViewModel } from "~/lib/core/view-models/send-message-to-conversation-view-model";
+import { type TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
 
 const signalsContainer = new Container();
 
 signalsContainer
   .bind<interfaces.Factory<Signal<TCreateResearchContextViewModel>>>(SIGNAL_FACTORY.CREATE_RESEARCH_CONTEXT)
-  .toFactory<Signal<TCreateResearchContextViewModel>, [TCreateResearchContextViewModel, (value: TCreateResearchContextViewModel) => void]>((context: interfaces.Context) => (initialValue: TCreateResearchContextViewModel, update?: (value: TCreateResearchContextViewModel) => void) => {
+  .toFactory<
+    Signal<TCreateResearchContextViewModel>,
+    [TCreateResearchContextViewModel, (value: TCreateResearchContextViewModel) => void]
+  >((context: interfaces.Context) => (initialValue: TCreateResearchContextViewModel, update?: (value: TCreateResearchContextViewModel) => void) => {
     return new Signal<TCreateResearchContextViewModel>("CreateResearchContext", "Display the status of a Create Research Context feature", initialValue, update);
   });
-
 
 signalsContainer
   .bind<interfaces.Factory<Signal<TFileUploadViewModel>>>(SIGNAL_FACTORY.KERNEL_FILE_UPLOAD)
@@ -70,14 +73,26 @@ signalsContainer
 
 signalsContainer
   .bind<interfaces.Factory<Signal<TListResearchContextsViewModel>>>(SIGNAL_FACTORY.KERNEL_LIST_RESEARCH_CONTEXTS)
-  .toFactory<Signal<TListResearchContextsViewModel>, [TListResearchContextsViewModel, (value: TListResearchContextsViewModel) => void]>((context: interfaces.Context) => (initialValue: TListResearchContextsViewModel, update?: (value: TListResearchContextsViewModel) => void) => {
+  .toFactory<
+    Signal<TListResearchContextsViewModel>,
+    [TListResearchContextsViewModel, (value: TListResearchContextsViewModel) => void]
+  >((context: interfaces.Context) => (initialValue: TListResearchContextsViewModel, update?: (value: TListResearchContextsViewModel) => void) => {
     return new Signal<TListResearchContextsViewModel>("KernelListResearchContexts", "Display the status of the List Research Contexts feature", initialValue, update);
   });
 
 signalsContainer
   .bind<interfaces.Factory<Signal<TSendMessageToConversationViewModel>>>(SIGNAL_FACTORY.SEND_MESSAGE_TO_CONVERSATION)
-  .toFactory<Signal<TSendMessageToConversationViewModel>, [TSendMessageToConversationViewModel, (value: TSendMessageToConversationViewModel) => void]>((context: interfaces.Context) => (initialValue: TSendMessageToConversationViewModel, update?: (value: TSendMessageToConversationViewModel) => void) => {
+  .toFactory<
+    Signal<TSendMessageToConversationViewModel>,
+    [TSendMessageToConversationViewModel, (value: TSendMessageToConversationViewModel) => void]
+  >((context: interfaces.Context) => (initialValue: TSendMessageToConversationViewModel, update?: (value: TSendMessageToConversationViewModel) => void) => {
     return new Signal<TSendMessageToConversationViewModel>("SendMessageToConversation", "Display the status of the Send Message to Conversation feature", initialValue, update);
+  });
+
+signalsContainer
+  .bind<interfaces.Factory<Signal<TCaseStudyViewModel>>>(SIGNAL_FACTORY.SDA_CASE_STUDY)
+  .toFactory<Signal<TCaseStudyViewModel>, [TCaseStudyViewModel, (value: TCaseStudyViewModel) => void]>((context: interfaces.Context) => (initialValue: TCaseStudyViewModel, update?: (value: TCaseStudyViewModel) => void) => {
+    return new Signal<TCaseStudyViewModel>("SDACaseStudy", "Display the status of a Case Study feature", initialValue, update);
   });
 
 export default signalsContainer;
