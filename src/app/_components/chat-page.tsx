@@ -14,6 +14,7 @@ import { type TBrowserSendMessageToConversationControllerParameters } from "~/li
 import type BrowserSendMessageToConversationController from "~/lib/infrastructure/client/controller/browser-send-message-to-conversation-controller";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
+import { TMessage } from "~/lib/core/entity/kernel-models";
 
 export function ChatClientPageSkeleton() {
   return (
@@ -29,12 +30,17 @@ export function ChatClientPageSkeleton() {
 export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForConversationViewModel; researchContextExternalID: string; researchContextID: number; conversationID: number }) {
   const [listMessagesViewModel, setListMessagesViewModel] = useState<TListMessagesForConversationViewModel>(props.listMessagesViewModel);
 
-  const [sendMessageViewModel, setSendMessageViewModel] = useState<TSendMessageToConversationViewModel>({
+  const emptySendMessageViewModel: TSendMessageToConversationViewModel = {
     status: "request",
     researchContextID: props.researchContextID,
     conversationID: props.conversationID,
     messageContent: "",
-  });
+  };
+
+  const [sendMessageViewModel, setSendMessageViewModel] = useState<TSendMessageToConversationViewModel>(emptySendMessageViewModel);
+
+  // A state for displaying a message that is being processed
+  const [requestedMessage, setRequestedMessage] = useState<TMessage | null>();
 
   const queryClient = useQueryClient();
 
@@ -103,7 +109,28 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
 
   const handleSendMessage = (message: string) => {
     console.log("Sending message: ", message);
+    // Set the message posting request as ongoing
+    setSendMessageViewModel(emptySendMessageViewModel);
+    setRequestedMessage({ message_contents: [{ content: message, content_type: "text" }], sender: "", sender_type: "user" });
     mutation.mutate(message);
+  };
+
+  const getMessagesWithStatus = () => {
+    if (listMessagesViewModel.status !== "success") return [];
+
+    const allMessages = listMessagesViewModel.messages.map((message) => ({
+      ...message,
+      status: "success",
+    }));
+
+    if (sendMessageViewModel.status !== "success" && requestedMessage) {
+      allMessages.push({
+        ...requestedMessage,
+        status: sendMessageViewModel.status === "error" ? "error" : "request",
+      });
+    }
+
+    return allMessages;
   };
 
   const { toast } = useToast();
@@ -130,7 +157,7 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
   } else if (listMessagesViewModel.status === "error") {
     throw new Error(listMessagesViewModel.message);
   } else if (listMessagesViewModel.status === "success") {
-    return <ChatPage messages={listMessagesViewModel.messages} onSendMessage={handleSendMessage} />;
+    return <ChatPage messages={getMessagesWithStatus()} onSendMessage={handleSendMessage} />;
   }
 
   throw new Error("Invalid state");
