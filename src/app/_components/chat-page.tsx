@@ -111,7 +111,13 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
     console.log("Sending message: ", message);
     // Set the message posting request as ongoing
     setSendMessageViewModel(emptySendMessageViewModel);
-    setRequestedMessage({ message_contents: [{ content: message, content_type: "text" }], sender: "", sender_type: "user" });
+    setRequestedMessage({
+      message_contents: [{ content: message, content_type: "text" }],
+      sender: "",
+      sender_type: "user",
+      // In contrast to the request timestamp, this one is expected in milliseconds
+      created_at: `${Date.now()}`,
+    });
     mutation.mutate(message);
   };
 
