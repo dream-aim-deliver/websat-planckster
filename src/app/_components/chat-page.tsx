@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatPage, useToast } from "@maany_shr/rage-ui-kit";
+import { ChatPage, useToast, TMessage as TPageMessage } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { type Signal } from "~/lib/core/entity/signals";
@@ -17,14 +17,7 @@ import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-containe
 import { TMessage } from "~/lib/core/entity/kernel-models";
 
 export function ChatClientPageSkeleton() {
-  return (
-    <ChatPage
-      messages={[]}
-      onSendMessage={() => {
-        console.log("Loading, please wait...");
-      }}
-    />
-  );
+  return <ChatPage messages={[]} />;
 }
 
 export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForConversationViewModel; researchContextExternalID: string; researchContextID: number; conversationID: number }) {
@@ -121,10 +114,12 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
     mutation.mutate(message);
   };
 
-  const getMessagesWithStatus = () => {
+  const isMessageBeingSent = (requestedMessage && sendMessageViewModel.status === "request") || sendMessageViewModel.status === "progress";
+
+  const getMessagesWithStatus = (): TPageMessage[] => {
     if (listMessagesViewModel.status !== "success") return [];
 
-    const allMessages = listMessagesViewModel.messages.map((message) => ({
+    const allMessages: TPageMessage[] = listMessagesViewModel.messages.map((message) => ({
       ...message,
       status: "success",
     }));
@@ -132,7 +127,7 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
     if (sendMessageViewModel.status !== "success" && requestedMessage) {
       allMessages.push({
         ...requestedMessage,
-        status: sendMessageViewModel.status === "error" ? "error" : "request",
+        status: isMessageBeingSent ? "request" : "error",
       });
     }
 
@@ -152,18 +147,11 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
   }, [sendMessageViewModel]);
 
   if (listMessagesViewModel.status === "request") {
-    return (
-      <ChatPage
-        messages={[]}
-        onSendMessage={() => {
-          console.log("Loading, please wait...");
-        }}
-      />
-    );
+    return <ChatPage messages={[]} />;
   } else if (listMessagesViewModel.status === "error") {
     throw new Error(listMessagesViewModel.message);
   } else if (listMessagesViewModel.status === "success") {
-    return <ChatPage messages={getMessagesWithStatus()} onSendMessage={handleSendMessage} />;
+    return <ChatPage messages={getMessagesWithStatus()} onSendMessage={isMessageBeingSent ? undefined : handleSendMessage} />;
   }
 
   throw new Error("Invalid state");
