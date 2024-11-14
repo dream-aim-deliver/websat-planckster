@@ -2,9 +2,9 @@ module.exports = {
     apps: [
         {
             name: "websat-planckster",
-            script: "npm install && npm run dev",
+            script: "npm install && npm run start",
             env: {
-                NODE_ENV: "development",
+                NODE_ENV: "production",
                 PRIMARY_USER_USERNAME: "{{ PRIMARY_USER_USERNAME }}",
                 PRIMARY_USER_PASSWORD: "{{ PRIMARY_USER_PASSWORD }}",
                 NEXTAUTH_SECRET: "{{ NEXTAUTH_SECRET }}",
