@@ -15,6 +15,7 @@ import type BrowserSendMessageToConversationController from "~/lib/infrastructur
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
 import { TMessage } from "~/lib/core/entity/kernel-models";
+import { DEFAULT_RETRIES, DEFAULT_RETRY_DELAY } from "~/app/queries";
 
 export function ChatClientPageSkeleton() {
   return <ChatPage messages={[]} />;
@@ -37,7 +38,7 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
 
   const queryClient = useQueryClient();
 
-  const { isFetching, isLoading, isError } = useQuery<Signal<TListMessagesForConversationViewModel>>({
+  useQuery<Signal<TListMessagesForConversationViewModel>>({
     queryKey: [`list-messages-for-conversation#${props.conversationID}`],
     queryFn: async () => {
       const signalFactory = signalsContainer.get<(initialValue: TListMessagesForConversationViewModel, update?: (value: TListMessagesForConversationViewModel) => void) => Signal<TListMessagesForConversationViewModel>>(
@@ -62,13 +63,11 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
 
   const mutation = useMutation({
     mutationKey: ["send-message-to-conversation"],
-    retry: 3,
-    retryDelay: 3000,
-
+    retry: DEFAULT_RETRIES,
+    retryDelay: DEFAULT_RETRY_DELAY,
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: [`list-messages-for-conversation#${props.conversationID}`] });
     },
-
     mutationFn: async (message: string) => {
       const signalFactory = signalsContainer.get<(initialValue: TSendMessageToConversationViewModel, update?: (value: TSendMessageToConversationViewModel) => void) => Signal<TSendMessageToConversationViewModel>>(
         SIGNAL_FACTORY.SEND_MESSAGE_TO_CONVERSATION,
@@ -114,7 +113,7 @@ export function ChatClientPage(props: { listMessagesViewModel: TListMessagesForC
     mutation.mutate(message);
   };
 
-  const isMessageBeingSent = (requestedMessage && sendMessageViewModel.status === "request") || sendMessageViewModel.status === "progress";
+  const isMessageBeingSent = requestedMessage && (sendMessageViewModel.status === "request" || sendMessageViewModel.status === "progress");
 
   const getMessagesWithStatus = (): TPageMessage[] => {
     if (listMessagesViewModel.status !== "success") return [];
