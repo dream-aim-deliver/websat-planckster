@@ -59,7 +59,7 @@ export default async function ListResearchContextsServerPage() {
 
   return (
     <div className="flex grow flex-col gap-4">
-      <ListResearchContextsClientPage viewModel={response.value} clientSourceData={listSourceDataForClientResponse.value.sourceData} />
+      <ListResearchContextsClientPage researchContextsViewModel={response.value} sourceDataViewModel={listSourceDataForClientResponse.value} />
     </div>
   );
 }

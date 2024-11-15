@@ -7,18 +7,24 @@ import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import type { Signal } from "~/lib/core/entity/signals";
 import { useRouter } from "next/navigation";
 import type { SelectableSourceDataRow } from "node_modules/@maany_shr/rage-ui-kit/dist/components/table/SelectableSourceDataAGGrid";
-import type { RemoteFile } from "~/lib/core/entity/file";
-import { createResearchContextMutation, DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, queryResearchContexts } from "~/app/queries";
+import { createResearchContextMutation, DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, queryResearchContexts, querySources } from "~/app/queries";
+import { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 
-export function ListResearchContextsClientPage(props: { viewModel: TListResearchContextsViewModel; clientSourceData: RemoteFile[] }) {
-  const [listResearchContextsViewModel, setListResearchContextsViewModel] = useState<TListResearchContextsViewModel>(props.viewModel);
+export function ListResearchContextsClientPage(props: { researchContextsViewModel: TListResearchContextsViewModel; sourceDataViewModel: TListSourceDataViewModel }) {
+  const [listResearchContextsViewModel, setListResearchContextsViewModel] = useState<TListResearchContextsViewModel>(props.researchContextsViewModel);
   const [createResearchContextViewModel, setCreateResearchContextViewModel] = useState<TCreateResearchContextViewModel>({
     status: "request",
     researchContextName: "",
   } as TCreateResearchContextViewModel);
+  const [listSourceDataViewModel, setListSourceDataViewModel] = useState<TListSourceDataViewModel>(props.sourceDataViewModel);
 
   const router = useRouter();
   const queryClient = useQueryClient();
+
+  useQuery<Signal<TListSourceDataViewModel>>({
+    queryKey: ["list-source-data"],
+    queryFn: querySources(setListSourceDataViewModel),
+  });
 
   useQuery<Signal<TListResearchContextsViewModel>>({
     queryKey: ["list-research-contexts"],
@@ -63,11 +69,15 @@ export function ListResearchContextsClientPage(props: { viewModel: TListResearch
     listComponent = <ListResearchContextCard items={cards} />;
   }
 
+  if (listSourceDataViewModel.status !== "success") {
+    throw Error("Couldn't load the sources");
+  }
+
   return (
     <>
       {listComponent}
       <CreateResearchContextDialog
-        clientFiles={props.clientSourceData}
+        clientFiles={listSourceDataViewModel.sourceData}
         onSubmit={(researchContextName: string, researchContextDescription: string, sourceData: SelectableSourceDataRow[]) => {
           createMutation.mutate({
             title: researchContextName,
