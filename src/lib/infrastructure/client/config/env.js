@@ -7,10 +7,12 @@ import { z } from "zod";
 
 const clientEnvSchema = z.object({
   //   NEXT_PUBLIC_CLIENTVAR: z.string(),
+  NEXT_PUBLIC_APP_URL: z.string().url(),
 });
 
 const runtimeEnv = {
   //   NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+  NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
 };
 
 let env = runtimeEnv;
