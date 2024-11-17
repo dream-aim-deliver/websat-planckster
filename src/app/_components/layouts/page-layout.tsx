@@ -1,29 +1,42 @@
-"use client"
-import {Header, Toaster, SiteFooter} from "@maany_shr/rage-ui-kit"
+"use client";
+import { Header, Toaster, SiteFooter, Button } from "@maany_shr/rage-ui-kit";
 import Link from "next/link";
+import { SessionProvider, signOut, useSession } from "next-auth/react";
 
-export const PageLayout = (props: {children: React.ReactNode}) =>{
-    const headerLinks = [
-        <Link key="research_contexts_link" href="/">Research Contexts</Link>,
-        <Link key="sources_link" href="/sources">Sources</Link>,
-        <a key="docs_link" href="https://dream-aim-deliver.github.io/planckster-docs/" target="_blank">Documentation</a>
-    ];
+const LayoutHeader = () => {
+  const headerLinks = [
+    <Link key="research_contexts_link" href="/">
+      Research Contexts
+    </Link>,
+    <Link key="sources_link" href="/sources">
+      Sources
+    </Link>,
+    <a key="docs_link" href="https://dream-aim-deliver.github.io/planckster-docs/" target="_blank">
+      Documentation
+    </a>,
+    <Button key="sign_out" label="Sign out" onClick={() => signOut()} />,
+  ];
 
-    return (
-        <div className="min-h-screen flex flex-col box-shadow shadow-lg bg-neutral-50 dark:bg-neutral-900">
-            {/* Header */}
-            <Header>{headerLinks}</Header>
+  const { status } = useSession();
 
-            {/* Main content */}
-            <main className="flex flex-grow container mx-auto p-4">
-                {props.children}
-            </main>
+  return <Header>{status === "authenticated" ? headerLinks : undefined}</Header>;
+};
 
-            <Toaster/>
+export const PageLayout = (props: { children: React.ReactNode }) => {
+  return (
+    <div className="box-shadow flex min-h-screen flex-col bg-neutral-50 shadow-lg dark:bg-neutral-900">
+      {/* Header */}
+      <SessionProvider>
+        <LayoutHeader />
+      </SessionProvider>
 
-            {/* Footer */}
-            <SiteFooter />
-        </div>
+      {/* Main content */}
+      <main className="container mx-auto flex flex-grow p-4">{props.children}</main>
 
-    )
-}
+      <Toaster />
+
+      {/* Footer */}
+      <SiteFooter />
+    </div>
+  );
+};
