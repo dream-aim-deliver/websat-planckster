@@ -11,6 +11,7 @@ export const ClimateMetadataSuccessDTOSchema = ClimateKeyframeArraySchema.extend
 });
 
 export const CaseStudyMetadataSuccessDTOSchema = z.discriminatedUnion("caseStudy", [ClimateMetadataSuccessDTOSchema, DisasterMetadataSuccessDTOSchema]);
+export type TCaseStudyMetadataSuccessDTO = z.infer<typeof CaseStudyMetadataSuccessDTOSchema>;
 
 export const GetCaseStudyMetadataDTOSchema = DTOSchemaFactory(CaseStudyMetadataSuccessDTOSchema, BaseErrorDTOSchema);
 
