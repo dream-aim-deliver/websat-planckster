@@ -20,6 +20,9 @@ export const DisasterRowSchema = z.object({
 });
 export type TDisasterDatum = z.infer<typeof DisasterRowSchema>;
 
+export const CaseStudyRowSchema = z.union([ClimateRowSchema, DisasterRowSchema]);
+export type TCaseStudyRow = z.infer<typeof CaseStudyRowSchema>;
+
 /**
  * Base schemas for metadata coming from the secondary side
  */
@@ -29,6 +32,12 @@ export const ImageErrorSchema = z.object({
   errorMessage: z.string(),
 });
 export type TImageError = z.infer<typeof ImageErrorSchema>;
+
+export const MetadataImageSchema = z.object({
+  relativePath: z.string(),
+  description: z.string(),
+});
+export type TMetadataImage = z.infer<typeof MetadataImageSchema>;
 
 export const ClimateMetadatumSchema = z.object({
   timestamp: z.string(),
@@ -62,7 +71,7 @@ export const ClimateCaseStudyMetadataSchema = z.object({
 export type TClimateCaseStudyMetadata = z.infer<typeof ClimateCaseStudyMetadataSchema>;
 
 export const DisasterCaseStudyMetadataSchema = z.object({
-  caseStudy: z.literal("disaster-monitoring"),
+  caseStudy: z.literal("disaster-tracking"),
   relativePathsForAgent: z.array(z.string()),
   data: z.array(DisasterMetadatumSchema),
 });
@@ -88,7 +97,6 @@ export const ClimateKeyframeSchema = z.object({
       description: z.string(),
     })
     .or(ImageErrorSchema),
-  caseStudy: z.literal("climate-monitoring"), // TBD: Seems redundant
   data: z.array(ClimateRowSchema),
 });
 export type TClimateKeyframe = z.infer<typeof ClimateKeyframeSchema>;
@@ -102,12 +110,11 @@ export const DisasterKeyframeSchema = z.object({
       description: z.string(),
     })
     .or(ImageErrorSchema),
-  caseStudy: z.literal("disaster-tracking"), // TBD: Seems redundant
   data: z.array(DisasterRowSchema),
 });
 export type TDisasterKeyframe = z.infer<typeof DisasterKeyframeSchema>;
 
-export const KeyframeSchema = z.discriminatedUnion("caseStudy", [ClimateKeyframeSchema, DisasterKeyframeSchema]);
+export const KeyframeSchema = z.union([ClimateKeyframeSchema, DisasterKeyframeSchema]);
 export type TKeyframe = z.infer<typeof KeyframeSchema>;
 
 /**
