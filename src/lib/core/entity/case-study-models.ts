@@ -113,7 +113,6 @@ export type TKeyframe = z.infer<typeof KeyframeSchema>;
 /**
  * Part of the output from the usecase to the primary side
  */
-
 export const ClimateKeyframeArraySchema = z.object({
   caseStudy: z.literal("climate-monitoring"),
   keyFrames: z.array(ClimateKeyframeSchema),
@@ -130,21 +129,3 @@ export type TDisasterKeyframeArray = z.infer<typeof DisasterKeyframeArraySchema>
 
 export const KeyframeArraySchema = z.discriminatedUnion("caseStudy", [ClimateKeyframeArraySchema, DisasterKeyframeArraySchema]);
 export type TKeyframeArray = z.infer<typeof KeyframeArraySchema>;
-
-/**
- * To send from the repository to the usecase
- * TODO: Cleanup the naming conventions, it's getting confusing
- */
-
-export const DisasterKeyframeArrayMetadataSchema = DisasterKeyframeArraySchema.extend({
-  relativePathsForAgent: z.array(z.string()),
-});
-export type TDisasterKeyframeArrayMetadata = z.infer<typeof DisasterKeyframeArrayMetadataSchema>;
-
-export const ClimateKeyframeArrayMetadataSchema = ClimateKeyframeArraySchema.extend({
-  relativePathsForAgent: z.array(z.string()),
-});
-export type TClimateKeyframeArrayMetadata = z.infer<typeof ClimateKeyframeArrayMetadataSchema>;
-
-export const KeyframeArrayMetadataSchema = z.discriminatedUnion("caseStudy", [ClimateKeyframeArrayMetadataSchema, DisasterKeyframeArrayMetadataSchema]);
-export type TKeyframeArrayMetadata = z.infer<typeof KeyframeArrayMetadataSchema>;
