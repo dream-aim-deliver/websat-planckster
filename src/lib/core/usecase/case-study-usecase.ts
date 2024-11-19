@@ -1,16 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type RemoteFile } from "../entity/file";
+import { type TConversation, type TResearchContext } from "../entity/kernel-models";
 import { type CaseStudyInputPort, type CaseStudyOutputPort } from "../ports/primary/case-study-primary-ports";
 import type AgentGatewayOutputPort from "../ports/secondary/agent-gateway-output-port";
 import type CaseStudyRepositoryOutputPort from "../ports/secondary/case-study-repository-output-port";
+import type ConversationGatewayOutputPort from "../ports/secondary/conversation-gateway-output-port";
 import type ResearchContextGatewayOutputPort from "../ports/secondary/research-context-gateway-output-port";
 import type SourceDataGatewayOutputPort from "../ports/secondary/source-data-gateway-output-port";
 import type VectorStoreOutputPort from "../ports/secondary/vector-store-output-port";
 import { type TCaseStudyRequest } from "../usecase-models/case-study-usecase-models";
+import { type TKeyframeArray } from "../entity/case-study-models";
 
 export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
   presenter: CaseStudyOutputPort;
   researchContextGateway: ResearchContextGatewayOutputPort;
+  conversationGateway: ConversationGatewayOutputPort;
   agentGateway: AgentGatewayOutputPort<any>;
   vectorStore: VectorStoreOutputPort;
   sourceDataGateway: SourceDataGatewayOutputPort;
@@ -18,6 +22,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
   constructor(
     presenter: CaseStudyOutputPort,
     researchContextsGateway: ResearchContextGatewayOutputPort,
+    conversationGateway: ConversationGatewayOutputPort,
     agentGateway: AgentGatewayOutputPort<any>,
     vectorStore: VectorStoreOutputPort,
     sourceDataGateway: SourceDataGatewayOutputPort,
@@ -25,6 +30,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
   ) {
     this.presenter = presenter;
     this.researchContextGateway = researchContextsGateway;
+    this.conversationGateway = conversationGateway;
     this.agentGateway = agentGateway;
     this.vectorStore = vectorStore;
     this.sourceDataGateway = sourceDataGateway;
@@ -34,19 +40,31 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
   async execute(request: TCaseStudyRequest): Promise<void> {
     const { caseStudyName, tracerID, jobID } = request;
 
-    // for Research Context:
-    const researchContextTitle = `${caseStudyName}_${tracerID}_${jobID}`;
-    // for Source Data:
-    const sourceDataPathStem = `${caseStudyName}/${tracerID}/${jobID}/`;
-
-    // 1. List all research contexts
-    const listRCDTO = await this.researchContextGateway.list();
-
-    if (!listRCDTO.success) {
+    // Ensure that the case study name is one of the two we support
+    if (caseStudyName !== "climate-monitoring" && caseStudyName !== "disaster-tracking") {
       this.presenter.presentError({
         status: "error",
         operation: "usecase#case-study",
-        message: listRCDTO.data.message,
+        message: "Case study name not recognized.",
+        context: {
+          caseStudyName,
+          tracerID,
+          jobID,
+        },
+      });
+      return;
+    }
+
+    const researchContextTitle = `${caseStudyName}_${tracerID}_${jobID}`;
+
+    // 1. List all research contexts
+    const listResearchContextDTO = await this.researchContextGateway.list();
+
+    if (!listResearchContextDTO.success) {
+      this.presenter.presentError({
+        status: "error",
+        operation: "usecase#case-study",
+        message: listResearchContextDTO.data.message,
         context: {
           tracerID,
           jobID,
@@ -58,11 +76,11 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
     this.presenter.presentProgress({
       status: "progress",
       message: "Research contexts listed. Searching for the case study...",
-      context: listRCDTO,
+      context: listResearchContextDTO,
     });
 
     // 2. Find the one that matches the name
-    const filteredRCs = listRCDTO.data.filter((rc) => rc.title === researchContextTitle);
+    const filteredRCs = listResearchContextDTO.data.filter((rc) => rc.title === researchContextTitle);
 
     if (filteredRCs.length > 1) {
       this.presenter.presentError({
@@ -78,7 +96,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
       return;
     }
 
-    let foundRC = null;
+    let foundRC: TResearchContext | null = null;
     // 3. If found, put it aside to return after we've gotten the map files
     if (filteredRCs.length === 1 && filteredRCs[0]) {
       if (filteredRCs[0].status === "active") {
@@ -119,9 +137,51 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
       return;
     }
 
+    // 4. Similar logic with conversation, if we found a Research Context
+    let foundConversation: TConversation | null = null;
+    if (foundRC) {
+      const listConversationsDTO = await this.conversationGateway.listConversations(foundRC.id);
+
+      if (!listConversationsDTO.success) {
+        this.presenter.presentError({
+          status: "error",
+          operation: "usecase#case-study",
+          message: listConversationsDTO.data.message,
+          context: {
+            caseStudyName,
+            tracerID,
+            jobID,
+          },
+        });
+        return;
+      }
+
+      this.presenter.presentProgress({
+        status: "progress",
+        message: "Conversations listed. Searching for the case study...",
+        context: listConversationsDTO,
+      });
+
+      const filteredConversations: TConversation[] = listConversationsDTO.data.filter((conv) => conv.title === researchContextTitle);
+
+      // NOTE: in this case, picking just the last one
+      if (filteredConversations.length > 0) {
+        foundConversation = filteredConversations[filteredConversations.length - 1]!;
+        this.presenter.presentProgress({
+          status: "progress",
+          message: "Conversation found. Continuing...",
+          context: {
+            caseStudyName,
+            tracerID,
+            jobID,
+          },
+        });
+      }
+    }
+
     this.presenter.presentProgress({
       status: "progress",
-      message: "Research Context not found. Preparing source data to create a new one...",
+      message: "Preparing metadata and source data...",
       context: {
         caseStudyName,
         tracerID,
@@ -129,7 +189,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
       },
     });
 
-    // 4. Parse case study metadata, and get the map source data and agent source data relative paths
+    // 4. Parse case study metadata to get the segregated source data relative paths
     const caseStudyMetadataDTO = await this.caseStudyRepository.getCaseStudyMetadata(caseStudyName, tracerID, jobID);
 
     if (!caseStudyMetadataDTO.success) {
@@ -146,9 +206,103 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
       return;
     }
 
-    const { mapSourceDataRelativePaths, agentSourceDataRelativePath } = caseStudyMetadataDTO.data;
+    const { caseStudy, keyFrames, expirationTime, relativePathsForAgent } = caseStudyMetadataDTO.data;
 
-    // 5. List all SourceData, and...
+    if (caseStudy !== caseStudyName) {
+      this.presenter.presentError({
+        status: "error",
+        operation: "usecase#case-study",
+        message: "Case study name does not match the metadata's.",
+        context: {
+          caseStudyName,
+          tracerID,
+          jobID,
+        },
+      });
+      return;
+    }
+
+    if (relativePathsForAgent.length === 0) {
+      this.presenter.presentError({
+        status: "error",
+        operation: "usecase#case-study",
+        message: "No source data found for the agent in the metadata.",
+        context: {
+          caseStudyName,
+          tracerID,
+          jobID,
+        },
+      });
+      return;
+    }
+
+    const keyframeArray = {
+      caseStudy,
+      keyFrames,
+      expirationTime,
+    } as TKeyframeArray;
+
+    // 5. Prepare the agent source data
+    // If the Research Context was found already, we return it with a conversation
+    if (foundRC) {
+      if (foundConversation) {
+        this.presenter.presentSuccess({
+          status: "success",
+          keyframeArray: keyframeArray,
+          researchContext: foundRC,
+          conversation: foundConversation,
+        });
+        return;
+      } else {
+        // create a new conversation
+        this.presenter.presentProgress({
+          status: "progress",
+          message: "Creating a new conversation...",
+          context: {
+            caseStudyName,
+            tracerID,
+            jobID,
+          },
+        });
+
+        const createConversationDTO = await this.conversationGateway.createConversation(foundRC.id, researchContextTitle);
+
+        if (!createConversationDTO.success) {
+          this.presenter.presentError({
+            status: "error",
+            operation: "usecase#case-study",
+            message: createConversationDTO.data.message,
+            context: {
+              caseStudyName,
+              tracerID,
+              jobID,
+            },
+          });
+          return;
+        }
+
+        this.presenter.presentSuccess({
+          status: "success",
+          keyframeArray: keyframeArray,
+          researchContext: foundRC,
+          conversation: createConversationDTO.data,
+        });
+        return;
+      }
+    }
+
+    // Else, we continue to create a new Research Context
+    this.presenter.presentProgress({
+      status: "progress",
+      message: " Preparing agent source data...",
+      context: {
+        caseStudyName,
+        tracerID,
+        jobID,
+      },
+    });
+
+    // 5.2 List all source data and filter the ones that are for the agent, using the relative paths
     const listSourceDataDTO = await this.sourceDataGateway.listSourceDataForClient();
 
     if (!listSourceDataDTO.success) {
@@ -165,156 +319,11 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
       return;
     }
 
-    const allSourceData = listSourceDataDTO.data;
-
-    // 5.1 Look for sourceDataForMap and sourceDataForAgent, if any of those are not found, return an error; then, download the map files to the server and prepare mapLocalFiles to return
-    const mapRemoteFiles = allSourceData.filter((sd): sd is RemoteFile => mapSourceDataRelativePaths.includes(sd.relativePath) && sd.type === "remote");
-
-    if (mapRemoteFiles.length !== mapSourceDataRelativePaths.length) {
-      this.presenter.presentError({
-        status: "error",
-        operation: "usecase#case-study",
-        message: "Not all map source data found.",
-        context: {
-          caseStudyName,
-          tracerID,
-          jobID,
-        },
-      });
-      return;
-    } else if (mapRemoteFiles.length === 0) {
-      this.presenter.presentError({
-        status: "error",
-        operation: "usecase#case-study",
-        message: "No map source data found.",
-        context: {
-          caseStudyName,
-          tracerID,
-          jobID,
-        },
-      });
-      return;
-    }
-
-    const mapLocalFilesDTO = await this.caseStudyRepository.downloadMapFiles(mapRemoteFiles);
-    if (!mapLocalFilesDTO.success) {
-      this.presenter.presentError({
-        status: "error",
-        operation: "usecase#case-study",
-        message: mapLocalFilesDTO.data.message,
-        context: {
-          caseStudyName,
-          tracerID,
-          jobID,
-        },
-      });
-      return;
-    }
-    const mapLocalFiles = mapLocalFilesDTO.data;
-    if (mapLocalFiles.length === 0) {
-      this.presenter.presentError({
-        status: "error",
-        operation: "usecase#case-study",
-        message: "No map local files found after triggering download.",
-        context: {
-          caseStudyName,
-          tracerID,
-          jobID,
-        },
-      });
-      return;
-    }
-
-    // If the Research Context was found, and we have the map files, we can return the Research Context and the map files
-    if (foundRC) {
-      this.presenter.presentSuccess({
-        status: "success",
-        researchContext: foundRC,
-        mapLocalFiles,
-      });
-      return;
-    }
-
-    // Else, we continue to create a new Research Context
-    this.presenter.presentProgress({
-      status: "progress",
-      message: "Map source data prepared and files downloaded. Preparing agent source data...",
-      context: {
-        caseStudyName,
-        tracerID,
-        jobID,
-      },
-    });
-
-    // 5.2 Loop for the explicit agentSourceData
-    const explicitAgentSourceData = allSourceData.filter((sd) => sd.relativePath === agentSourceDataRelativePath);
-
-    if (explicitAgentSourceData.length === 0) {
-      this.presenter.presentError({
-        status: "error",
-        operation: "usecase#case-study",
-        message: "No explicit agent source data, as per metadata of the case study, found.",
-        context: {
-          caseStudyName,
-          tracerID,
-          jobID,
-        },
-      });
-      return;
-    } else if (explicitAgentSourceData.length > 1) {
-      this.presenter.presentError({
-        status: "error",
-        operation: "usecase#case-study",
-        message: "More than one explicit agent source data, as per metadata of the case study, found.",
-        context: {
-          caseStudyName,
-          tracerID,
-          jobID,
-        },
-      });
-      return;
-    }
-
-    // 5.3 Filter all whose relative paths' stem match the naming; call this set (A)
-    const caseStudySourceData = allSourceData.filter((sd) => sd.relativePath.startsWith(sourceDataPathStem));
-
-    // 5.4 Segregate into two groups: (B) mapSourceData; and (C) constructed from (A) by filtering out (B), all images, and adding sourceDataForAgent
-
-    // TODO: to discuss this ugly filter. Would be better if we had some sort of "type" field in the SourceData model
-    const imageFileExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp", ".svg", ".ico", ".heif", ".heic"];
-
-    const caseStudySourceDataWithoutMap = caseStudySourceData.filter((sd) => !mapSourceDataRelativePaths.includes(sd.relativePath) && !imageFileExtensions.some((ext) => sd.relativePath.endsWith(ext)));
-
-    if (caseStudySourceDataWithoutMap.length === 0) {
-      this.presenter.presentError({
-        status: "error",
-        operation: "usecase#case-study",
-        message: "No source data found for the case study.",
-        context: {
-          caseStudyName,
-          tracerID,
-          jobID,
-        },
-      });
-      return;
-    }
-
-    const agentSourceData = caseStudySourceDataWithoutMap.concat(explicitAgentSourceData);
-
-    const agentRemoteFiles: RemoteFile[] = agentSourceData.filter((file): file is RemoteFile => file.type === "remote");
-
-    if (agentRemoteFiles.length === 0) {
-      this.presenter.presentError({
-        status: "error",
-        operation: "usecase#case-study",
-        message: "After filering, no source data was left to create the agent.",
-        context: {
-          caseStudyName,
-          tracerID,
-          jobID,
-        },
-      });
-      return;
+    const agentRemoteFiles: RemoteFile[] = [];
+    for (const sourceData of listSourceDataDTO.data) {
+      if (relativePathsForAgent.includes(sourceData.relativePath) && sourceData.type === "remote") {
+        agentRemoteFiles.push(sourceData);
+      }
     }
 
     this.presenter.presentProgress({
@@ -385,11 +394,31 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
       return;
     }
 
-    // 8. Return the Research Context and the map files
+    this.presenter.presentProgress({
+      status: "progress",
+      message: "Research context created. Creating conversation...",
+      context: createResearchContextDTO,
+    });
+
+    // 8. Create a new conversation
+    const createConversationDTO = await this.conversationGateway.createConversation(createResearchContextDTO.data.id, researchContextTitle);
+
+    if (!createConversationDTO.success) {
+      this.presenter.presentError({
+        status: "error",
+        operation: "usecase#case-study",
+        message: createConversationDTO.data.message,
+        context: createConversationDTO.data,
+      });
+      return;
+    }
+
+    // 9. Return the Research Context and the map files
     this.presenter.presentSuccess({
       status: "success",
+      keyframeArray: keyframeArray,
       researchContext: createResearchContextDTO.data,
-      mapLocalFiles: mapLocalFiles,
+      conversation: createConversationDTO.data,
     });
   }
 }

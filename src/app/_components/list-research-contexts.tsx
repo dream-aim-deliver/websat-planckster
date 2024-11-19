@@ -8,7 +8,7 @@ import type { Signal } from "~/lib/core/entity/signals";
 import { useRouter } from "next/navigation";
 import type { SelectableSourceDataRow } from "node_modules/@maany_shr/rage-ui-kit/dist/components/table/SelectableSourceDataAGGrid";
 import { createResearchContextMutation, DEFAULT_RETRIES, DEFAULT_RETRY_DELAY, queryResearchContexts, querySources } from "~/app/queries";
-import { TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
+import { type TListSourceDataViewModel } from "~/lib/core/view-models/list-source-data-view-models";
 
 export function ListResearchContextsClientPage(props: { researchContextsViewModel: TListResearchContextsViewModel; sourceDataViewModel: TListSourceDataViewModel }) {
   const [listResearchContextsViewModel, setListResearchContextsViewModel] = useState<TListResearchContextsViewModel>(props.researchContextsViewModel);

@@ -1,15 +1,6 @@
-import { z } from "zod";
+import { type z } from "zod";
 import { BaseErrorDTOSchema, DTOSchemaFactory } from "~/sdk/core/dto";
-import { LocalFileSchema } from "../entity/file";
+import { KeyframeArrayMetadataSchema } from "../entity/case-study-models";
 
-export const GetCaseStudyMetadataDTOSchema = DTOSchemaFactory(
-  z.object({
-    mapSourceDataRelativePaths: z.array(z.string()),
-    agentSourceDataRelativePath: z.string(),
-  }),
-  BaseErrorDTOSchema,
-);
+export const GetCaseStudyMetadataDTOSchema = DTOSchemaFactory(KeyframeArrayMetadataSchema, BaseErrorDTOSchema);
 export type GetCaseStudyMetadataDTO = z.infer<typeof GetCaseStudyMetadataDTOSchema>;
-
-export const DownloadMapFilesDTOSchema = DTOSchemaFactory(z.array(LocalFileSchema), BaseErrorDTOSchema);
-export type DownloadMapFilesDTO = z.infer<typeof DownloadMapFilesDTOSchema>;
