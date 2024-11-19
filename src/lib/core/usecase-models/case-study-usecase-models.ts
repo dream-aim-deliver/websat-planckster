@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { ResearchContextSchema } from "../entity/kernel-models";
-import { LocalFileSchema } from "../entity/file";
+import { ConversationSchema, ResearchContextSchema } from "../entity/kernel-models";
+import { KeyframeArraySchema } from "../entity/case-study-models";
 
 export const CaseStudyRequestSchema = z.object({
   caseStudyName: z.string(),
@@ -11,8 +11,9 @@ export type TCaseStudyRequest = z.infer<typeof CaseStudyRequestSchema>;
 
 export const CaseStudySuccessResponseSchema = z.object({
   status: z.literal("success"),
+  keyframeArray: KeyframeArraySchema,
   researchContext: ResearchContextSchema,
-  mapLocalFiles: z.array(LocalFileSchema),
+  conversation: ConversationSchema,
 });
 export type TCaseStudySuccessResponse = z.infer<typeof CaseStudySuccessResponseSchema>;
 

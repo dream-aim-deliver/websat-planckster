@@ -35,8 +35,9 @@ export default class BrowserCaseStudyPresenter implements CaseStudyOutputPort {
     this.logger.info({ usecaseSuccessResponse }, `Successfully executed case study.`);
     this.response.update({
       status: "success",
+      keyframeArray: usecaseSuccessResponse.keyframeArray,
       researchContext: usecaseSuccessResponse.researchContext,
-      mapLocalFiles: usecaseSuccessResponse.mapLocalFiles,
+      conversation: usecaseSuccessResponse.conversation,
     });
   }
 }

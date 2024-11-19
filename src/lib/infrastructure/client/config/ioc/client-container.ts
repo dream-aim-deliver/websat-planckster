@@ -135,12 +135,13 @@ clientContainer.bind<interfaces.Factory<CaseStudyInputPort>>(USECASE_FACTORY.CAS
   const presenter = new BrowserCaseStudyPresenter(response, loggerFactory);
 
   const researchContextGateway = context.container.get<ResearchContextGatewayOutputPort>(GATEWAYS.RESEARCH_CONTEXT_GATEWAY);
+  const conversationGateway = context.container.get<ConversationGatewayOutputPort>(GATEWAYS.CONVERSATION_GATEWAY);
   const agentGateway = context.container.get<AgentGatewayOutputPort<any>>(GATEWAYS.AGENT_GATEWAY);
   const vectorStoreGateway = context.container.get<VectorStoreOutputPort>(GATEWAYS.VECTOR_STORE_GATEWAY);
   const sourceDataGateway = context.container.get<SourceDataGatewayOutputPort>(GATEWAYS.KERNEL_SOURCE_DATA_GATEWAY);
   const caseStudyRepository = context.container.get<CaseStudyRepositoryOutputPort>(REPOSITORY.CASE_STUDY_REPOSITORY);
 
-  const usecase = new BrowserCaseStudyUsecase(presenter, researchContextGateway, agentGateway, vectorStoreGateway, sourceDataGateway, caseStudyRepository);
+  const usecase = new BrowserCaseStudyUsecase(presenter, researchContextGateway, conversationGateway, agentGateway, vectorStoreGateway, sourceDataGateway, caseStudyRepository);
   return usecase;
 });
 

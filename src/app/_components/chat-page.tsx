@@ -1,6 +1,6 @@
 "use client";
 
-import { ChatPage, useToast, TMessage as TPageMessage } from "@maany_shr/rage-ui-kit";
+import { ChatPage, useToast, type TMessage as TPageMessage } from "@maany_shr/rage-ui-kit";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { type Signal } from "~/lib/core/entity/signals";
@@ -14,7 +14,7 @@ import { type TBrowserSendMessageToConversationControllerParameters } from "~/li
 import type BrowserSendMessageToConversationController from "~/lib/infrastructure/client/controller/browser-send-message-to-conversation-controller";
 import signalsContainer from "~/lib/infrastructure/common/signals-container";
 import { SIGNAL_FACTORY } from "~/lib/infrastructure/common/signals-ioc-container";
-import { TMessage } from "~/lib/core/entity/kernel-models";
+import { type TMessage } from "~/lib/core/entity/kernel-models";
 import { DEFAULT_RETRIES, DEFAULT_RETRY_DELAY } from "~/app/queries";
 
 export function ChatClientPageSkeleton() {
