@@ -106,6 +106,8 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
             return `### START OF FILE: '${file.name}' ###\n${fileContent}\n### END OF FILE ###\n`;
           })
           .join("\n");
+
+          this.logger.info({ concatenatedJSONFileContent }, "DEBUG: Concatenated JSON file content");
       }
 
       let concatenatedTxtFileContent = null;
@@ -116,6 +118,8 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
             return `### START OF FILE: '${file.name}' ###\n${fileContent}\n### END OF FILE ###\n`;
           })
           .join("\n");
+
+          this.logger.info({ concatenatedTxtFileContent }, "DEBUG: Concatenated TXT file content");
       }
 
       const scratchDir = process.env.SCRATCH_DIR ?? "/tmp";
