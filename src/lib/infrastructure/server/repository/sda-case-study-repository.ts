@@ -30,7 +30,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
     this.logger = this.loggerFactory("SDACaseStudyRepository");
   }
 
-  async getCaseStudyMetadata(caseStudyName: string, tracerID: string, jobID: string): Promise<GetCaseStudyMetadataDTO> {
+  async getCaseStudyMetadata(caseStudyName: string, tracerID: string, jobID: number): Promise<GetCaseStudyMetadataDTO> {
     try {
       // TODO: concrete implementation of get case study metadata, after we standardize the scrapers
 
