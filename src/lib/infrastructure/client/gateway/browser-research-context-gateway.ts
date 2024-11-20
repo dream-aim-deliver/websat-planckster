@@ -16,7 +16,19 @@ export default class BrowserResearchContextGateway implements ResearchContextGat
     this.logger = this.loggerFactory("BrowserSourceDataRepository");
   }
   async list(): Promise<TListResearchContextDTO> {
-    throw new Error("Method not implemented.");
+    try {
+      const dto = await this.api.gateways.researchContext.list.query();
+      return dto;
+    } catch (error) {
+      this.logger.error({ error }, "Could not invoke the server side feature to get client data for download");
+      return {
+        success: false,
+        data: {
+          operation: "researchContextRouter#list",
+          message: "Could not invoke the server side feature to get client data for download",
+        },
+      };
+    }
   }
   async get(researchContextID: string): Promise<TGetResearchContextDTO> {
     throw new Error("Method not implemented.");

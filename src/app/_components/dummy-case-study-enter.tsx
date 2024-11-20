@@ -18,7 +18,7 @@ export function DummyCaseStudyEnter() {
     retry: DEFAULT_RETRIES,
     retryDelay: DEFAULT_RETRY_DELAY,
     onSuccess: async () => {
-      alert("Case study created successfully");
+      alert("Processed!");
     },
     mutationFn: caseStudyMutation(setCaseStudyViewModel),
   });
@@ -47,6 +47,13 @@ export function DummyCaseStudyEnter() {
           <div>Recovered case study name: {caseStudyViewModel.keyframeArray.caseStudy}</div>
         </div>
       )}
+
+      {caseStudyViewModel.status === "error" && <div>Error: {caseStudyViewModel.message}</div>}
+
+      {caseStudyViewModel.status === "progress" && <div>Processing...</div>}
+
+      {caseStudyViewModel.status === "request" && <div>Waiting for request...</div>}
+
     </div>
   );
 }

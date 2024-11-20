@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../../server";
-import type { TCreateResearchContextDTO } from "~/lib/core/dto/research-context-gateway-dto";
+import type { TCreateResearchContextDTO, TListResearchContextDTO } from "~/lib/core/dto/research-context-gateway-dto";
 import type { Logger } from "pino";
 import serverContainer from "../../../config/ioc/server-container";
 import { GATEWAYS, UTILS } from "../../../config/ioc/server-ioc-symbols";
@@ -36,4 +36,24 @@ export const researchContextGatewayRouter = createTRPCRouter({
         };
       }
     }),
+
+  list: protectedProcedure.query(async (): Promise<TListResearchContextDTO> => {
+    const loggerFactory = serverContainer.get<(module: string) => Logger>(UTILS.LOGGER_FACTORY);
+    const logger = loggerFactory("ListResearchContext TRPC Router");
+
+    try {
+      const gateway = serverContainer.get<KernelResearchContextGateway>(GATEWAYS.KERNEL_RESEARCH_CONTEXT_GATEWAY);
+      const dto = await gateway.list();
+      return dto;
+    } catch (error) {
+      logger.error({ error }, "Could not invoke the server side feature to list research context");
+      return {
+        success: false,
+        data: {
+          operation: "researchContextGatewayRouter#list",
+          message: "Could not invoke the server side feature to list research context",
+        },
+      };
+    }
+  }),
 });
