@@ -107,7 +107,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
           })
           .join("\n");
 
-          this.logger.info({ concatenatedJSONFileContent }, "DEBUG: Concatenated JSON file content");
+        this.logger.info({ concatenatedJSONFileContent }, "DEBUG: Concatenated JSON file content");
       }
 
       let concatenatedTxtFileContent = null;
@@ -119,7 +119,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
           })
           .join("\n");
 
-          this.logger.info({ concatenatedTxtFileContent }, "DEBUG: Concatenated TXT file content");
+        this.logger.info({ concatenatedTxtFileContent }, "DEBUG: Concatenated TXT file content");
       }
 
       const scratchDir = process.env.SCRATCH_DIR ?? "/tmp";
@@ -133,7 +133,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
           purpose: "assistants",
         });
 
-        const remoteFile: RemoteFile = {
+        const remoteFileNonVS: RemoteFile = {
           id: openaiFile.id,
           type: "remote",
           provider: "openai#non-vector-store",
@@ -141,8 +141,17 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
           relativePath: concatenatedJSONFilePath,
           createdAt: `${new Date().toISOString()}`,
         };
+        uploadedFiles.push(remoteFileNonVS);
 
-        uploadedFiles.push(remoteFile);
+        const remoteFileVS: RemoteFile = {
+          id: openaiFile.id,
+          type: "remote",
+          provider: "openai#vector-store",
+          name: "concatenated-json-files.json",
+          relativePath: concatenatedJSONFilePath,
+          createdAt: `${new Date().toISOString()}`,
+        };
+        uploadedFiles.push(remoteFileVS);
         fs.unlinkSync(concatenatedJSONFilePath);
       }
 
@@ -155,7 +164,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
           purpose: "assistants",
         });
 
-        const remoteFile: RemoteFile = {
+        const remoteFileNonVS: RemoteFile = {
           id: openaiFile.id,
           type: "remote",
           provider: "openai#non-vector-store",
@@ -163,8 +172,18 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
           relativePath: concatenatedTxtFilePath,
           createdAt: `${new Date().toISOString()}`,
         };
+        uploadedFiles.push(remoteFileNonVS);
 
-        uploadedFiles.push(remoteFile);
+        const remoteFileVS: RemoteFile = {
+          id: openaiFile.id,
+          type: "remote",
+          provider: "openai#vector-store",
+          name: "concatenated-txt-files.txt",
+          relativePath: concatenatedTxtFilePath,
+          createdAt: `${new Date().toISOString()}`,
+        };
+        uploadedFiles.push(remoteFileVS);
+
         fs.unlinkSync(concatenatedTxtFilePath);
       }
 
