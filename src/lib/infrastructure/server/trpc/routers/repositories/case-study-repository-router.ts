@@ -12,7 +12,7 @@ export const caseStudyRepositoryRouter = createTRPCRouter({
       z.object({
         caseStudyName: z.string(),
         tracerID: z.string(),
-        jobID: z.string(),
+        jobID: z.number(),
       }),
     )
     .query(async ({ input }): Promise<GetCaseStudyMetadataDTO> => {

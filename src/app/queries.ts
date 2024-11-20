@@ -7,24 +7,26 @@ import { CONTROLLERS } from "~/lib/infrastructure/client/config/ioc/client-ioc-s
 import type { TFileDownloadViewModel } from "~/lib/core/view-models/file-download-view-model";
 import type { TFileUploadViewModel } from "~/lib/core/view-models/file-upload-view-model";
 import { type Dispatch, type SetStateAction } from "react";
-import {type TBrowserListSourceDataControllerParameters} from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
+import { type TBrowserListSourceDataControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
 import type BrowserListSourceDataController from "~/lib/infrastructure/client/controller/browser-list-source-data-controller";
-import {type TBrowserFileDownloadControllerParameters} from "~/lib/infrastructure/client/controller/browser-file-download-controller";
+import { type TBrowserFileDownloadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-download-controller";
 import type BrowserFileDownloadController from "~/lib/infrastructure/client/controller/browser-file-download-controller";
-import {type TBrowserFileUploadControllerParameters} from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
+import { type TBrowserFileUploadControllerParameters } from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
 import type BrowserFileUploadController from "~/lib/infrastructure/client/controller/browser-file-upload-controller";
 import type { TListConversationsViewModel } from "~/lib/core/view-models/list-conversations-view-model";
-import {type TBrowserListConversationsControllerParameters} from "~/lib/infrastructure/client/controller/browser-list-conversations-controller";
+import { type TBrowserListConversationsControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-conversations-controller";
 import type BrowserListConversationsController from "~/lib/infrastructure/client/controller/browser-list-conversations-controller";
 import type { TCreateConversationViewModel } from "~/lib/core/view-models/create-conversation-view-model";
-import {type TBrowserCreateConversationControllerParameters} from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
+import { type TBrowserCreateConversationControllerParameters } from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
 import type BrowserCreateConversationController from "~/lib/infrastructure/client/controller/browser-create-conversation-controller";
 import type { TListResearchContextsViewModel } from "~/lib/core/view-models/list-research-contexts-view-models";
-import {type TBrowserListResearchContextsControllerParameters} from "~/lib/infrastructure/client/controller/browser-list-research-contexts-controller";
+import { type TBrowserListResearchContextsControllerParameters } from "~/lib/infrastructure/client/controller/browser-list-research-contexts-controller";
 import type BrowserListResearchContextsController from "~/lib/infrastructure/client/controller/browser-list-research-contexts-controller";
 import { type TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
 import type { SelectableSourceDataRow } from "node_modules/@maany_shr/rage-ui-kit/dist/components/table/SelectableSourceDataAGGrid";
 import type BrowserCreateResearchContextController from "~/lib/infrastructure/client/controller/browser-create-research-context-controller";
+import { TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
+import BrowserCaseStudyController from "~/lib/infrastructure/client/controller/browser-case-study-controller";
 
 export const DEFAULT_RETRIES = 3;
 export const DEFAULT_RETRY_DELAY = 3000;
@@ -183,4 +185,37 @@ const createResearchContextMutation = (setCreateResearchContextViewModel: Dispat
   await createResearchContextController.execute(controllerParameters);
 };
 
-export { querySources, downloadSourceMutation, uploadSourceMutation, queryConversations, createConversationMutation, queryResearchContexts, createResearchContextMutation };
+type CaseStudyMutationParams = {
+  caseStudyName: string;
+  tracerID: string;
+  jobID: number;
+};
+
+const caseStudyMutation = (setCaseStudyViewModel: Dispatch<SetStateAction<TCaseStudyViewModel>>) => async (request: CaseStudyMutationParams) => {
+  const caseStudyController = clientContainer.get<BrowserCaseStudyController>(CONTROLLERS.CASE_STUDY_CONTROLLER);
+  const signalFactory = signalsContainer.get<(initialValue: TCaseStudyViewModel, update?: (value: TCaseStudyViewModel) => void) => Signal<TCaseStudyViewModel>>(SIGNAL_FACTORY.SDA_CASE_STUDY);
+
+  const response = signalFactory(
+    {
+      status: "request",
+      caseStudyName: request.caseStudyName,
+      tracerID: request.tracerID,
+      jobID: request.jobID,
+    } as TCaseStudyViewModel,
+    setCaseStudyViewModel,
+  );
+
+  const controllerParameters = {
+    response: response,
+    caseStudyName: request.caseStudyName,
+    tracerID: request.tracerID,
+    jobID: request.jobID,
+  };
+
+  console.log("controllerParameters", controllerParameters);
+
+  await caseStudyController.execute(controllerParameters);
+  console.log("hello");
+};
+
+export { querySources, downloadSourceMutation, uploadSourceMutation, queryConversations, createConversationMutation, queryResearchContexts, createResearchContextMutation, caseStudyMutation };

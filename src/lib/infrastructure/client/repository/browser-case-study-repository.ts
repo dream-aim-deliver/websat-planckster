@@ -15,7 +15,7 @@ export default class BrowserSDACaseStudyRepository implements CaseStudyRepositor
     this.logger = this.loggerFactory("BrowserCaseStudyRepository");
   }
 
-  async getCaseStudyMetadata(caseStudyName: string, tracerID: string, jobID: string): Promise<GetCaseStudyMetadataDTO> {
+  async getCaseStudyMetadata(caseStudyName: string, tracerID: string, jobID: number): Promise<GetCaseStudyMetadataDTO> {
     try {
       const dto = await this.api.repositories.caseStudy.getMetadata.query({
         caseStudyName,

@@ -6,7 +6,7 @@ export const CaseStudyRequestViewModelSchema = z.object({
   status: z.enum(["request"]),
   caseStudyName: z.string(),
   tracerID: z.string(),
-  jobID: z.string(),
+  jobID: z.number(),
 });
 export type TCaseStudyRequestViewModel = z.infer<typeof CaseStudyRequestViewModelSchema>;
 

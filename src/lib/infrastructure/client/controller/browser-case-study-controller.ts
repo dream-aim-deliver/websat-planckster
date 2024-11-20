@@ -10,7 +10,7 @@ export interface TBrowserCaseStudyControllerParameters {
   response: Signal<TCaseStudyViewModel>;
   caseStudyName: string;
   tracerID: string;
-  jobID: string;
+  jobID: number;
 }
 
 @injectable()
@@ -23,8 +23,11 @@ export default class BrowserCaseStudyController {
         tracerID,
         jobID,
       };
+      console.log("BrowserCaseStudyController#execute", request);
       const usecaseFactory: (response: Signal<TCaseStudyViewModel>) => CaseStudyInputPort = clientContainer.get(USECASE_FACTORY.CASE_STUDY);
+      console.log("BrowserCaseStudyController#execute", usecaseFactory);
       const usecase = usecaseFactory(response);
+      console.log("BrowserCaseStudyController#execute", usecase);
       await usecase.execute(request);
     } catch (error) {
       const err = error as Error;

@@ -5,7 +5,7 @@ import { KeyframeArraySchema } from "../entity/case-study-models";
 export const CaseStudyRequestSchema = z.object({
   caseStudyName: z.string(),
   tracerID: z.string(),
-  jobID: z.string(),
+  jobID: z.number(),
 });
 export type TCaseStudyRequest = z.infer<typeof CaseStudyRequestSchema>;
 
