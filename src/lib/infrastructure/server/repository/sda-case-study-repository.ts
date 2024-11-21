@@ -50,7 +50,13 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
 
       const rawContent = fs.readFileSync(localPath);
 
-      const rawMetadataParseResult = CaseStudyMetadataSchema.safeParse(JSON.parse(rawContent.toString()));
+      // TODO: find a way to correctly parse file contents
+      // The downloaded content might include additional headers (Content-Disposition). The code below attempts to remove those extra lines.
+      let lines = rawContent.toString().split("\n");
+      lines = lines.slice(3, -2);
+      const cleanContent = lines.join("\n");
+
+      const rawMetadataParseResult = CaseStudyMetadataSchema.safeParse(JSON.parse(cleanContent.toString()));
 
       if (!rawMetadataParseResult.success) {
         this.logger.error({ metadata: rawContent.toString() }, "Failed to parse metadata.");

@@ -40,28 +40,6 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
   async execute(request: TCaseStudyRequest): Promise<void> {
     const { caseStudyName, tracerID, jobID } = request;
 
-    // this.presenter.presentSuccess({
-    //   status: "success",
-    //   researchContext: {
-    //     id: 1,
-    //     title: "Hello World",
-    //     description: "My description",
-    //     externalID: "3989sdfkjd",
-    //     status: "active",
-    //   },
-    //   conversation: {
-    //     id: 1,
-    //     title: "Hello World",
-    //     created_at: "24/24/24"
-    //   },
-    //   keyframeArray: {
-    //     caseStudy: "climate-monitoring",
-    //     keyFrames: [],
-    //     expirationTime: 1732181904,
-    //   }
-    // })
-    // return;
-
     // Ensure that the case study name is one of the two we support
     if (caseStudyName !== "climate-monitoring" && caseStudyName !== "disaster-tracking") {
       this.presenter.presentError({
