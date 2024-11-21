@@ -1,6 +1,6 @@
 "use client";
 
-import { CaseStudyForm, useToast } from "@maany_shr/rage-ui-kit";
+import { CaseStudyForm, CaseStudyPage, useToast } from "@maany_shr/rage-ui-kit";
 import { CaseStudyParameters } from "@maany_shr/rage-ui-kit";
 import { useEffect, useState } from "react";
 import { TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
@@ -50,9 +50,6 @@ export const ViewCaseStudy = () => {
     mutationKey: ["trigger-case-study"],
     retry: DEFAULT_RETRIES,
     retryDelay: DEFAULT_RETRY_DELAY,
-    onSuccess: async () => {
-      alert("Processed!");
-    },
     mutationFn: caseStudyMutation(setCaseStudyViewModel),
   });
 
@@ -86,5 +83,5 @@ export const ViewCaseStudy = () => {
     return <span>{caseStudyViewModel.message}</span>;
   }
 
-  return <span>Success!</span>;
+  return <CaseStudyPage info={caseStudyViewModel.keyframeArray} messages={[]} />;
 };
