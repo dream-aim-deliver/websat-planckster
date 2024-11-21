@@ -5,20 +5,9 @@ import { GATEWAYS, UTILS } from "../config/ioc/server-ioc-symbols";
 import { GetCaseStudyMetadataDTO, TCaseStudyMetadataSuccessDTO } from "~/lib/core/dto/case-study-repository-dto";
 import { RemoteFile } from "~/lib/core/entity/file";
 import fs from "fs";
-import {
-  CaseStudyMetadataSchema,
-  ClimateRowSchema,
-  DisasterRowSchema,
-  ImageErrorSchema,
-  MetadataImageSchema,
-  TCaseStudyMetadata,
-  TClimateDatum,
-  TClimateKeyframe,
-  TDisasterDatum,
-  TDisasterKeyframe,
-  TImageError,
-} from "~/lib/core/entity/case-study-models";
+import { CaseStudyMetadataSchema, ClimateRowSchema, DisasterRowSchema, ImageErrorSchema, MetadataImageSchema, TCaseStudyMetadata, TClimateKeyframe, TDisasterKeyframe, TImageError, TKeyframeImage } from "~/lib/core/entity/case-study-models";
 import type KernelPlancksterSourceDataOutputPort from "../../common/ports/secondary/kernel-planckster-source-data-output-port";
+import { ZodSchema } from "zod";
 
 @injectable()
 export default class SDACaseStudyRepository implements CaseStudyRepositoryOutputPort {
@@ -32,8 +21,6 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
 
   async getCaseStudyMetadata(caseStudyName: string, tracerID: string, jobID: number): Promise<GetCaseStudyMetadataDTO> {
     try {
-      // TODO: concrete implementation of get case study metadata, after we standardize the scrapers
-
       this.logger.info({ caseStudyName, tracerID, jobID }, "Getting case study metadata.");
 
       const metadataRelativePath = `${caseStudyName}/${tracerID}/${jobID}/metadata.json`;
@@ -81,103 +68,15 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
 
       const expirationTime = new Date(Date.now() + 60 * 60 * 1000).getTime();
 
-      let keyFrames: TClimateKeyframe[] | TDisasterKeyframe[];
+      // TODO: additional row schemas
+      const caseStudyToSchema: Record<string, ZodSchema> = {
+        "climate-monitoring": ClimateRowSchema,
+        "disaster-tracking": DisasterRowSchema,
+      };
 
-      if (caseStudy === "climate-monitoring") {
-        keyFrames = await Promise.all(
-          metadata.data.map(async (rawKeyframe) => {
-            const { timestamp, image: imageDatum, data } = rawKeyframe;
+      const RowSchema = caseStudyToSchema[caseStudy];
 
-            let image: { relativePath: string; signedUrl: string; description: string } | TImageError;
-
-            const errorImageParseResult = ImageErrorSchema.safeParse(imageDatum);
-            const metadataImageParseResult = MetadataImageSchema.safeParse(imageDatum);
-
-            if (errorImageParseResult.success) {
-              image = errorImageParseResult.data;
-            } else if (metadataImageParseResult.success) {
-              const { relativePath, description } = metadataImageParseResult.data;
-
-              const signedUrlDTO = await this.kernelSourceDataGateway.getClientDataForDownload(relativePath);
-
-              if (!signedUrlDTO.success) {
-                this.logger.error({ signedUrlDTO }, "Failed to get signed URL for image.");
-                throw new Error("Failed to get signed URL for image.");
-              }
-              image = {
-                relativePath: relativePath,
-                signedUrl: signedUrlDTO.data,
-                description: description,
-              };
-            } else {
-              this.logger.error({ imageDatum }, "Failed to parse image metadata.");
-              throw new Error("Failed to parse image metadata.");
-            }
-
-            const parsedData = data.map((item) => {
-              const result = ClimateRowSchema.safeParse(item);
-              if (!result.success) {
-                this.logger.error({ item }, "Invalid ClimateRow data.");
-                throw new Error("Invalid ClimateRow data.");
-              }
-              return result.data; // Validated TClimateDatum
-            });
-
-            return {
-              timestamp: timestamp,
-              image: image,
-              data: parsedData as TClimateDatum[],
-            } as TClimateKeyframe;
-          }),
-        );
-      } else if (caseStudy === "disaster-tracking") {
-        keyFrames = await Promise.all(
-          metadata.data.map(async (rawKeyframe) => {
-            const { timestamp, image: imageDatum, data } = rawKeyframe;
-
-            let image: { relativePath: string; signedUrl: string; description: string } | TImageError;
-
-            const errorImageParseResult = ImageErrorSchema.safeParse(imageDatum);
-            const metadataImageParseResult = MetadataImageSchema.safeParse(imageDatum);
-
-            if (errorImageParseResult.success) {
-              image = errorImageParseResult.data;
-            } else if (metadataImageParseResult.success) {
-              const { relativePath, description } = metadataImageParseResult.data;
-
-              const signedUrlDTO = await this.kernelSourceDataGateway.getClientDataForDownload(relativePath);
-
-              if (!signedUrlDTO.success) {
-                this.logger.error({ signedUrlDTO }, "Failed to get signed URL for image.");
-                throw new Error("Failed to get signed URL for image.");
-              }
-              image = {
-                relativePath: relativePath,
-                signedUrl: signedUrlDTO.data,
-                description: description,
-              };
-            } else {
-              this.logger.error({ imageDatum }, "Failed to parse image metadata.");
-              throw new Error("Failed to parse image metadata.");
-            }
-
-            const parsedData = data.map((item) => {
-              const result = DisasterRowSchema.safeParse(item);
-              if (!result.success) {
-                this.logger.error({ item }, "Invalid DisasterRow data.");
-                throw new Error("Invalid DisasterRow data.");
-              }
-              return result.data; // Validated TDisasterDatum
-            });
-
-            return {
-              timestamp,
-              image,
-              data: parsedData as TDisasterDatum[], // Now safely TDisasterDatum[]
-            } as TDisasterKeyframe;
-          }),
-        );
-      } else {
+      if (!RowSchema) {
         this.logger.error({ caseStudy }, "Case study not supported.");
         return {
           success: false,
@@ -187,6 +86,56 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
           },
         };
       }
+
+      const keyFrames: TClimateKeyframe[] | TDisasterKeyframe[] = await Promise.all(
+        metadata.data.map(async (rawKeyframe) => {
+          const { timestamp, images: rawImages, data } = rawKeyframe;
+
+          const parsedImages: (TKeyframeImage | TImageError)[] = [];
+
+          for (const singleRawImage of rawImages) {
+            const errorImageParseResult = ImageErrorSchema.safeParse(singleRawImage);
+            const metadataImageParseResult = MetadataImageSchema.safeParse(singleRawImage);
+
+            if (errorImageParseResult.success) {
+              parsedImages.push(errorImageParseResult.data);
+            } else if (metadataImageParseResult.success) {
+              const { relativePath, description } = metadataImageParseResult.data;
+
+              const signedUrlDTO = await this.kernelSourceDataGateway.getClientDataForDownload(relativePath);
+
+              if (!signedUrlDTO.success) {
+                this.logger.error({ signedUrlDTO }, "Failed to get signed URL for image.");
+                throw new Error("Failed to get signed URL for image.");
+              }
+              parsedImages.push({
+                relativePath: relativePath,
+                signedUrl: signedUrlDTO.data,
+                description: description,
+              });
+            } else {
+              this.logger.error({ imageDatum: singleRawImage }, "Failed to parse image metadata.");
+              throw new Error("Failed to parse image metadata.");
+            }
+          }
+
+          const parsedData = data.map((item) => {
+            const result = RowSchema.safeParse(item);
+            if (!result.success) {
+              this.logger.error({ item }, "Invalid data.");
+              throw new Error("Invalid data.");
+            }
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return result.data;
+          });
+
+          return {
+            timestamp: timestamp,
+            images: parsedImages,
+            data: parsedData,
+          };
+        }),
+      );
 
       const successData = {
         caseStudy: metadata.caseStudy,

@@ -39,26 +39,23 @@ export const MetadataImageSchema = z.object({
 });
 export type TMetadataImage = z.infer<typeof MetadataImageSchema>;
 
+export const KeyframeImageSchema = z.object({
+  relativePath: z.string(),
+  description: z.string(),
+  signedUrl: z.string().url(),
+});
+export type TKeyframeImage = z.infer<typeof KeyframeImageSchema>;
+
 export const ClimateMetadatumSchema = z.object({
   timestamp: z.string(),
-  image: z
-    .object({
-      relativePath: z.string(),
-      description: z.string(),
-    })
-    .or(ImageErrorSchema),
+  images: z.array(MetadataImageSchema.or(ImageErrorSchema)),
   data: z.array(ClimateRowSchema),
 });
 export type TClimateMetadata = z.infer<typeof ClimateMetadatumSchema>;
 
 export const DisasterMetadatumSchema = z.object({
   timestamp: z.string(),
-  image: z
-    .object({
-      relativePath: z.string(),
-      description: z.string(),
-    })
-    .or(ImageErrorSchema),
+  images: z.array(MetadataImageSchema.or(ImageErrorSchema)),
   data: z.array(DisasterRowSchema),
 });
 export type TDisasterMetadata = z.infer<typeof DisasterMetadatumSchema>;
@@ -90,26 +87,14 @@ export type TCaseStudyMetadata = z.infer<typeof CaseStudyMetadataSchema>;
 
 export const ClimateKeyframeSchema = z.object({
   timestamp: z.string(),
-  image: z
-    .object({
-      relativePath: z.string(),
-      signedUrl: z.string().url(),
-      description: z.string(),
-    })
-    .or(ImageErrorSchema),
+  images: z.array(KeyframeImageSchema.or(ImageErrorSchema)),
   data: z.array(ClimateRowSchema),
 });
 export type TClimateKeyframe = z.infer<typeof ClimateKeyframeSchema>;
 
 export const DisasterKeyframeSchema = z.object({
   timestamp: z.string(),
-  image: z
-    .object({
-      relativePath: z.string(),
-      signedUrl: z.string().url(),
-      description: z.string(),
-    })
-    .or(ImageErrorSchema),
+  images: z.array(KeyframeImageSchema.or(ImageErrorSchema)),
   data: z.array(DisasterRowSchema),
 });
 export type TDisasterKeyframe = z.infer<typeof DisasterKeyframeSchema>;
