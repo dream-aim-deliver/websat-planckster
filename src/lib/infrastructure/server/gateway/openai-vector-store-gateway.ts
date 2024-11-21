@@ -106,8 +106,6 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
             return `// START OF FILE: '${file.name}' //\n${fileContent}\n// END OF FILE //\n`;
           })
           .join("\n");
-        // print the concatenated JSON file content to a file
-        fs.writeFileSync("concatenated-json-files.json", concatenatedJSONFileContent);
       }
 
       let concatenatedTxtFileContent = null;
@@ -118,8 +116,6 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
             return `// START OF FILE: '${file.name}' //\n${fileContent}\n// END OF FILE //\n`;
           })
           .join("\n");
-        // print the concatenated TXT file content to a file
-        fs.writeFileSync("concatenated-txt-files.txt", concatenatedTxtFileContent);
       }
 
       const scratchDir = process.env.SCRATCH_DIR ?? "/tmp";
