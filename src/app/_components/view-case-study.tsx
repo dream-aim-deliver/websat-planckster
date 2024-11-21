@@ -5,6 +5,7 @@ import { CaseStudyPage } from "@maany_shr/rage-ui-kit";
 import { TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
 import { useMutation } from "@tanstack/react-query";
 import { caseStudyMutation, DEFAULT_RETRIES, DEFAULT_RETRY_DELAY } from "~/app/queries";
+import {ChatClientPage} from "~/app/_components/chat-page";
 
 type ViewCaseStudyProps = {
   caseStudy: string;
@@ -47,5 +48,17 @@ export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
     return <span>{caseStudyViewModel.message}</span>;
   }
 
-  return <CaseStudyPage info={caseStudyViewModel.metadata} messages={[]} />;
+  return (
+    <CaseStudyPage
+      info={caseStudyViewModel.metadata}
+      sideComponent={
+        <ChatClientPage
+          conversationID={caseStudyViewModel.conversation.id}
+          researchContextID={caseStudyViewModel.researchContext.id}
+          researchContextExternalID={caseStudyViewModel.researchContext.externalID}
+          listMessagesViewModel={{ status: "request", conversationID: caseStudyViewModel.conversation.id }}
+        />
+      }
+    />
+  );
 };
