@@ -5,7 +5,16 @@ import { GATEWAYS, UTILS } from "../config/ioc/server-ioc-symbols";
 import { GetCaseStudyMetadataDTO, TCaseStudyMetadataSuccessDTO } from "~/lib/core/dto/case-study-repository-dto";
 import { RemoteFile } from "~/lib/core/entity/file";
 import fs from "fs";
-import { CaseStudyMetadataSchema, ClimateRowSchema, DisasterRowSchema, ImageErrorSchema, MetadataImageSchema, TCaseStudyMetadata, TClimateKeyframe, TDisasterKeyframe, TImageError, TKeyframeImage } from "~/lib/core/entity/case-study-models";
+import {
+  CaseStudyMetadataSchema,
+  ClimateRowSchema,
+  KeyframeErrorSchema,
+  MetadataImageSchema, SentinelRowSchema,
+  TCaseStudyMetadata,
+  TKeyframe,
+  TKeyframeError,
+  TKeyframeImage,
+} from "~/lib/core/entity/case-study-models";
 import type KernelPlancksterSourceDataOutputPort from "../../common/ports/secondary/kernel-planckster-source-data-output-port";
 import { ZodSchema } from "zod";
 
@@ -49,14 +58,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
       const localPath = downloadDTO.data.relativePath;
 
       const rawContent = fs.readFileSync(localPath);
-
-      // TODO: find a way to correctly parse file contents
-      // The downloaded content might include additional headers (Content-Disposition). The code below attempts to remove those extra lines.
-      let lines = rawContent.toString().split("\n");
-      lines = lines.slice(3, -2);
-      const cleanContent = lines.join("\n");
-
-      const rawMetadataParseResult = CaseStudyMetadataSchema.safeParse(JSON.parse(cleanContent.toString()));
+      const rawMetadataParseResult = CaseStudyMetadataSchema.safeParse(JSON.parse(rawContent.toString()));
 
       if (!rawMetadataParseResult.success) {
         this.logger.error({ metadata: rawContent.toString() }, "Failed to parse metadata.");
@@ -77,7 +79,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
       // TODO: additional row schemas
       const caseStudyToSchema: Record<string, ZodSchema> = {
         "climate-monitoring": ClimateRowSchema,
-        "disaster-tracking": DisasterRowSchema,
+        "sentinel-5p": SentinelRowSchema,
       };
 
       const RowSchema = caseStudyToSchema[caseStudy];
@@ -93,14 +95,14 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
         };
       }
 
-      const keyFrames: TClimateKeyframe[] | TDisasterKeyframe[] = await Promise.all(
-        metadata.data.map(async (rawKeyframe) => {
-          const { timestamp, images: rawImages, data } = rawKeyframe;
+      const keyFrames: TKeyframe[] = await Promise.all(
+        metadata.keyframes.map(async (rawKeyframe) => {
+          const { timestamp, images: rawImages, data } = rawKeyframe as TKeyframe;
 
-          const parsedImages: (TKeyframeImage | TImageError)[] = [];
+          const parsedImages: (TKeyframeImage | TKeyframeError)[] = [];
 
           for (const singleRawImage of rawImages) {
-            const errorImageParseResult = ImageErrorSchema.safeParse(singleRawImage);
+            const errorImageParseResult = KeyframeErrorSchema.safeParse(singleRawImage);
             const metadataImageParseResult = MetadataImageSchema.safeParse(singleRawImage);
 
             if (errorImageParseResult.success) {
@@ -112,6 +114,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
 
               if (!signedUrlDTO.success) {
                 this.logger.error({ signedUrlDTO }, "Failed to get signed URL for image.");
+                // TODO: return an error image
                 throw new Error("Failed to get signed URL for image.");
               }
               parsedImages.push({
@@ -140,6 +143,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
             timestamp: timestamp,
             images: parsedImages,
             data: parsedData,
+            dataDescription: rawKeyframe.dataDescription
           };
         }),
       );
