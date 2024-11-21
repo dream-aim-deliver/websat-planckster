@@ -103,7 +103,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
         concatenatedJSONFileContent = jsonLocalFiles
           .map((file) => {
             const fileContent = fs.readFileSync(file.relativePath).toString();
-            return `### START OF FILE: '${file.name}' ###\n${fileContent}\n### END OF FILE ###\n`;
+            return `// START OF FILE: '${file.name}' //\n${fileContent}\n// END OF FILE //\n`;
           })
           .join("\n");
         // print the concatenated JSON file content to a file
@@ -115,7 +115,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
         concatenatedTxtFileContent = txtLocalFiles
           .map((file) => {
             const fileContent = fs.readFileSync(file.relativePath).toString();
-            return `### START OF FILE: '${file.name}' ###\n${fileContent}\n### END OF FILE ###\n`;
+            return `// START OF FILE: '${file.name}' //\n${fileContent}\n// END OF FILE //\n`;
           })
           .join("\n");
         // print the concatenated TXT file content to a file
