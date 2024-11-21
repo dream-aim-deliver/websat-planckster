@@ -11,8 +11,8 @@ const LayoutHeader = () => {
     <Link key="sources_link" href="/sources">
       Sources
     </Link>,
-    <Link key="case_studies_link" href="/case-study">
-      Case Studies
+    <Link key="case_studies_link" href="/case-study/create">
+      Case Study
     </Link>,
     <a key="docs_link" href="https://dream-aim-deliver.github.io/planckster-docs/" target="_blank">
       Documentation
