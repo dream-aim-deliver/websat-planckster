@@ -23,10 +23,12 @@ export type TImage = z.infer<typeof ImageSchema>;
  */
 
 export const ClimateRowSchema = z.object({
-  id: z.string().uuid(),
-  location: z.string().min(1),
-  temperature: z.number().min(-100).max(100),
-  humidity: z.number().min(0).max(100),
+  timestamp: z.string(),
+  latitude: z.number(),
+  longitude: z.number(),
+  CarbonMonoxideLevel: z.string(),
+  PredictedWeather: z.string(),
+  ActualWeather: z.string(),
 });
 export type TClimateRow = z.infer<typeof ClimateRowSchema>;
 

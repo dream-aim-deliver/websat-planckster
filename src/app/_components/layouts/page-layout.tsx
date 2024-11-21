@@ -11,6 +11,9 @@ export const PageLayout = (props: { children: React.ReactNode; isAuthenticated: 
     <Link key="sources_link" href="/sources">
       Sources
     </Link>,
+    <Link key="case_studies_link" href="/case-study/create">
+      Case Study
+    </Link>,
     <a key="docs_link" href="https://dream-aim-deliver.github.io/planckster-docs/" target="_blank">
       Documentation
     </a>,
