@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
-import { DummyCaseStudyEnter } from "../_components/dummy-case-study-enter";
+import { ViewCaseStudy } from "~/app/_components/view-case-study";
 
 export default async function SDACaseStudyServerPage() {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
@@ -11,5 +11,5 @@ export default async function SDACaseStudyServerPage() {
     redirect("/auth/login");
   }
 
-  return <DummyCaseStudyEnter />;
+  return <ViewCaseStudy />;
 }
