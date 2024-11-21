@@ -239,6 +239,7 @@ export default class BrowserKernelSourceDataGateway implements KernelPlancksterS
   }
 
   async listSourceDataForResearchContext(researchContextID: number): Promise<ListSourceDataDTO> {
+    this.logger.error("Browser Source Data Gateway: listSourceDataForResearchContext method deprecated");
     return {
       success: false,
       data: {
@@ -249,13 +250,19 @@ export default class BrowserKernelSourceDataGateway implements KernelPlancksterS
   }
 
   async listSourceDataForClient(): Promise<ListSourceDataDTO> {
-    return {
-      success: false,
-      data: {
-        operation: "browser#source-data#list",
-        message: `Method deprecated`,
-      },
-    };
+    try {
+      const dto = await this.api.gateways.sourceData.listSourceDataForClient.query();
+      return dto;
+    } catch (error) {
+      this.logger.error({ error }, "Could not invoke the server side feature to get client data for download");
+      return {
+        success: false,
+        data: {
+          operation: "sourceDataRouter#list",
+          message: "Could not invoke the server side feature to get client data for download",
+        },
+      };
+    }
   }
 
   async get(fileID: string): Promise<GetSourceDataDTO> {
