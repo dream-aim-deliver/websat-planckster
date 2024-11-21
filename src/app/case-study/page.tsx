@@ -1,9 +1,10 @@
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
-import AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 import { redirect } from "next/navigation";
 import { ViewCaseStudy } from "~/app/_components/view-case-study";
 
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
 export default async function SDACaseStudyServerPage({ searchParams }: { searchParams?: { [key: string]: string | string[] | undefined } }) {
   const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
   const sessionDTO = await authGateway.getSession();
