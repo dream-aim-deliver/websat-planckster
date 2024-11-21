@@ -1,6 +1,6 @@
 "use client";
 
-import { CaseStudyForm } from "@maany_shr/rage-ui-kit";
+import { CaseStudyForm, useToast } from "@maany_shr/rage-ui-kit";
 import { CaseStudyParameters } from "@maany_shr/rage-ui-kit";
 import { useEffect, useState } from "react";
 import { TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
@@ -15,15 +15,27 @@ export const ViewCaseStudy = () => {
     "sentinel-5p": "Sentinel 5P",
   };
 
+  const { toast } = useToast();
+
   const onSubmit = (parameters: CaseStudyParameters) => {
-    if (Number.isNaN(parameters.jobId) || parameters.tracerId === "" || parameters.jobId < 0) {
-      // TODO: show error
-      return;
-    }
     if (!Object.keys(availableCaseStudies).includes(parameters.caseStudy)) {
-      // TODO: show error
+      toast({
+        variant: "error",
+        title: "No case study is specified",
+        description: "Please choose one of the available case studies.",
+      });
       return;
     }
+
+    if (Number.isNaN(parameters.jobId) || parameters.tracerId === "" || parameters.jobId < 0) {
+      toast({
+        variant: "error",
+        title: "Wrong parameters specified",
+        description: "Please make sure the job ID and tracer ID fields are not empty.",
+      });
+      return;
+    }
+
     setParameters(parameters);
   };
 
