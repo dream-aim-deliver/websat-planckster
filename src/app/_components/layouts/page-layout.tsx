@@ -1,9 +1,9 @@
 "use client";
 import { Header, Toaster, SiteFooter, Button } from "@maany_shr/rage-ui-kit";
 import Link from "next/link";
-import { SessionProvider, signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 
-const LayoutHeader = () => {
+export const PageLayout = (props: { children: React.ReactNode; isAuthenticated: boolean }) => {
   const headerLinks = [
     <Link key="research_contexts_link" href="/">
       Research Contexts
@@ -17,24 +17,12 @@ const LayoutHeader = () => {
     <Button key="sign_out" label="Sign out" onClick={() => signOut()} />,
   ];
 
-  const { status } = useSession();
-
-  return <Header>{status === "authenticated" ? headerLinks : undefined}</Header>;
-};
-
-export const PageLayout = (props: { children: React.ReactNode }) => {
   return (
     <div className="box-shadow flex min-h-screen flex-col bg-neutral-50 shadow-lg dark:bg-neutral-900">
       {/* Header */}
-      <SessionProvider>
-        <LayoutHeader />
-      </SessionProvider>
-
-      {/* Main content */}
+      <Header>{props.isAuthenticated ? headerLinks : undefined}</Header>;{/* Main content */}
       <main className="container mx-auto flex flex-grow p-4">{props.children}</main>
-
       <Toaster />
-
       {/* Footer */}
       <SiteFooter />
     </div>

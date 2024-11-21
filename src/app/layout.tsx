@@ -4,6 +4,8 @@ import serverContainer from "~/lib/infrastructure/server/config/ioc/server-conta
 import { Inter } from "next/font/google";
 import { TRPCReactProvider } from "~/lib/infrastructure/client/trpc/react-provider";
 import { PageLayout } from "./_components/layouts/page-layout";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import {GATEWAYS} from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 
 // Explicitly load the container to ensure all dependencies are loaded, else the optimization of the build will fail
 serverContainer.load();
@@ -19,12 +21,15 @@ export const metadata = {
   icons: [{ rel: "icon", url: "/satellite.svg" }],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const authGateway = serverContainer.get<AuthGatewayOutputPort>(GATEWAYS.AUTH_GATEWAY);
+  const sessionDTO = await authGateway.getSession();
+
   return (
     <html lang="en">
       <body className={`font-sans ${inter.variable}`}>
         <TRPCReactProvider>
-          <PageLayout>{children}</PageLayout>
+          <PageLayout isAuthenticated={sessionDTO.success}>{children}</PageLayout>
         </TRPCReactProvider>
       </body>
     </html>
