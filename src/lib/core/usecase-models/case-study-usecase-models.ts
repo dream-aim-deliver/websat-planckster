@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ConversationSchema, ResearchContextSchema } from "../entity/kernel-models";
-import { KeyframeArraySchema } from "../entity/case-study-models";
+import { CaseStudyMetadataWithoutRelativePathsSchema } from "../entity/case-study-models";
 
 export const CaseStudyRequestSchema = z.object({
   caseStudyName: z.string(),
@@ -11,7 +11,7 @@ export type TCaseStudyRequest = z.infer<typeof CaseStudyRequestSchema>;
 
 export const CaseStudySuccessResponseSchema = z.object({
   status: z.literal("success"),
-  keyframeArray: KeyframeArraySchema,
+  metadata: CaseStudyMetadataWithoutRelativePathsSchema,
   researchContext: ResearchContextSchema,
   conversation: ConversationSchema,
 });

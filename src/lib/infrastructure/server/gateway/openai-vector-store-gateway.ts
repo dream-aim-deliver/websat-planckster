@@ -7,7 +7,7 @@ import { GATEWAYS, OPENAI, UTILS } from "../config/ioc/server-ioc-symbols";
 import OpenAI from "openai";
 import type SourceDataGatewayOutputPort from "~/lib/core/ports/secondary/source-data-gateway-output-port";
 import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
-import { generateOpenAIVectorStoreName, OPENAI_VECTOR_STORE_SUPPORTED_FILE_FORMATS } from "../config/openai/openai-utils";
+import { generateOpenAIVectorStoreName, DATA_FILE_FORMATS, WEBSAT_VECTOR_STORE_FILE_FORMATS, OPENAI_CODE_INTERPRETER_MAX_AMOUNT_OF_FILES, OPENAI_VECTOR_STORE_SUPPORTED_FILE_FORMATS } from "../config/openai/openai-utils";
 import fs from "fs";
 
 @injectable()
@@ -37,7 +37,158 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
       this.logger.info({ files }, "Uploading files to OpenAI");
       const uploadedFiles: RemoteFile[] = [];
 
-      for (const file of files) {
+      // Separate data files from non-data files
+      const dataFiles = files.filter((file) => {
+        const fileExtension = file.relativePath.split(".").pop();
+        return fileExtension ? DATA_FILE_FORMATS.includes(`.${fileExtension}`) : false;
+      });
+
+      // Note: .csv are bundled here, so they already go to the non-vector-store files
+      const filesToUpload = files.filter((file) => {
+        const fileExtension = file.relativePath.split(".").pop();
+        return fileExtension ? !DATA_FILE_FORMATS.includes(`.${fileExtension}`) : true;
+      });
+
+      // Concatenate JSON and TXT files into a single file per format, and upload them as non-vector-store files
+      const jsonRemoteFiles = dataFiles.filter((file) => file.relativePath.endsWith(".json"));
+      const txtRemoteFiles = dataFiles.filter((file) => file.relativePath.endsWith(".txt"));
+
+      const jsonLocalFiles = [];
+      for (const file of jsonRemoteFiles) {
+        const downloadDTO = await this.KernelSourceDataGateway.download(file);
+
+        if (!downloadDTO.success) {
+          this.logger.error({ file }, "Failed to download file from Kernel");
+          return {
+            status: "error",
+            message: "Failed to download file from Kernel",
+            operation: "openai:upload-files",
+          };
+        }
+        jsonLocalFiles.push(downloadDTO.data);
+      }
+
+      const txtLocalFiles = [];
+      for (const file of txtRemoteFiles) {
+        const downloadDTO = await this.KernelSourceDataGateway.download(file);
+
+        if (!downloadDTO.success) {
+          this.logger.error({ file }, "Failed to download file from Kernel");
+          return {
+            status: "error",
+            message: "Failed to download file from Kernel",
+            operation: "openai:upload-files",
+          };
+        }
+        txtLocalFiles.push(downloadDTO.data);
+      }
+
+      // Check if the amount of files to upload is greater than the limit
+      const jsonCount = jsonLocalFiles.length === 0 ? 0 : 1;
+      const txtCount = txtLocalFiles.length === 0 ? 0 : 1;
+      const nonVectorStoreFilesCount = filesToUpload.filter((file) => !OPENAI_VECTOR_STORE_SUPPORTED_FILE_FORMATS.includes(`.${file.relativePath.split(".").pop()}`)).length;
+
+      if (nonVectorStoreFilesCount + jsonCount + txtCount > OPENAI_CODE_INTERPRETER_MAX_AMOUNT_OF_FILES) {
+        this.logger.error({ nonDataFiles: filesToUpload }, `Too many files to upload to OpenAI. Found ${filesToUpload.length} files, but the limit is ${OPENAI_CODE_INTERPRETER_MAX_AMOUNT_OF_FILES}.`);
+        return {
+          status: "error",
+          message: `Too many files to upload. Please try again with a maximum of ${OPENAI_CODE_INTERPRETER_MAX_AMOUNT_OF_FILES} files. Consider that all ".json" and ".txt" files will be concatenated into a single file per format.`,
+          operation: "openai:upload-files",
+        };
+      }
+
+      // Concatenate JSON and TXT files and upload them first
+      let concatenatedJSONFileContent = null;
+      if (jsonLocalFiles.length > 0) {
+        concatenatedJSONFileContent = jsonLocalFiles
+          .map((file) => {
+            const fileContent = fs.readFileSync(file.relativePath).toString();
+            return `// START OF FILE: '${file.name}' //\n${fileContent}\n// END OF FILE //\n`;
+          })
+          .join("\n");
+        // print the concatenated JSON file content to a file
+        fs.writeFileSync("concatenated-json-files.json", concatenatedJSONFileContent);
+      }
+
+      let concatenatedTxtFileContent = null;
+      if (txtLocalFiles.length > 0) {
+        concatenatedTxtFileContent = txtLocalFiles
+          .map((file) => {
+            const fileContent = fs.readFileSync(file.relativePath).toString();
+            return `// START OF FILE: '${file.name}' //\n${fileContent}\n// END OF FILE //\n`;
+          })
+          .join("\n");
+        // print the concatenated TXT file content to a file
+        fs.writeFileSync("concatenated-txt-files.txt", concatenatedTxtFileContent);
+      }
+
+      const scratchDir = process.env.SCRATCH_DIR ?? "/tmp";
+
+      // Write concatenated JSON file, upload to OpenAi, and push it to the uploaded files array
+      if (concatenatedJSONFileContent) {
+        const concatenatedJSONFilePath = `${scratchDir}/concatenated-json-files.json`;
+        fs.writeFileSync(concatenatedJSONFilePath, concatenatedJSONFileContent);
+        const openaiFile = await this.openai.files.create({
+          file: fs.createReadStream(concatenatedJSONFilePath),
+          purpose: "assistants",
+        });
+
+        const remoteFileNonVS: RemoteFile = {
+          id: openaiFile.id,
+          type: "remote",
+          provider: "openai#non-vector-store",
+          name: "concatenated-json-files.json",
+          relativePath: concatenatedJSONFilePath,
+          createdAt: `${new Date().toISOString()}`,
+        };
+        uploadedFiles.push(remoteFileNonVS);
+
+        const remoteFileVS: RemoteFile = {
+          id: openaiFile.id,
+          type: "remote",
+          provider: "openai#vector-store",
+          name: "concatenated-json-files.json",
+          relativePath: concatenatedJSONFilePath,
+          createdAt: `${new Date().toISOString()}`,
+        };
+        uploadedFiles.push(remoteFileVS);
+        fs.unlinkSync(concatenatedJSONFilePath);
+      }
+
+      // Write concatenated TXT file, upload to OpenAi, and push it to the uploaded files array
+      if (concatenatedTxtFileContent) {
+        const concatenatedTxtFilePath = `${scratchDir}/concatenated-txt-files.txt`;
+        fs.writeFileSync(concatenatedTxtFilePath, concatenatedTxtFileContent);
+        const openaiFile = await this.openai.files.create({
+          file: fs.createReadStream(concatenatedTxtFilePath),
+          purpose: "assistants",
+        });
+
+        const remoteFileNonVS: RemoteFile = {
+          id: openaiFile.id,
+          type: "remote",
+          provider: "openai#non-vector-store",
+          name: "concatenated-txt-files.txt",
+          relativePath: concatenatedTxtFilePath,
+          createdAt: `${new Date().toISOString()}`,
+        };
+        uploadedFiles.push(remoteFileNonVS);
+
+        const remoteFileVS: RemoteFile = {
+          id: openaiFile.id,
+          type: "remote",
+          provider: "openai#vector-store",
+          name: "concatenated-txt-files.txt",
+          relativePath: concatenatedTxtFilePath,
+          createdAt: `${new Date().toISOString()}`,
+        };
+        uploadedFiles.push(remoteFileVS);
+
+        fs.unlinkSync(concatenatedTxtFilePath);
+      }
+
+      // Upload the rest of the files, and segregate the ones that are not supported by OpenAI's vector stores
+      for (const file of filesToUpload) {
         // 1. Download file from Kernel
         const downloadDTO = await this.KernelSourceDataGateway.download(file);
 
@@ -63,7 +214,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
 
         let remoteFile: RemoteFile;
 
-        if (fileExtension && OPENAI_VECTOR_STORE_SUPPORTED_FILE_FORMATS.includes(fileExtension)) {
+        if (fileExtension && WEBSAT_VECTOR_STORE_FILE_FORMATS.includes(fileExtension)) {
           remoteFile = {
             id: openaiFile.id,
             type: "remote",

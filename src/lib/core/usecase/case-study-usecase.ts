@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { type TCaseStudyMetadataWithoutRelativePaths } from "../entity/case-study-models";
 import { type RemoteFile } from "../entity/file";
 import { type TConversation, type TResearchContext } from "../entity/kernel-models";
 import { type CaseStudyInputPort, type CaseStudyOutputPort } from "../ports/primary/case-study-primary-ports";
@@ -9,7 +10,6 @@ import type ResearchContextGatewayOutputPort from "../ports/secondary/research-c
 import type SourceDataGatewayOutputPort from "../ports/secondary/source-data-gateway-output-port";
 import type VectorStoreOutputPort from "../ports/secondary/vector-store-output-port";
 import { type TCaseStudyRequest } from "../usecase-models/case-study-usecase-models";
-import { type TKeyframeArray } from "../entity/case-study-models";
 
 export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
   presenter: CaseStudyOutputPort;
@@ -41,7 +41,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
     const { caseStudyName, tracerID, jobID } = request;
 
     // Ensure that the case study name is one of the two we support
-    if (caseStudyName !== "climate-monitoring" && caseStudyName !== "disaster-tracking") {
+    if (caseStudyName !== "climate-monitoring" && caseStudyName !== "sentinel-5p") {
       this.presenter.presentError({
         status: "error",
         operation: "usecase#case-study",
@@ -206,7 +206,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
       return;
     }
 
-    const { caseStudy, keyFrames, expirationTime, relativePathsForAgent } = caseStudyMetadataDTO.data;
+    const { caseStudy, keyframes, expirationTime, relativePathsForAgent, imageKinds } = caseStudyMetadataDTO.data;
 
     if (caseStudy !== caseStudyName) {
       this.presenter.presentError({
@@ -236,11 +236,12 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
       return;
     }
 
-    const keyframeArray = {
+    const metadata = {
       caseStudy,
-      keyFrames,
+      keyframes: keyframes,
+      imageKinds: imageKinds,
       expirationTime,
-    } as TKeyframeArray;
+    } as TCaseStudyMetadataWithoutRelativePaths;
 
     // 5. Prepare the agent source data
     // If the Research Context was found already, we return it with a conversation
@@ -248,7 +249,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
       if (foundConversation) {
         this.presenter.presentSuccess({
           status: "success",
-          keyframeArray: keyframeArray,
+          metadata: metadata,
           researchContext: foundRC,
           conversation: foundConversation,
         });
@@ -283,7 +284,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
 
         this.presenter.presentSuccess({
           status: "success",
-          keyframeArray: keyframeArray,
+          metadata: metadata,
           researchContext: foundRC,
           conversation: createConversationDTO.data,
         });
@@ -416,7 +417,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
     // 9. Return the Research Context and the map files
     this.presenter.presentSuccess({
       status: "success",
-      keyframeArray: keyframeArray,
+      metadata: metadata,
       researchContext: createResearchContextDTO.data,
       conversation: createConversationDTO.data,
     });

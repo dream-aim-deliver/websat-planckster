@@ -47,5 +47,5 @@ export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
     return <span>{caseStudyViewModel.message}</span>;
   }
 
-  return <CaseStudyPage info={caseStudyViewModel.keyframeArray} messages={[]} />;
+  return <CaseStudyPage info={caseStudyViewModel.metadata} messages={[]} />;
 };

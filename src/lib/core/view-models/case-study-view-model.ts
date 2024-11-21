@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ConversationSchema, ResearchContextSchema } from "../entity/kernel-models";
-import { KeyframeArraySchema } from "../entity/case-study-models";
+import { CaseStudyMetadataWithoutRelativePathsSchema } from "../entity/case-study-models";
 
 export const CaseStudyRequestViewModelSchema = z.object({
   status: z.enum(["request"]),
@@ -12,7 +12,7 @@ export type TCaseStudyRequestViewModel = z.infer<typeof CaseStudyRequestViewMode
 
 export const CaseStudySuccessViewModelSchema = z.object({
   status: z.enum(["success"]),
-  keyframeArray: KeyframeArraySchema,
+  metadata: CaseStudyMetadataWithoutRelativePathsSchema,
   researchContext: ResearchContextSchema,
   conversation: ConversationSchema,
 });
