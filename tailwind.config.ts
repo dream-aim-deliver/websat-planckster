@@ -33,12 +33,17 @@ export default {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
         },
+        pulseGrow: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.05)' },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "slide-down": "slide-down 0.5s ease-out",
         opacity: "opacity 2s ease-in-out",
+        pulseGrow: 'pulseGrow 1.5s ease-in-out infinite',
       },
       colors: {
         black: "#000",
