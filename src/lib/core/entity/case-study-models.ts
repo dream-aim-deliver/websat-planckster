@@ -36,6 +36,7 @@ export type TImageError = z.infer<typeof ImageErrorSchema>;
 export const MetadataImageSchema = z.object({
   relativePath: z.string(),
   description: z.string(),
+  kind: z.string(),
 });
 export type TMetadataImage = z.infer<typeof MetadataImageSchema>;
 
@@ -43,6 +44,7 @@ export const KeyframeImageSchema = z.object({
   relativePath: z.string(),
   description: z.string(),
   signedUrl: z.string().url(),
+  kind: z.string(),
 });
 export type TKeyframeImage = z.infer<typeof KeyframeImageSchema>;
 

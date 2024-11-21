@@ -100,7 +100,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
             if (errorImageParseResult.success) {
               parsedImages.push(errorImageParseResult.data);
             } else if (metadataImageParseResult.success) {
-              const { relativePath, description } = metadataImageParseResult.data;
+              const { relativePath, description, kind } = metadataImageParseResult.data;
 
               const signedUrlDTO = await this.kernelSourceDataGateway.getClientDataForDownload(relativePath);
 
@@ -109,6 +109,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
                 throw new Error("Failed to get signed URL for image.");
               }
               parsedImages.push({
+                kind: kind,
                 relativePath: relativePath,
                 signedUrl: signedUrlDTO.data,
                 description: description,
