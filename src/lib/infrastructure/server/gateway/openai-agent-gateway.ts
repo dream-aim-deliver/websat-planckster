@@ -60,12 +60,6 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
       });
       const researchContextExternalID = generateRCExternalIDFromOpenAIAssistantID(openaiAgent.id);
 
-      // await this.openai.beta.assistants.update(openaiAgent.id, {
-      //   tool_resources: {
-      //     file_search: {},
-      //   },
-      // });
-
       this.logger.info({ openaiAgent }, "Agent created");
       return {
         success: true,
