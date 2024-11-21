@@ -53,6 +53,7 @@ export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
       info={caseStudyViewModel.metadata}
       sideComponent={
         <ChatClientPage
+          className="border rounded-lg"
           conversationID={caseStudyViewModel.conversation.id}
           researchContextID={caseStudyViewModel.researchContext.id}
           researchContextExternalID={caseStudyViewModel.researchContext.externalID}
