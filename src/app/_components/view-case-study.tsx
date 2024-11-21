@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { CaseStudyPage } from "@maany_shr/rage-ui-kit";
-import { TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
+import type { TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
 import { useMutation } from "@tanstack/react-query";
 import { caseStudyMutation, DEFAULT_RETRIES, DEFAULT_RETRY_DELAY } from "~/app/queries";
-import {ChatClientPage} from "~/app/_components/chat-page";
+import { ChatClientPage } from "~/app/_components/chat-page";
 
 type ViewCaseStudyProps = {
   caseStudy: string;
@@ -37,15 +37,36 @@ export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
   }, []);
 
   if (caseStudyViewModel.status === "request") {
-    return <span>Loading...</span>;
+    return (
+      <div className="h-screen w-screen justify-center">
+        <div className="rounded-lg bg-white p-6 shadow-md">
+          <h2 className="mb-4 text-xl font-semibold">Loading...</h2>
+          <p>Please wait while we process your request.</p>
+        </div>
+      </div>
+    );
   }
 
   if (caseStudyViewModel.status === "progress") {
-    return <span>{caseStudyViewModel.message}</span>;
+    return (
+      <div className="h-screen w-screen justify-center">
+        <div className="rounded-lg bg-white p-6 shadow-md">
+          <h2 className="mb-4 text-xl font-semibold">Creating case study...</h2>
+          <p>Please wait while we process your request.</p>
+        </div>
+      </div>
+    );
   }
 
   if (caseStudyViewModel.status === "error") {
-    return <span>{caseStudyViewModel.message}</span>;
+    return (
+      <div className="h-screen w-screen justify-center">
+        <div className="rounded-lg bg-red-800 p-6 shadow-md">
+          <h2 className="mb-4 text-xl font-semibold">Error!</h2>
+          <p>Could not setup your case study.</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -53,7 +74,7 @@ export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
       info={caseStudyViewModel.metadata}
       sideComponent={
         <ChatClientPage
-          className="border rounded-lg"
+          className="rounded-lg border"
           conversationID={caseStudyViewModel.conversation.id}
           researchContextID={caseStudyViewModel.researchContext.id}
           researchContextExternalID={caseStudyViewModel.researchContext.externalID}
