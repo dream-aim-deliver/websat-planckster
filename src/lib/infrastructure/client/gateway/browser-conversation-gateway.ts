@@ -17,23 +17,42 @@ export default class BrowserConversationGateway implements ConversationGatewayOu
   }
 
   async createConversation(researchContextID: number, conversationTitle: string): Promise<CreateConversationDTO> {
-    return {
-      success: false,
-      data: {
-        operation: "browser#conversation#create",
-        message: "Method deprecated",
-      },
-    };
+    try {
+      const dto = await this.api.gateways.conversation.create.mutate({
+        researchContextID,
+        title: conversationTitle,
+      });
+      return dto;
+    } catch (error) {
+      this.logger.error({ error }, "Could not invoke the server side feature to create conversation");
+
+      return {
+        success: false,
+        data: {
+          operation: "browser#conversation#create-conversation",
+          message: "Could not invoke the server side feature to create conversation",
+        },
+      };
+    }
   }
 
   async listConversations(researchContextID: number): Promise<ListConversationsDTO> {
-    return {
-      success: false,
-      data: {
-        operation: "browser#conversation#list-conversations",
-        message: "Method deprecated",
-      },
-    };
+    try {
+      const dto = await this.api.gateways.conversation.list.query({
+        researchContextID,
+      });
+      return dto;
+    } catch (error) {
+      this.logger.error({ error }, "Could not invoke the server side feature to list conversations");
+
+      return {
+        success: false,
+        data: {
+          operation: "browser#conversation#list-conversations",
+          message: "Could not invoke the server side feature to list conversations",
+        },
+      };
+    }
   }
 
   async sendMessageToConversation(conversationID: number, message: TMessage): Promise<SendMessageToConversationResponseDTO> {
@@ -59,6 +78,7 @@ export default class BrowserConversationGateway implements ConversationGatewayOu
   }
 
   async listMessagesForConversation(conversationID: number): Promise<ListMessagesForConversationDTO> {
+    this.logger.error("Browser Conversation Gateway: listMessagesForConversation method deprecated");
     return {
       success: false,
       data: {

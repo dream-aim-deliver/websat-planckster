@@ -20,7 +20,7 @@ export const caseStudyToSchema: Record<TRegisteredSDACaseStudyName, TRowSchema> 
   "sentinel-5p": SentinelRowSchema,
 };
 
-const SDAImageSchema = ImageSchema.omit({
+export const SDAImageSchema = ImageSchema.omit({
   signedUrl: true,
 });
 
@@ -32,7 +32,10 @@ const SDAClimateKeyframeSchema = ClimateKeyframeSchema.omit({ images: true }).ex
   images: z.array(SDAImageSchema),
 });
 
-const SDAClimateMetadataSchema = ClimateMetadataSchema.omit({ keyframes: true }).extend({
+const SDAClimateMetadataSchema = ClimateMetadataSchema.omit({
+  keyframes: true,
+  expirationTime: true,
+}).extend({
   keyframes: z.array(SDAClimateKeyframeSchema),
   relativePathsForAgent: z.array(z.string()),
 });
@@ -45,7 +48,10 @@ const SDASentinelKeyframeSchema = SentinelKeyframeSchema.omit({ images: true }).
   images: z.array(SDAImageSchema),
 });
 
-const SDASentinelMetadataSchema = SentinelMetadataSchema.omit({ keyframes: true }).extend({
+const SDASentinelMetadataSchema = SentinelMetadataSchema.omit({
+  keyframes: true,
+  expirationTime: true,
+}).extend({
   keyframes: z.array(SDASentinelKeyframeSchema),
   relativePathsForAgent: z.array(z.string()),
 });

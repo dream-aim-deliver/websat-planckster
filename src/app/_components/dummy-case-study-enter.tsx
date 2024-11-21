@@ -17,17 +17,14 @@ export function DummyCaseStudyEnter() {
     mutationKey: ["trigger-case-study"],
     retry: DEFAULT_RETRIES,
     retryDelay: DEFAULT_RETRY_DELAY,
-    onSuccess: async () => {
-      alert("Processed!");
-    },
     mutationFn: caseStudyMutation(setCaseStudyViewModel),
   });
 
   function onSubmitHandlerForMutation() {
     createMutation.mutate({
-      caseStudyName: "climate-monitoring",
-      tracerID: "test",
-      jobID: 1,
+      caseStudyName: "sentinel-5p",
+      tracerID: "potato",
+      jobID: 4,
     });
   }
 
@@ -53,7 +50,6 @@ export function DummyCaseStudyEnter() {
       {caseStudyViewModel.status === "progress" && <div>Processing...</div>}
 
       {caseStudyViewModel.status === "request" && <div>Waiting for request...</div>}
-
     </div>
   );
 }

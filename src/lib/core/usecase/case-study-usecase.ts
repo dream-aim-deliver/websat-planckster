@@ -41,7 +41,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
     const { caseStudyName, tracerID, jobID } = request;
 
     // Ensure that the case study name is one of the two we support
-    if (caseStudyName !== "climate-monitoring" && caseStudyName !== "disaster-tracking") {
+    if (caseStudyName !== "climate-monitoring" && caseStudyName !== "sentinel-5p") {
       this.presenter.presentError({
         status: "error",
         operation: "usecase#case-study",
@@ -236,12 +236,12 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
       return;
     }
 
-    const metadata: TCaseStudyMetadataWithoutRelativePaths = {
+    const metadata = {
       caseStudy,
       keyframes: keyframes,
       imageKinds: imageKinds,
       expirationTime,
-    };
+    } as TCaseStudyMetadataWithoutRelativePaths;
 
     // 5. Prepare the agent source data
     // If the Research Context was found already, we return it with a conversation
