@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
+import type AuthGatewayOutputPort from "~/lib/core/ports/secondary/auth-gateway-output-port";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { GATEWAYS } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
 import { DummyCaseStudyEnter } from "../_components/dummy-case-study-enter";

@@ -2,7 +2,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
+import { type TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
 import { caseStudyMutation, DEFAULT_RETRIES, DEFAULT_RETRY_DELAY } from "../queries";
 
 export function DummyCaseStudyEnter() {
@@ -44,7 +44,7 @@ export function DummyCaseStudyEnter() {
           <div>Case study created successfully</div>
           <div>Research Context title: {caseStudyViewModel.researchContext.title}</div>
           <div>Conversation title: {caseStudyViewModel.conversation.title}</div>
-          <div>Recovered case study name: {caseStudyViewModel.keyframeArray.caseStudy}</div>
+          <div>Recovered case study name: {caseStudyViewModel.metadata.caseStudy}</div>
         </div>
       )}
 

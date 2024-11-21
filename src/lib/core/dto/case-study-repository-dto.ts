@@ -1,18 +1,10 @@
 import { z } from "zod";
 import { BaseErrorDTOSchema, DTOSchemaFactory } from "~/sdk/core/dto";
-import { ClimateKeyframeArraySchema, DisasterKeyframeArraySchema } from "../entity/case-study-models";
 
-export const DisasterMetadataSuccessDTOSchema = DisasterKeyframeArraySchema.extend({
-  relativePathsForAgent: z.array(z.string()),
-});
+import { ClimateMetadataSchema, SentinelMetadataSchema } from "../entity/case-study-models";
 
-export const ClimateMetadataSuccessDTOSchema = ClimateKeyframeArraySchema.extend({
-  relativePathsForAgent: z.array(z.string()),
-});
+const CaseStudyMetadataWithRelativePathsSchema = z.discriminatedUnion("caseStudy", [ClimateMetadataSchema, SentinelMetadataSchema]);
 
-export const CaseStudyMetadataSuccessDTOSchema = z.discriminatedUnion("caseStudy", [ClimateMetadataSuccessDTOSchema, DisasterMetadataSuccessDTOSchema]);
-export type TCaseStudyMetadataSuccessDTO = z.infer<typeof CaseStudyMetadataSuccessDTOSchema>;
-
-export const GetCaseStudyMetadataDTOSchema = DTOSchemaFactory(CaseStudyMetadataSuccessDTOSchema, BaseErrorDTOSchema);
+export const GetCaseStudyMetadataDTOSchema = DTOSchemaFactory(CaseStudyMetadataWithRelativePathsSchema, BaseErrorDTOSchema);
 
 export type GetCaseStudyMetadataDTO = z.infer<typeof GetCaseStudyMetadataDTOSchema>;

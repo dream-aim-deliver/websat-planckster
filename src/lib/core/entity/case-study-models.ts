@@ -1,7 +1,25 @@
 import { z } from "zod";
 
 /**
- *  Base schemas for table rows
+ * Common
+ */
+
+export const ErrorSchema = z.object({
+  errorName: z.string(),
+  errorMessage: z.string(),
+});
+export type TError = z.infer<typeof ErrorSchema>;
+
+export const ImageSchema = z.object({
+  relativePath: z.string(),
+  description: z.string(),
+  signedUrl: z.string().url(),
+  kind: z.string(),
+});
+export type TImage = z.infer<typeof ImageSchema>;
+
+/**
+ *  climate-monitoring
  */
 
 export const ClimateRowSchema = z.object({
@@ -10,124 +28,67 @@ export const ClimateRowSchema = z.object({
   temperature: z.number().min(-100).max(100),
   humidity: z.number().min(0).max(100),
 });
-export type TClimateDatum = z.infer<typeof ClimateRowSchema>;
+export type TClimateRow = z.infer<typeof ClimateRowSchema>;
+
+export const ClimateKeyframeSchema = z.object({
+  timestamp: z.string(),
+  images: z.array(ImageSchema.or(ErrorSchema)),
+  data: z.array(ClimateRowSchema.or(ErrorSchema)),
+  dataDescription: z.string(),
+});
+export type TClimateKeyframe = z.infer<typeof ClimateKeyframeSchema>;
+
+export const ClimateMetadataSchema = z.object({
+  caseStudy: z.literal("climate-monitoring"),
+  keyframes: z.array(ClimateKeyframeSchema),
+  imageKinds: z.array(z.string()),
+  relativePathsForAgent: z.array(z.string()),
+  expirationTime: z.number(),
+});
+export type TClimateMetadata = z.infer<typeof ClimateMetadataSchema>;
+
+/**
+ * sentinel-5P
+ */
 
 export const SentinelRowSchema = z.object({
-  timestamp: z.string(),
+  timestamp: z.string(), // TODO: TBD if a timestamp is needed here too
   latitude: z.number(),
   longitude: z.number(),
   CarbonMonoxideLevel: z.string(),
 });
-export type TSentinelDatum = z.infer<typeof SentinelRowSchema>;
-
-export const CaseStudyRowSchema = z.union([ClimateRowSchema, SentinelRowSchema]);
-export type TCaseStudyRow = z.infer<typeof CaseStudyRowSchema>;
-
-/**
- * Base schemas for metadata coming from the secondary side
- */
-
-export const KeyframeErrorSchema = z.object({
-  errorName: z.string(),
-  errorMessage: z.string(),
-});
-export type TKeyframeError = z.infer<typeof KeyframeErrorSchema>;
-
-export const MetadataImageSchema = z.object({
-  relativePath: z.string(),
-  description: z.string(),
-  kind: z.string(),
-});
-export type TMetadataImage = z.infer<typeof MetadataImageSchema>;
-
-export const KeyframeImageSchema = z.object({
-  relativePath: z.string(),
-  description: z.string(),
-  signedUrl: z.string().url(),
-  kind: z.string(),
-});
-export type TKeyframeImage = z.infer<typeof KeyframeImageSchema>;
-
-export const ClimateMetadatumSchema = z.object({
-  timestamp: z.string(),
-  images: z.array(MetadataImageSchema.or(KeyframeErrorSchema)),
-  data: z.array(ClimateRowSchema.or(KeyframeErrorSchema)),
-  dataDescription: z.string()
-});
-export type TClimateMetadata = z.infer<typeof ClimateMetadatumSchema>;
-
-export const SentinelMetadatumSchema = z.object({
-  timestamp: z.string(),
-  images: z.array(MetadataImageSchema.or(KeyframeErrorSchema)),
-  data: z.array(SentinelRowSchema.or(KeyframeErrorSchema)),
-  dataDescription: z.string()
-});
-export type TSentinelMetadata = z.infer<typeof SentinelMetadatumSchema>;
-
-export const ClimateCaseStudyMetadataSchema = z.object({
-  caseStudy: z.literal("climate-monitoring"),
-  relativePathsForAgent: z.array(z.string()),
-  keyframes: z.array(ClimateMetadatumSchema),
-  imageKinds: z.array(z.string())
-});
-export type TClimateCaseStudyMetadata = z.infer<typeof ClimateCaseStudyMetadataSchema>;
-
-export const SentinelCaseStudyMetadataSchema = z.object({
-  caseStudy: z.literal("sentinel-5p"),
-  relativePathsForAgent: z.array(z.string()),
-  keyframes: z.array(SentinelMetadatumSchema),
-  imageKinds: z.array(z.string())
-});
-export type TSentinelCaseStudyMetadata = z.infer<typeof SentinelCaseStudyMetadataSchema>;
-
-/**
- * Input from the secondary side to the case study repository
- */
-
-export const CaseStudyMetadataSchema = z.discriminatedUnion("caseStudy", [ClimateCaseStudyMetadataSchema, SentinelCaseStudyMetadataSchema]);
-export type TCaseStudyMetadata = z.infer<typeof CaseStudyMetadataSchema>;
-
-/**
- *  Part of the input to the usecase from the repository, and part of the output from the usecase to the viewmodel
- */
-
-export const ClimateKeyframeSchema = z.object({
-  timestamp: z.string(),
-  images: z.array(KeyframeImageSchema.or(KeyframeErrorSchema)),
-  data: z.array(ClimateRowSchema.or(KeyframeErrorSchema)),
-  dataDescription: z.string()
-});
-export type TClimateKeyframe = z.infer<typeof ClimateKeyframeSchema>;
+export type TSentinelRow = z.infer<typeof SentinelRowSchema>;
 
 export const SentinelKeyframeSchema = z.object({
   timestamp: z.string(),
-  images: z.array(KeyframeImageSchema.or(KeyframeErrorSchema)),
-  data: z.array(SentinelRowSchema.or(KeyframeErrorSchema)),
-  dataDescription: z.string()
+  images: z.array(ImageSchema.or(ErrorSchema)),
+  data: z.array(SentinelRowSchema.or(ErrorSchema)),
+  dataDescription: z.string(),
 });
 export type TSentinelKeyframe = z.infer<typeof SentinelKeyframeSchema>;
 
-export const KeyframeSchema = z.union([ClimateKeyframeSchema, SentinelKeyframeSchema]);
-export type TKeyframe = z.infer<typeof KeyframeSchema>;
+export const SentinelMetadataSchema = z.object({
+  caseStudy: z.literal("sentinel-5p"),
+  keyframes: z.array(SentinelKeyframeSchema),
+  imageKinds: z.array(z.string()),
+  relativePathsForAgent: z.array(z.string()),
+  expirationTime: z.number(),
+});
+export type TSentinelMetadata = z.infer<typeof SentinelMetadataSchema>;
 
 /**
- * Part of the output from the usecase to the primary side
+ * Case study metadata
  */
-export const ClimateKeyframeArraySchema = z.object({
-  caseStudy: z.literal("climate-monitoring"),
-  keyFrames: z.array(ClimateKeyframeSchema),
-  expirationTime: z.number().int().positive(),
-  imageKinds: z.array(z.string())
-});
-export type TClimateKeyframeArray = z.infer<typeof ClimateKeyframeArraySchema>;
 
-export const SentinelKeyframeArraySchema = z.object({
-  caseStudy: z.literal("sentinel-5p"),
-  keyFrames: z.array(SentinelKeyframeSchema),
-  expirationTime: z.number().int().positive(),
-  imageKinds: z.array(z.string())
-});
-export type TSentinelKeyframeArray = z.infer<typeof SentinelKeyframeArraySchema>;
-
-export const KeyframeArraySchema = z.discriminatedUnion("caseStudy", [ClimateKeyframeArraySchema, SentinelKeyframeArraySchema]);
+export const KeyframeArraySchema = z.array(ClimateKeyframeSchema).or(z.array(SentinelKeyframeSchema));
 export type TKeyframeArray = z.infer<typeof KeyframeArraySchema>;
+
+export const CaseStudyMetadataSchema = z.discriminatedUnion("caseStudy", [ClimateMetadataSchema, SentinelMetadataSchema]);
+
+export type TCaseStudyMetadata = z.infer<typeof CaseStudyMetadataSchema>;
+
+const ClimateMetadataWithoutRelativePathsSchema = ClimateMetadataSchema.omit({ relativePathsForAgent: true });
+const SentinelMetadataWithoutRelativePathsSchema = SentinelMetadataSchema.omit({ relativePathsForAgent: true });
+
+export const CaseStudyMetadataWithoutRelativePathsSchema = z.discriminatedUnion("caseStudy", [ClimateMetadataWithoutRelativePathsSchema, SentinelMetadataWithoutRelativePathsSchema]);
+export type TCaseStudyMetadataWithoutRelativePaths = z.infer<typeof CaseStudyMetadataWithoutRelativePathsSchema>;

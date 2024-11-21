@@ -25,8 +25,8 @@ import type BrowserListResearchContextsController from "~/lib/infrastructure/cli
 import { type TCreateResearchContextViewModel } from "~/lib/core/view-models/create-research-context-view-models";
 import type { SelectableSourceDataRow } from "node_modules/@maany_shr/rage-ui-kit/dist/components/table/SelectableSourceDataAGGrid";
 import type BrowserCreateResearchContextController from "~/lib/infrastructure/client/controller/browser-create-research-context-controller";
-import { TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
-import BrowserCaseStudyController from "~/lib/infrastructure/client/controller/browser-case-study-controller";
+import { type TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
+import type BrowserCaseStudyController from "~/lib/infrastructure/client/controller/browser-case-study-controller";
 
 export const DEFAULT_RETRIES = 3;
 export const DEFAULT_RETRY_DELAY = 3000;
