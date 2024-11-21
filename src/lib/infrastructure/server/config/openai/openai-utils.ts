@@ -158,18 +158,18 @@ export const DATA_FILE_FORMATS: string[] = [".json", ".txt"];
 
 export const WEBSAT_VECTOR_STORE_FILE_FORMATS = OPENAI_VECTOR_STORE_SUPPORTED_FILE_FORMATS.filter((format) => !DATA_FILE_FORMATS.includes(format));
 
-export const generateOpenAiAssistantInstructions = (researchContextTitle: string, researchContextDescription: string, jsonFileName: string | undefined, txtFileName: string | undefined): string => {
+export const generateOpenAiAssistantInstructions = (researchContextTitle: string, researchContextDescription: string, jsonFileId: string | undefined, txtFileId: string | undefined): string => {
   // concatenated-json-files.json
   // concatenated-txt-files.txt
 
   let jsonFileInstructions = "";
-  if (jsonFileName !== undefined) {
-    jsonFileInstructions = ` The file '${jsonFileName}' contains a concatenation of JSON data. Within this file, there are comments that indicate the source files of the JSON data. When a user references a specific JSON source file, please search for the data that is between the start of file comment which refers to that source file name, and the next end of file comment.`;
+  if (jsonFileId !== undefined) {
+    jsonFileInstructions = ` The file '${jsonFileId}' contains a concatenation of JSON data. Within this file, there are markers that indicate the source files of the JSON data. The markers have the following structure: \"### START OF FILE: '\${file.name}' ###\" and \"### END OF FILE ###\". When a user references a specific JSON source file, please search for the data that is between the start of file comment which refers to that source file name, and the next end of file comment.`;
   }
 
   let txtFileInstructions = "";
-  if (txtFileName !== undefined) {
-    txtFileInstructions = ` The file '${txtFileName}' contains a concatenation of TXT data. Within this file, there are comments that indicate the source files of the TXT data. When a user references a specific TXT source file, please search for the data that is between the start of file comment which refers to that source file name, and the next end of file comment.`;
+  if (txtFileId !== undefined) {
+    txtFileInstructions = ` The file '${txtFileId}' contains a concatenation of TXT data. Within this file, there are markers that indicate the source files of the TXT data. The markers have the following structure: \"### START OF FILE: '\${file.name}' ###\" and \"### END OF FILE ###\". When a user references a specific TXT source file, please search for the data that is between the start of file comment which refers to that source file name, and the next end of file comment.`;
   }
 
   const instructions = `You are an expert data analyst specialized working in the research context with title \"${researchContextTitle}\". This research context has the following description \"${researchContextDescription}\". You have also been assigned some files and you have access to scraped data and some results produced by us in your vector store. Some of these are images in different formats (e.g., JPG, JPEG, PNG, etc.), assigned to you via normal code interpreter.${jsonFileInstructions}${txtFileInstructions} Other files, containing key data, have been assigned to you via a vector store. Please consider files from both sources anytime the user asks you about files you have access to, and name which sources you're drawing from.

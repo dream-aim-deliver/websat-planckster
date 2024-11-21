@@ -29,14 +29,14 @@ export default class OpenAIAgentGateway implements AgentGatewayOutputPort<TOpenA
   }
 
   async createAgent(researchContextTitle: string, researchContextDescription: string, vectorStoreID: string, additionalFiles?: RemoteFile[], agentSystemInstructions?: string): Promise<TCreateAgentDTO> {
-    const jsonFile = additionalFiles?.find((file) => file.relativePath.endsWith(".json"))?.name;
-    const txtFile = additionalFiles?.find((file) => file.relativePath.endsWith(".txt"))?.name;
+    const jsonFileId = additionalFiles?.find((file) => file.relativePath.endsWith(".json"))?.id;
+    const txtFileId = additionalFiles?.find((file) => file.relativePath.endsWith(".txt"))?.id;
 
     let instructions: string;
     if (agentSystemInstructions) {
       instructions = agentSystemInstructions;
     } else {
-      instructions = generateOpenAiAssistantInstructions(researchContextTitle, researchContextDescription, jsonFile, txtFile);
+      instructions = generateOpenAiAssistantInstructions(researchContextTitle, researchContextDescription, jsonFileId, txtFileId);
     }
 
     const model = "gpt-4o";
