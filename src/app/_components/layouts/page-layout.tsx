@@ -23,7 +23,7 @@ export const PageLayout = (props: { children: React.ReactNode; isAuthenticated: 
   return (
     <div className="box-shadow flex min-h-screen flex-col bg-neutral-50 shadow-lg dark:bg-neutral-900">
       {/* Header */}
-      <Header>{props.isAuthenticated ? headerLinks : undefined}</Header>;{/* Main content */}
+      <Header>{props.isAuthenticated ? headerLinks : undefined}</Header>{/* Main content */}
       <main className="container mx-auto flex flex-grow p-4">{props.children}</main>
       <Toaster />
       {/* Footer */}
