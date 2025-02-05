@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {useEffect, useRef, useState} from "react";
 import { CaseStudyPage, StepProgress } from "@maany_shr/rage-ui-kit";
 import type { TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
 import { useMutation } from "@tanstack/react-query";
@@ -13,7 +13,7 @@ type ViewCaseStudyProps = {
   tracerId: string;
 };
 
-const PROGRESS_STEPS = 11;
+const PROGRESS_STEPS = 6;
 
 export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
   const [caseStudyViewModel, setCaseStudyViewModel] = useState<TCaseStudyViewModel>({
@@ -31,12 +31,17 @@ export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
     mutationFn: caseStudyMutation(setCaseStudyViewModel),
   });
 
+  const hasCreationStarted = useRef(false);
+
   useEffect(() => {
-    createMutation.mutate({
-      caseStudyName: props.caseStudy,
-      tracerID: props.tracerId,
-      jobID: props.jobId,
-    });
+    if (!hasCreationStarted.current) {
+      createMutation.mutate({
+        caseStudyName: props.caseStudy,
+        tracerID: props.tracerId,
+        jobID: props.jobId,
+      });
+      hasCreationStarted.current = true;
+    }
   }, []);
 
   useEffect(() => {
