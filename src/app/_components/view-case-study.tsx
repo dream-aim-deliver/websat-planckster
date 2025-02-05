@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CaseStudyPage } from "@maany_shr/rage-ui-kit";
+import { CaseStudyPage, StepProgress } from "@maany_shr/rage-ui-kit";
 import type { TCaseStudyViewModel } from "~/lib/core/view-models/case-study-view-model";
 import { useMutation } from "@tanstack/react-query";
 import { caseStudyMutation, DEFAULT_RETRIES, DEFAULT_RETRY_DELAY } from "~/app/queries";
@@ -13,6 +13,8 @@ type ViewCaseStudyProps = {
   tracerId: string;
 };
 
+const PROGRESS_STEPS = 11;
+
 export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
   const [caseStudyViewModel, setCaseStudyViewModel] = useState<TCaseStudyViewModel>({
     status: "request",
@@ -20,6 +22,7 @@ export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
     tracerID: "",
     jobID: 1,
   } as TCaseStudyViewModel);
+  const [step, setStep] = useState(0);
 
   const createMutation = useMutation({
     mutationKey: ["trigger-case-study"],
@@ -36,12 +39,19 @@ export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
     });
   }, []);
 
+  useEffect(() => {
+    if (caseStudyViewModel.status === "progress") {
+      setStep((prev) => prev + 1);
+    } else {
+      setStep(0)
+    }
+  }, [caseStudyViewModel]);
+
   if (caseStudyViewModel.status === "request") {
     return (
       <div className="h-screen w-screen justify-center">
         <div className="rounded-lg bg-white p-6 shadow-md">
           <h2 className="mb-4 text-xl font-semibold">Loading...</h2>
-          <p>Please wait while we process your request.</p>
         </div>
       </div>
     );
@@ -51,8 +61,8 @@ export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
     return (
       <div className="h-screen w-screen justify-center">
         <div className="rounded-lg bg-white p-6 shadow-md">
-          <h2 className="mb-4 text-xl font-semibold">Creating case study...</h2>
-          <p>Please wait while we process your request.</p>
+          <h2 className="mb-4 text-xl font-semibold">{caseStudyViewModel.message ?? ""}</h2>
+          <StepProgress totalSteps={PROGRESS_STEPS} currentStep={step} />
         </div>
       </div>
     );
@@ -63,7 +73,7 @@ export const ViewCaseStudy = (props: ViewCaseStudyProps) => {
       <div className="h-screen w-screen justify-center">
         <div className="rounded-lg bg-red-800 p-6 shadow-md">
           <h2 className="mb-4 text-xl font-semibold">Error!</h2>
-          <p>Could not setup your case study.</p>
+          <p>{caseStudyViewModel.message ?? ""}</p>
         </div>
       </div>
     );
