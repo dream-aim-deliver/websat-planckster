@@ -79,6 +79,37 @@ export const SentinelMetadataSchema = z.object({
 export type TSentinelMetadata = z.infer<typeof SentinelMetadataSchema>;
 
 /**
+ * swiss-grid
+ */
+
+const OnOffLiteral = z.enum(['ON', 'OFF']).transform(val => val.toUpperCase());
+
+export const SwissGridRowSchema = z.object({
+  timestamp: z.string(),
+  prediction_unified: OnOffLiteral,
+  prediction_benzau: OnOffLiteral,
+});
+export type TSwissGridRow = z.infer<typeof SwissGridRowSchema>;
+
+export const SwissGridKeyframeSchema = z.object({
+  timestamp: z.string(),
+  images: z.array(ImageSchema.or(ErrorSchema)),
+  data: z.array(SwissGridRowSchema.or(ErrorSchema)),
+  dataDescription: z.string(),
+});
+export type TSwissGridKeyframe = z.infer<typeof SwissGridKeyframeSchema>;
+
+export const SwissGridMetadataSchema = z.object({
+  caseStudy: z.literal("swiss-grid"),
+  keyframes: z.array(SwissGridKeyframeSchema),
+  imageKinds: z.array(z.string()),
+  relativePathsForAgent: z.array(z.string()),
+  expirationTime: z.number(),
+});
+export type TSwissGridMetadata = z.infer<typeof SwissGridMetadataSchema>;
+
+
+/**
  * Case study metadata
  */
 
