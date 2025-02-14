@@ -85,9 +85,9 @@ export type TSentinelMetadata = z.infer<typeof SentinelMetadataSchema>;
 const OnOffLiteral = z.enum(['ON', 'OFF']).transform(val => val.toUpperCase());
 
 export const SwissGridRowSchema = z.object({
-  timestamp: z.string(),
-  prediction_unified: OnOffLiteral,
-  prediction_benzau: OnOffLiteral,
+  label: z.string(),
+  prediction: OnOffLiteral,
+  confidence: z.number(),
 });
 export type TSwissGridRow = z.infer<typeof SwissGridRowSchema>;
 
@@ -113,7 +113,7 @@ export type TSwissGridMetadata = z.infer<typeof SwissGridMetadataSchema>;
  * Case study metadata
  */
 
-export const KeyframeArraySchema = z.array(ClimateKeyframeSchema).or(z.array(SentinelKeyframeSchema));
+export const KeyframeArraySchema = z.array(ClimateKeyframeSchema).or(z.array(SentinelKeyframeSchema)).or(z.array(SwissGridKeyframeSchema));
 export type TKeyframeArray = z.infer<typeof KeyframeArraySchema>;
 
 export const CaseStudyMetadataSchema = z.discriminatedUnion("caseStudy", [ClimateMetadataSchema, SentinelMetadataSchema]);
