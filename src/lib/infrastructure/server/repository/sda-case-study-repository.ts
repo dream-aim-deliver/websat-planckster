@@ -95,8 +95,6 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
 
       const expirationTime = new Date(Date.now() + 60 * 60 * 1000).getTime();
 
-      let keyframes: TKeyframeArray;
-
       const caseStudySchemas = {
         'climate-monitoring': ClimateRowSchema,
         'sentinel-5p': SentinelRowSchema,
@@ -114,7 +112,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
         };
       }
 
-      keyframes = await Promise.all(
+      const keyframes: TKeyframeArray = await Promise.all(
           metadata.keyframes.map(async (rawKeyframe) => {
             const { timestamp, images: rawImages, data } = rawKeyframe;
 
@@ -167,7 +165,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
               dataDescription: rawKeyframe.dataDescription,
             };
           })
-      );
+      ) as TKeyframeArray;
 
       // 4. Reconstruct metadata
       const successMetadata = {
