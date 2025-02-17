@@ -98,7 +98,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
       const caseStudySchemas = {
         'climate-monitoring': ClimateRowSchema,
         'sentinel-5p': SentinelRowSchema,
-        'swiss-grid': SwissGridRowSchema,
+        'swissgrid': SwissGridRowSchema,
       };
 
       if (!Object.keys(caseStudySchemas).includes(caseStudy)) {

@@ -18,7 +18,7 @@ export const generateMetadataRelativePath = (caseStudyName: string, tracerID: st
   return `${caseStudyName}/${tracerID}/${jobID}/metadata.json`;
 };
 
-export const RegisteredSDACaseStudyNameSchema = z.union([z.literal("climate-monitoring"), z.literal("sentinel-5p"), z.literal("swiss-grid")]);
+export const RegisteredSDACaseStudyNameSchema = z.union([z.literal("climate-monitoring"), z.literal("sentinel-5p"), z.literal("swissgrid")]);
 export type TRegisteredSDACaseStudyName = z.infer<typeof RegisteredSDACaseStudyNameSchema>;
 
 export type TRowSchema = typeof ClimateRowSchema | typeof SentinelRowSchema | typeof SwissGridRowSchema;
@@ -27,7 +27,7 @@ export type TRowSchema = typeof ClimateRowSchema | typeof SentinelRowSchema | ty
 export const caseStudyToSchema: Record<TRegisteredSDACaseStudyName, TRowSchema> = {
   "climate-monitoring": ClimateRowSchema,
   "sentinel-5p": SentinelRowSchema,
-  "swiss-grid": SwissGridRowSchema,
+  "swissgrid": SwissGridRowSchema,
 };
 
 export const SDAImageSchema = ImageSchema.omit({
@@ -67,7 +67,7 @@ const SDASentinelMetadataSchema = SentinelMetadataSchema.omit({
 });
 
 /**
- * swiss-grid
+ * swissgrid
  */
 
 const SDASwissGridKeyframeSchema = SwissGridKeyframeSchema.omit({ images: true }).extend({
