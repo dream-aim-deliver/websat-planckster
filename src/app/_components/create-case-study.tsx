@@ -15,7 +15,7 @@ export const CreateCaseStudy = (props: { initialViewModel: TListSourceDataViewMo
   const availableCaseStudies = {
     "climate-monitoring": "Climate Monitoring",
     "sentinel-5p": "Sentinel 5P",
-    "swiss-grid": "Swiss Grid",
+    "swissgrid": "Swiss Grid",
   };
 
   const [parameters, setParameters] = useState<CaseStudyParameters>({

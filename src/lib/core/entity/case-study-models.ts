@@ -79,7 +79,7 @@ export const SentinelMetadataSchema = z.object({
 export type TSentinelMetadata = z.infer<typeof SentinelMetadataSchema>;
 
 /**
- * swiss-grid
+ * swissgrid
  */
 
 const OnOffLiteral = z.enum(['ON', 'OFF']).transform(val => val.toUpperCase());
@@ -100,7 +100,7 @@ export const SwissGridKeyframeSchema = z.object({
 export type TSwissGridKeyframe = z.infer<typeof SwissGridKeyframeSchema>;
 
 export const SwissGridMetadataSchema = z.object({
-  caseStudy: z.literal("swiss-grid"),
+  caseStudy: z.literal("swissgrid"),
   keyframes: z.array(SwissGridKeyframeSchema),
   imageKinds: z.array(z.string()),
   relativePathsForAgent: z.array(z.string()),
