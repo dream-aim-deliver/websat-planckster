@@ -40,7 +40,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
   async execute(request: TCaseStudyRequest): Promise<void> {
     const { caseStudyName, tracerID, jobID } = request;
 
-    const supportedCaseStudies = ["climate-monitoring", "sentinel-5p", "swiss-grid"];
+    const supportedCaseStudies = ["climate-monitoring", "sentinel-5p", "swissgrid"];
 
     // Ensure that the case study name is one of the two we support
     if (!supportedCaseStudies.includes(caseStudyName)) {
