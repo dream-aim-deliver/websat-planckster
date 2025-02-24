@@ -34,9 +34,6 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
     try {
       this.logger.info({ caseStudyName, tracerID, jobID }, "Getting case study metadata.");
 
-      try {
-      } catch (error) {}
-
       // 1. Prepare download of the metadata file
       const metadataRelativePath = generateMetadataRelativePath(caseStudyName, tracerID, jobID);
 
@@ -52,6 +49,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
       const downloadDTO = await this.kernelSourceDataGateway.download(metadataRemoteFile);
 
       if (!downloadDTO.success) {
+        this.logger.error({ downloadDTO }, "Failed to download metadata file.");
         return {
           success: false,
           data: {
@@ -119,12 +117,9 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
             const parsedImages: (TImage | TError)[] = [];
 
             for (const singleRawImage of rawImages) {
-              const errorImageParseResult = ErrorSchema.safeParse(singleRawImage);
               const metadataImageParseResult = SDAImageSchema.safeParse(singleRawImage);
 
-              if (errorImageParseResult.success) {
-                parsedImages.push(errorImageParseResult.data);
-              } else if (metadataImageParseResult.success) {
+              if (metadataImageParseResult.success) {
                 const { relativePath, description, kind } = metadataImageParseResult.data;
 
                 const signedUrlDTO = await this.kernelSourceDataGateway.getClientDataForDownload(relativePath);
@@ -144,18 +139,26 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
                   });
                 }
               } else {
-                this.logger.error({ errorImageParseResult, metadataImageParseResult }, "Failed to parse image metadata.");
-                throw new Error("Failed to parse image metadata.");
+                this.logger.error({ metadataImageParseResult }, "Failed to parse image metadata.");
+                parsedImages.push({
+                    errorMessage: "Failed to parse image metadata.",
+                    errorName: "ImageMetadataParseError",
+                });
               }
             }
 
             const parsedData = data.map((item) => {
-              const result = caseStudySchemas[caseStudy].safeParse(item);
-              if (!result.success) {
-                this.logger.error({ item }, "Invalid data.");
-                throw new Error("Invalid data.");
+              const successSchemaParseResult = caseStudySchemas[caseStudy].safeParse(item);
+              const errorSchemaParseResult = ErrorSchema.safeParse(item);
+
+              if (!errorSchemaParseResult.success && !successSchemaParseResult.success) {
+                this.logger.error({ item }, 'Failed to parse a data row.');
+                return {
+                    errorMessage: "Failed to parse a data row.",
+                    errorName: "DataParseError",
+                }
               }
-              return result.data;
+              return item;
             });
 
             return {
