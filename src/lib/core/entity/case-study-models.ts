@@ -116,12 +116,13 @@ export type TSwissGridMetadata = z.infer<typeof SwissGridMetadataSchema>;
 export const KeyframeArraySchema = z.array(ClimateKeyframeSchema).or(z.array(SentinelKeyframeSchema)).or(z.array(SwissGridKeyframeSchema));
 export type TKeyframeArray = z.infer<typeof KeyframeArraySchema>;
 
-export const CaseStudyMetadataSchema = z.discriminatedUnion("caseStudy", [ClimateMetadataSchema, SentinelMetadataSchema]);
+export const CaseStudyMetadataSchema = z.discriminatedUnion("caseStudy", [ClimateMetadataSchema, SentinelMetadataSchema, SwissGridMetadataSchema]);
 
 export type TCaseStudyMetadata = z.infer<typeof CaseStudyMetadataSchema>;
 
 const ClimateMetadataWithoutRelativePathsSchema = ClimateMetadataSchema.omit({ relativePathsForAgent: true });
 const SentinelMetadataWithoutRelativePathsSchema = SentinelMetadataSchema.omit({ relativePathsForAgent: true });
+const SwissGridMetadataWithoutRelativePathsSchema = SwissGridMetadataSchema.omit({ relativePathsForAgent: true });
 
-export const CaseStudyMetadataWithoutRelativePathsSchema = z.discriminatedUnion("caseStudy", [ClimateMetadataWithoutRelativePathsSchema, SentinelMetadataWithoutRelativePathsSchema]);
+export const CaseStudyMetadataWithoutRelativePathsSchema = z.discriminatedUnion("caseStudy", [ClimateMetadataWithoutRelativePathsSchema, SentinelMetadataWithoutRelativePathsSchema, SwissGridMetadataWithoutRelativePathsSchema]);
 export type TCaseStudyMetadataWithoutRelativePaths = z.infer<typeof CaseStudyMetadataWithoutRelativePathsSchema>;
