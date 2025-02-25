@@ -13,8 +13,7 @@ const mockClimateMonitoringMetadata = {
                     relativePath: 'path/to/image.jpg',
                     description: 'Test image',
                     kind: 'rgb',
-                    signedUrl: 'https://example.com/signed-url',
-                },
+                }
             ],
             data: [
                 {
@@ -98,6 +97,88 @@ const mockSentinel5PMetadata = {
     ],
     relativePathsForAgent: ['path/to/agent/data'],
 }
+
+const mockSwissGridMetadata = {
+    caseStudy: "swissgrid",
+    imageKinds: ["map", "chart", "heatmap", "lineGraph"],
+    relativePathsForAgent: [
+        "data/swissgrid/images/",
+        "data/swissgrid/csv/",
+        "data/swissgrid/processed/"
+    ],
+    keyframes: [
+        {
+            timestamp: "2023-01-15T08:00:00Z",
+            images: [
+                {
+                    kind: "map",
+                    relativePath: "data/swissgrid/images/grid_map_20230115.png",
+                    description: "Swiss electricity grid map showing power flow distribution",
+                },
+                {
+                    errorName: "Image retrieval failed",
+                    errorMessage: "Cannot access chart image: load_chart_20230115.png - file not found"
+                }
+            ],
+            data: [
+                {
+                    label: "Generator Station A",
+                    prediction: "ON",
+                    confidence: 0.95
+                },
+                {
+                    label: "Transmission Line B-C",
+                    prediction: "ON",
+                    confidence: 0.87
+                },
+                {
+                    label: "Substation D",
+                    prediction: "OFF",
+                    confidence: 0.92
+                },
+            ],
+            dataDescription: "Grid load and capacity measurements across Swiss regions during morning peak hours."
+        },
+        {
+            timestamp: "2023-01-15T12:00:00Z",
+            images: [
+                {
+                    kind: "map",
+                    relativePath: "data/swissgrid/images/grid_map_20230115.png",
+                    description: "Swiss electricity grid map showing power flow distribution",
+                },
+                {
+                    kind: "map",
+                    relativePath: "data/swissgrid/images/grid_map_20230115.png",
+                    description: "Swiss electricity grid map showing power flow distribution",
+                },
+                {
+                    errorName: "Authorization error",
+                    errorMessage: "Access denied to secure image resource: system_status_20230115.png"
+                }
+            ],
+            data: [
+                {
+                    label: "Generator Station A",
+                    prediction: "ON",
+                    confidence: 0.95
+                },
+                {
+                    label: "Transmission Line B-C",
+                    prediction: "ON",
+                    confidence: 0.87
+                },
+                {
+                    label: "Substation D",
+                    prediction: "OFF",
+                    confidence: 0.92
+                },
+            ],
+            dataDescription: "Grid load and capacity measurements during midday peak consumption."
+        }
+    ]
+};
+
 
 describe('SDACaseStudyRepository', () => {
     let repository: SDACaseStudyRepository;
@@ -330,6 +411,34 @@ describe('SDACaseStudyRepository', () => {
             expect(result.data.keyframes[0].data[0]).toEqual({
                 errorName: 'AugmentedCoordinatesError',
                 errorMessage: 'Error while processing augmented coordinates: timed out',
+            });
+        });
+
+        it('should handle errors in images', async () => {
+            mockKernelSourceDataGateway.download.mockResolvedValue({
+                success: true,
+                data: {
+                    relativePath: '/tmp/local-path/metadata.json',
+                },
+            });
+
+            // Mock signed URL responses for images
+            mockKernelSourceDataGateway.getClientDataForDownload.mockResolvedValue({
+                success: true,
+                data: 'https://example.com/signed-url',
+            });
+
+            // Mock file system
+            // @ts-ignore (mocking fs.readFileSync)
+            fs.readFileSync.mockReturnValue(Buffer.from(JSON.stringify(mockSwissGridMetadata)));
+
+            // Execute method
+            const result = await repository.getCaseStudyMetadata('swissgrid', 'tracer-123', 456);
+
+            expect(result.success).toBe(true);
+            expect(result.data.keyframes[0].images[1]).toEqual({
+                errorName: "Image retrieval failed",
+                errorMessage: "Cannot access chart image: load_chart_20230115.png - file not found"
             });
         });
     });

@@ -11,14 +11,12 @@ import {
   SentinelRowSchema,
   SwissGridRowSchema,
   TCaseStudyMetadata,
-  TClimateKeyframe,
   TError,
   TImage,
   TKeyframeArray,
-  TSentinelKeyframe
 } from "~/lib/core/entity/case-study-models";
 import type KernelPlancksterSourceDataOutputPort from "../../common/ports/secondary/kernel-planckster-source-data-output-port";
-import { SDACaseStudyMetadataSchema, TSDAKeyframe, TSDACaseStudyMetadata, generateMetadataRelativePath, SDAImageSchema } from "../utils/sda-case-study-utils";
+import { RawCaseStudyMetadataSchema, TRawCaseStudyMetadata, generateMetadataRelativePath, RawImageSchema } from "../utils/sda-case-study-utils";
 
 @injectable()
 export default class SDACaseStudyRepository implements CaseStudyRepositoryOutputPort {
@@ -63,9 +61,10 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
 
       // 2. Parse the metadata
       const rawContent = fs.readFileSync(localPath);
-      const rawMetadataParseResult = SDACaseStudyMetadataSchema.safeParse(JSON.parse(rawContent.toString()));
+      const rawMetadataParseResult = RawCaseStudyMetadataSchema.safeParse(JSON.parse(rawContent.toString()));
 
       if (!rawMetadataParseResult.success) {
+        console.log(rawMetadataParseResult.error.message);
         this.logger.error({ rawMetadataParseResult }, "Failed to parse metadata.");
         return {
           success: false,
@@ -75,7 +74,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
           },
         };
       }
-      const metadata: TSDACaseStudyMetadata = rawMetadataParseResult.data;
+      const metadata: TRawCaseStudyMetadata = rawMetadataParseResult.data;
 
       const caseStudy = metadata.caseStudy;
       if (caseStudy !== caseStudyName) {
@@ -117,10 +116,13 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
             const parsedImages: (TImage | TError)[] = [];
 
             for (const singleRawImage of rawImages) {
-              const metadataImageParseResult = SDAImageSchema.safeParse(singleRawImage);
+              const errorParseResult = ErrorSchema.safeParse(singleRawImage);
+              const successParseResult = RawImageSchema.safeParse(singleRawImage);
 
-              if (metadataImageParseResult.success) {
-                const { relativePath, description, kind } = metadataImageParseResult.data;
+              if (errorParseResult.success) {
+                parsedImages.push(errorParseResult.data);
+              } else if (successParseResult.success) {
+                const { relativePath, description, kind } = successParseResult.data;
 
                 const signedUrlDTO = await this.kernelSourceDataGateway.getClientDataForDownload(relativePath);
 
@@ -139,7 +141,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
                   });
                 }
               } else {
-                this.logger.error({ metadataImageParseResult }, "Failed to parse image metadata.");
+                this.logger.error({ metadataImageParseResult: successParseResult }, "Failed to parse image metadata.");
                 parsedImages.push({
                     errorMessage: "Failed to parse image metadata.",
                     errorName: "ImageMetadataParseError",
