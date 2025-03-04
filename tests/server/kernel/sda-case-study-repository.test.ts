@@ -122,17 +122,20 @@ const mockSwissGridMetadata = {
             ],
             data: [
                 {
-                    label: "Generator Station A",
+                    "timestamp": "1693008000",
+                    model: "Generator Station A",
                     prediction: "ON",
                     confidence: 0.95
                 },
                 {
-                    label: "Transmission Line B-C",
+                    "timestamp": "1693008000",
+                    model: "Transmission Line B-C",
                     prediction: "ON",
                     confidence: 0.87
                 },
                 {
-                    label: "Substation D",
+                    "timestamp": "1693008000",
+                    model: "Substation D",
                     prediction: "OFF",
                     confidence: 0.92
                 },
@@ -159,17 +162,20 @@ const mockSwissGridMetadata = {
             ],
             data: [
                 {
-                    label: "Generator Station A",
+                    "timestamp": "1693008000",
+                    model: "Generator Station A",
                     prediction: "ON",
                     confidence: 0.95
                 },
                 {
-                    label: "Transmission Line B-C",
+                    "timestamp": "1693008000",
+                    model: "Transmission Line B-C",
                     prediction: "ON",
                     confidence: 0.87
                 },
                 {
-                    label: "Substation D",
+                    "timestamp": "1693008000",
+                    model: "Substation D",
                     prediction: "OFF",
                     confidence: 0.92
                 },
