@@ -85,7 +85,8 @@ export type TSentinelMetadata = z.infer<typeof SentinelMetadataSchema>;
 const OnOffLiteral = z.enum(['ON', 'OFF']).transform(val => val.toUpperCase());
 
 export const SwissGridRowSchema = z.object({
-  label: z.string(),
+  model: z.string(),
+  timestamp: z.string(),
   prediction: OnOffLiteral,
   confidence: z.number(),
 });
