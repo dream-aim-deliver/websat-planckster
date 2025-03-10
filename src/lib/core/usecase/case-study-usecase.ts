@@ -10,6 +10,7 @@ import type ResearchContextGatewayOutputPort from "../ports/secondary/research-c
 import type SourceDataGatewayOutputPort from "../ports/secondary/source-data-gateway-output-port";
 import type VectorStoreOutputPort from "../ports/secondary/vector-store-output-port";
 import { type TCaseStudyRequest } from "../usecase-models/case-study-usecase-models";
+import {generateMetadataRelativePath} from "~/lib/infrastructure/server/utils/sda-case-study-utils";
 
 export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
   presenter: CaseStudyOutputPort;
@@ -225,17 +226,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
     }
 
     if (relativePathsForAgent.length === 0) {
-      this.presenter.presentError({
-        status: "error",
-        operation: "usecase#case-study",
-        message: "No source data found for the agent in the metadata.",
-        context: {
-          caseStudyName,
-          tracerID,
-          jobID,
-        },
-      });
-      return;
+      relativePathsForAgent.push(generateMetadataRelativePath(caseStudyName, tracerID, jobID));
     }
 
     const metadata = {
