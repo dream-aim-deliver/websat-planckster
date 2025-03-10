@@ -13,7 +13,6 @@ export type TError = z.infer<typeof ErrorSchema>;
 export const ImageSchema = z.object({
   relativePath: z.string(),
   description: z.string(),
-  signedUrl: z.string().url(),
   kind: z.string(),
 });
 export type TImage = z.infer<typeof ImageSchema>;

@@ -11,12 +11,10 @@ import {
   SentinelRowSchema,
   SwissGridRowSchema,
   TCaseStudyMetadata,
-  TError,
-  TImage,
   TKeyframeArray,
 } from "~/lib/core/entity/case-study-models";
 import type KernelPlancksterSourceDataOutputPort from "../../common/ports/secondary/kernel-planckster-source-data-output-port";
-import { RawCaseStudyMetadataSchema, TRawCaseStudyMetadata, generateMetadataRelativePath, RawImageSchema } from "../utils/sda-case-study-utils";
+import { RawCaseStudyMetadataSchema, TRawCaseStudyMetadata, generateMetadataRelativePath } from "../utils/sda-case-study-utils";
 
 @injectable()
 export default class SDACaseStudyRepository implements CaseStudyRepositoryOutputPort {
@@ -111,43 +109,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
 
       const keyframes: TKeyframeArray = await Promise.all(
           metadata.keyframes.map(async (rawKeyframe) => {
-            const { timestamp, images: rawImages, data } = rawKeyframe;
-
-            const parsedImages: (TImage | TError)[] = [];
-
-            for (const singleRawImage of rawImages) {
-              const errorParseResult = ErrorSchema.safeParse(singleRawImage);
-              const successParseResult = RawImageSchema.safeParse(singleRawImage);
-
-              if (errorParseResult.success) {
-                parsedImages.push(errorParseResult.data);
-              } else if (successParseResult.success) {
-                const { relativePath, description, kind } = successParseResult.data;
-
-                const signedUrlDTO = await this.kernelSourceDataGateway.getClientDataForDownload(relativePath);
-
-                if (!signedUrlDTO.success) {
-                  this.logger.error({ signedUrlDTO }, "Failed to get signed URL for image.");
-                  parsedImages.push({
-                    errorMessage: "Failed to fetch image.",
-                    errorName: "ImageFetchError",
-                  });
-                } else {
-                  parsedImages.push({
-                    kind: kind,
-                    relativePath: relativePath,
-                    signedUrl: signedUrlDTO.data,
-                    description: description,
-                  });
-                }
-              } else {
-                this.logger.error({ metadataImageParseResult: successParseResult }, "Failed to parse image metadata.");
-                parsedImages.push({
-                    errorMessage: "Failed to parse image metadata.",
-                    errorName: "ImageMetadataParseError",
-                });
-              }
-            }
+            const { timestamp, images, data } = rawKeyframe;
 
             const parsedData = data.map((item) => {
               const successSchemaParseResult = caseStudySchemas[caseStudy].safeParse(item);
@@ -165,7 +127,7 @@ export default class SDACaseStudyRepository implements CaseStudyRepositoryOutput
 
             return {
               timestamp: timestamp,
-              images: parsedImages,
+              images: images,
               data: parsedData,
               dataDescription: rawKeyframe.dataDescription,
             };
