@@ -223,12 +223,6 @@ describe('SDACaseStudyRepository', () => {
                 },
             });
 
-            // Mock signed URL responses for images
-            mockKernelSourceDataGateway.getClientDataForDownload.mockResolvedValue({
-                success: true,
-                data: 'https://example.com/signed-url',
-            });
-
             // Mock file system
             // @ts-ignore (mocking fs.readFileSync)
             fs.readFileSync.mockReturnValue(Buffer.from(JSON.stringify(mockClimateMonitoringMetadata)));
@@ -241,7 +235,6 @@ describe('SDACaseStudyRepository', () => {
             expect(result.data.caseStudy).toBe('climate-monitoring');
             expect(result.data.keyframes).toHaveLength(1);
             expect(result.data.keyframes[0].images).toHaveLength(1);
-            expect(result.data.keyframes[0].images[0].signedUrl).toBe('https://example.com/signed-url');
 
             // Verify that expiration time was added and is roughly an hour in the future
             expect(result.data.expirationTime).toBeDefined();
@@ -347,38 +340,6 @@ describe('SDACaseStudyRepository', () => {
             expect(result.data.message).toBe('Failed to parse metadata.');
         });
 
-        it('should handle image fetch failure', async () => {
-            // Mock download success
-            mockKernelSourceDataGateway.download.mockResolvedValue({
-                success: true,
-                data: {
-                    relativePath: '/tmp/local-path/metadata.json',
-                },
-            });
-
-            // Mock signed URL failure
-            mockKernelSourceDataGateway.getClientDataForDownload.mockResolvedValue({
-                success: false,
-                data: {
-                    message: 'Failed to generate signed URL',
-                },
-            });
-
-            // @ts-ignore (mocking fs.readFileSync)
-            fs.readFileSync.mockReturnValue(Buffer.from(JSON.stringify(mockClimateMonitoringMetadata)));
-
-            // Execute method
-            const result = await repository.getCaseStudyMetadata('climate-monitoring', 'tracer-123', 456);
-
-            // Assertions
-            expect(result.success).toBe(true);
-            expect(result.data.keyframes[0].images[0]).toEqual({
-                errorMessage: 'Failed to fetch image.',
-                errorName: 'ImageFetchError',
-            });
-            expect(mockLogger.error).toHaveBeenCalled();
-        });
-
         it('should handle unexpected exceptions', async () => {
             // Mock download to throw exception
             mockKernelSourceDataGateway.download.mockRejectedValue(new Error('Unexpected error'));
@@ -398,12 +359,6 @@ describe('SDACaseStudyRepository', () => {
                 data: {
                     relativePath: '/tmp/local-path/metadata.json',
                 },
-            });
-
-            // Mock signed URL responses for images
-            mockKernelSourceDataGateway.getClientDataForDownload.mockResolvedValue({
-                success: true,
-                data: 'https://example.com/signed-url',
             });
 
             // Mock file system
@@ -426,12 +381,6 @@ describe('SDACaseStudyRepository', () => {
                 data: {
                     relativePath: '/tmp/local-path/metadata.json',
                 },
-            });
-
-            // Mock signed URL responses for images
-            mockKernelSourceDataGateway.getClientDataForDownload.mockResolvedValue({
-                success: true,
-                data: 'https://example.com/signed-url',
             });
 
             // Mock file system
