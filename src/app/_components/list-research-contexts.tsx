@@ -43,7 +43,9 @@ export function ListResearchContextsClientPage(props: { researchContextsViewMode
 
   let cards: ResearchContextCardProps[] = [];
   if (listResearchContextsViewModel.status === "success") {
-    cards = listResearchContextsViewModel.researchContexts.map((researchContext) => {
+    cards = listResearchContextsViewModel.researchContexts
+    .sort((a, b) => b.id - a.id)
+    .map((researchContext) => {
       return {
         callbacks: {
           onNavigateToListConversationPage: () => {
