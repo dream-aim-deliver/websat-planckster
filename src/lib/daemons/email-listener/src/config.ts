@@ -1,10 +1,11 @@
 import dotenv from "dotenv";
 import Imap from "imap";
 import * as fs from "node:fs";
+import { OpenAPI } from "@maany_shr/kernel-planckster-sdk-ts";
 
 dotenv.config();
 
-const requiredEnvVars = ["EMAIL_ADDRESS", "EMAIL_PASSWORD", "IMAP_HOST", "IMAP_PORT"];
+const requiredEnvVars = ["EMAIL_ADDRESS", "EMAIL_PASSWORD", "IMAP_HOST", "IMAP_PORT", "KP_AUTH_TOKEN", "KP_CLIENT_ID", "KP_HOST"];
 
 const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 
@@ -41,3 +42,9 @@ const readWhitelist = (filePath: string): string[] => {
 };
 
 export const whitelist = readWhitelist(process.env.WHITELIST_FILE ?? "./whitelist.txt");
+
+export const authToken = process.env.KP_AUTH_TOKEN!;
+
+export const clientId = parseInt(process.env.KP_CLIENT_ID!);
+
+OpenAPI.BASE = process.env.KP_HOST!;

@@ -4,6 +4,7 @@ import { sendCompanyProcessingError, sendCompanyProcessingSuccess, sendReply, se
 import { extractMessageDetails, parseMessage } from "./parsing.js";
 import { MessageDetails } from "../models.js";
 import { ParsedMail } from "mailparser";
+import { saveAttachments } from "./saving.js";
 
 // Temporary date for testing
 const afterDate = new Date("2025-04-05T00:00:00Z");
@@ -55,6 +56,9 @@ const processNewEmails = () => {
       }
 
       sendCompanyProcessingSuccess(mail, details);
+      const relativePaths = await saveAttachments(mail, details);
+      console.log(relativePaths);
+      // TODO: Run the LLM processing script with the relative paths
     });
   });
 };
