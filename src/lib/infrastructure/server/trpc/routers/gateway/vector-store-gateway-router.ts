@@ -12,6 +12,7 @@ export const vectorStoreGatewayRouter = createTRPCRouter({
     .input(
       z.object({
         files: z.array(RemoteFileSchema),
+        name: z.string(),
       }),
     )
     .mutation(async ({ input }): Promise<TCreateVectorStoreDTO> => {
@@ -20,7 +21,7 @@ export const vectorStoreGatewayRouter = createTRPCRouter({
 
       try {
         const gateway = serverContainer.get<OpenAIVectorStoreGateway>(GATEWAYS.VECTOR_STORE_GATEWAY);
-        const dto = await gateway.createVectorStore(input.files);
+        const dto = await gateway.createVectorStore(input.name, input.files);
         return dto;
       } catch (error) {
         logger.error({ error }, "Could not invoke the server side feature to create vector store");

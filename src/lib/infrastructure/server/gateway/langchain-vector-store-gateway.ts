@@ -14,6 +14,7 @@ import * as fs from 'fs';
 import { TEmbeddings } from '~/lib/core/entity/dadbod/vector-store';
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { Chroma } from "@langchain/community/vectorstores/chroma";
+import { loadDocuments } from '../config/langchain/langchain-utils';
 
 @injectable()
 export default class LangchainVectorStoreGateway implements VectorStoreOutputPort {
@@ -116,45 +117,6 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
         }
     }
 
-    async loadDocuments(files: LocalFile[]): Promise<Document[]> {
-        const documents: Document[] = [];
-        for (const file of files) {
-            let loader;
-            const ext = file.name.split('.').pop();
-            if (!ext) {
-                this.logger.error(`File ${file.name} has no extension`);
-                continue;
-            }
-            if (ext == "txt") {
-                loader = new TextLoader(file.relativePath);
-            }
-            else if (ext == "pdf") {
-                loader = new PDFLoader(file.relativePath, {
-                    splitPages: true,
-                });
-            }
-            else if (ext == "docx || doc") {
-                //loader = new DocxLoader(file.relativePath);
-            }
-            else if (ext == "csv") {
-                loader = new CSVLoader(file.relativePath);
-            }
-            else if (ext == "pptx" || ext == "ppt") {
-                loader = new PPTLoader(file.relativePath);
-            }
-            if (!loader) {
-                this.logger.error(`File ${file.name} has unsupported extension ${ext}`);
-                continue;
-            }
-            try {
-                const loadedDocuments = await loader.load();
-                documents.push(...loadedDocuments);
-            } catch (error) {
-                this.logger.error(`Failed to load file ${file.name}: ${(error as Error).message}`);
-            }
-        }
-        return documents;
-    }
 
     async _deleteFilesLocally(files: LocalFile[]): Promise<void> {
         for (const file of files) {
@@ -195,7 +157,7 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
 
         for (const file of localFiles) {
             try {
-                const documents = await this.loadDocuments([file.localFile]);
+                const documents = await loadDocuments([file.localFile], this.logger);
                 for (const document of documents) {
                     document.metadata.source = file.remoteFile.relativePath;
                     document.metadata.provider = file.remoteFile.provider;

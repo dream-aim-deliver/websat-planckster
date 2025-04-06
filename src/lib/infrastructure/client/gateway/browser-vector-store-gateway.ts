@@ -15,11 +15,15 @@ export default class BrowserVectorStoreGateway implements VectorStoreOutputPort 
   ) {
     this.logger = this.loggerFactory("BrowserVectorStoreGateway");
   }
+  addFilesToVectorStore(researchContextExternalID: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
+    throw new Error("Method not implemented.");
+  }
 
-  async createVectorStore(files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
+  async createVectorStore(name: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
     try {
       const dto = await this.api.gateways.vectorStore.create.mutate({
-        files,
+        name: name,
+        files: files,
       });
       return dto;
     } catch (error) {

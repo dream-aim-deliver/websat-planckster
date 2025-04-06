@@ -1,11 +1,10 @@
 import type VectorStoreOutputPort from "~/lib/core/ports/secondary/vector-store-output-port";
 import serverContainer from "~/lib/infrastructure/server/config/ioc/server-container";
 import { LANGCHAIN } from "~/lib/infrastructure/server/config/ioc/server-ioc-symbols";
-import type LangchainVectorStoreGateway from "~/lib/infrastructure/server/gateway/langchain-vector-store-gateway";
 
 export default async function DealAnalysisServerPage() {
   serverContainer.load();
-  const langchainVectorStoreGateway = serverContainer.get<LangchainVectorStoreGateway>(LANGCHAIN.LANGCHAIN_VECTOR_STORE);
+  const langchainVectorStoreGateway = serverContainer.get<VectorStoreOutputPort>(LANGCHAIN.LANGCHAIN_VECTOR_STORE);
   const createVectorStoreDTO = await langchainVectorStoreGateway.createVectorStore("test-vector-store", [
     {
       id: "1",
