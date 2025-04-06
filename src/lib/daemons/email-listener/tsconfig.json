@@ -4,7 +4,10 @@
     "module": "esnext",
     "moduleResolution": "node",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDirs": ["./src", "../../utils"],
+    "paths": {
+      "@utils/*": ["../../utils/*"]
+    },
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
