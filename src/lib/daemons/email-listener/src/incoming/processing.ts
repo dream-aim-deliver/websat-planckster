@@ -4,7 +4,7 @@ import { sendCompanyProcessingError, sendCompanyProcessingSuccess, sendReply, se
 import { extractMessageDetails, parseMessage } from "./parsing.js";
 import { MessageDetails } from "../models.js";
 import { ParsedMail } from "mailparser";
-import { saveAttachments } from "./saving.js";
+import { getRootPath, saveAttachments } from "./saving.js";
 
 // Temporary date for testing
 const afterDate = new Date("2025-04-05T00:00:00Z");
@@ -45,10 +45,13 @@ const processNewEmails = () => {
         return;
       }
 
+      // TODO: check if the thread is already being processed
+
       let details: MessageDetails;
 
       try {
         // TODO: extract the address and name first
+        // TODO: extract the companyId from the saved thread details
         details = extractMessageDetails(mail);
       } catch (_) {
         console.error(`Couldn't extract company ID from message #${sequenceNumber}`);
@@ -57,9 +60,10 @@ const processNewEmails = () => {
       }
 
       sendCompanyProcessingSuccess(mail, details);
-      const relativePaths = await saveAttachments(mail, details);
-      console.log(relativePaths);
-      // TODO: Run the LLM processing script with the relative paths
+      const rootPath = getRootPath(details);
+      // TODO: send an email if errors occur or there is incomplete data
+      await saveAttachments(mail, rootPath);
+      // TODO: Run the LLM processing script with the rootPath, fromAddress and messageId
     });
   });
 };

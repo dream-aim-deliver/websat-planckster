@@ -4,13 +4,19 @@ import { Attachment, ParsedMail } from "mailparser";
 import { MessageDetails } from "../models.js";
 import axios from "axios";
 
-export const saveAttachments = async (mail: ParsedMail, details: MessageDetails): Promise<string[]> => {
+export const getRootPath = (details: MessageDetails): string => {
+  return `users/${details.fromName}/${details.companyId}/${details.jobId}`;
+};
+
+export const saveAttachments = async (mail: ParsedMail, rootPath: string) => {
+  // TODO: collect and output errors
   try {
     if (!mail.attachments || mail.attachments.length === 0) {
       console.log("No attachments found in the email");
       return [];
     }
 
+    // TODO: process other types of attachments
     const pdfAttachments = mail.attachments.filter((attachment) => attachment.contentType === "application/pdf");
 
     if (pdfAttachments.length === 0) {
@@ -20,23 +26,19 @@ export const saveAttachments = async (mail: ParsedMail, details: MessageDetails)
 
     console.log(`Found ${pdfAttachments.length} PDF attachments`);
 
-    const uploadResults = await Promise.all(
-      pdfAttachments.map(async (attachment) => {
-        return await uploadAttachment(attachment);
-      }),
-    );
-
-    return uploadResults.filter((result) => result !== null) as string[];
+    for await (const attachment of pdfAttachments) {
+      await uploadAttachment(attachment, rootPath);
+    }
   } catch (error: any) {
     console.error("Error saving attachments:", error);
     throw new Error(`Failed to save attachments: ${error.message}`);
   }
 };
 
-async function uploadAttachment(attachment: Attachment): Promise<string | null> {
+async function uploadAttachment(attachment: Attachment, rootPath: string): Promise<string | null> {
   try {
-    const filename = attachment.filename || `attachment_${Date.now()}.pdf`;
-    const relativePath = `attachments/${Date.now()}_${filename}`;
+    const filename = attachment.filename ?? `attachment_${Date.now()}.pdf`;
+    const relativePath = `${rootPath}/${Date.now()}_${filename}`;
 
     const linkData = await ClientService.getClientDataForUpload({
       id: clientId,
