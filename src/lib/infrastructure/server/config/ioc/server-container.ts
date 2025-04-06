@@ -46,6 +46,8 @@ import ListResearchContextsUsecase from "~/lib/core/usecase/list-research-contex
 import ListResearchContextsPresenter from "../../presenter/list-research-contexts-presenter";
 import SDACaseStudyRepository from "../../repository/sda-case-study-repository";
 import LangchainVectorStoreGateway from "../../gateway/langchain-vector-store-gateway";
+import { ChromaClient } from 'chromadb';
+import env from "~/lib/infrastructure/server/config/env";
 
 const serverContainer = new Container();
 
@@ -83,7 +85,8 @@ serverContainer.bind(GATEWAYS.RESEARCH_CONTEXT_GATEWAY).to(ResearchContextGatewa
 serverContainer.bind(GATEWAYS.VECTOR_STORE_GATEWAY).to(OpenAIVectorStoreGateway);
 
 /** LANGCHAIN */
-serverContainer.bind(LANGCHAIN.LANGCHAIN_VECTOR_STORE).to(LangchainVectorStoreGateway);
+  serverContainer.bind(LANGCHAIN.LANGCHAIN_VECTOR_STORE).to(LangchainVectorStoreGateway);
+
 
 /** REPOSITORY */
 serverContainer.bind(REPOSITORIES.SDA_CASE_STUDY_REPOSITORY).to(SDACaseStudyRepository);

@@ -1,4 +1,3 @@
-import { Document } from 'langchain/document';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'pino';
 import { GATEWAYS, UTILS } from '../config/ioc/server-ioc-symbols';
@@ -6,15 +5,13 @@ import VectorStoreOutputPort from '~/lib/core/ports/secondary/vector-store-outpu
 import { TCreateVectorStoreDTO, TGetVectorStoreDTO, TDeleteVectorStoreDTO } from '~/lib/core/dto/vector-store-dto';
 import { LocalFile, RemoteFile } from '~/lib/core/entity/file';
 import type SourceDataGatewayOutputPort from '~/lib/core/ports/secondary/source-data-gateway-output-port';
-import { TextLoader } from "langchain/document_loaders/fs/text";
-import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
-import { CSVLoader } from "@langchain/community/document_loaders/fs/csv";
-import { PPTLoader } from '../langchain/langchain-pptx-loader';
 import * as fs from 'fs';
-import { TEmbeddings } from '~/lib/core/entity/dadbod/vector-store';
-import { OpenAIEmbeddings } from "@langchain/openai";
 import { Chroma } from "@langchain/community/vectorstores/chroma";
+import { OpenAIEmbeddings } from "@langchain/openai"
 import { loadDocuments } from '../config/langchain/langchain-utils';
+import { TEmbeddings } from '~/lib/core/entity/dadbod/vector-store';
+import { Document } from 'langchain/document';
+import env from "~/lib/infrastructure/server/config/env";
 
 @injectable()
 export default class LangchainVectorStoreGateway implements VectorStoreOutputPort {
@@ -85,8 +82,8 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
                 localFiles.push({
                     localFile: {
                         type: "local",
-                        name: file.name,
-                        relativePath: file.relativePath,
+                        name: downloadDTO.data.name,
+                        relativePath: downloadDTO.data.relativePath,
                     },
                     remoteFile: file
                 });
@@ -140,32 +137,58 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
                 }
             }
         }
-        const localFiles = localFilesDTO.status == "partial" ? localFilesDTO.data.successful : localFilesDTO.data;
+        const availableFiles = localFilesDTO.status == "partial" ? localFilesDTO.data.successful : localFilesDTO.data;
         const failedFiles = localFilesDTO.status == "partial" ? localFilesDTO.data.failed : [];
-        // const embeddings: TEmbeddings = {
-        //     id: "langchain-vector-store",
-        //     provider: "langchain-chroma",
-        //     algorithm: "all-MiniLM-L6-v2",
-        //     files: []
-        // }
         const embeddings = new OpenAIEmbeddings({
-            model: "text-embedding-3-small",
+            model: "text-embedding-3-large",
+            openAIApiKey: env.OPENAI_API_KEY,
         });
+
+        const outputEmbeddings: TEmbeddings = {
+            id: name,
+            provider: "langchain-chroma",
+            model: embeddings.model,
+            files: []
+        }
+
         const vectorStore = new Chroma(embeddings, {
-            collectionName: "langchain-vector-store",
+            collectionName: name,
+            url: env.CHROMA_DB_SERVER_URL, // Optional, will default to this value
         });
 
-        for (const file of localFiles) {
-            try {
-                const documents = await loadDocuments([file.localFile], this.logger);
-                for (const document of documents) {
-                    document.metadata.source = file.remoteFile.relativePath;
-                    document.metadata.provider = file.remoteFile.provider;
-                    document.metadata.provider_id = file.remoteFile.id;
-                }
-                // add files to vector store
 
-                embeddings.files.push(file.remoteFile);
+        for (const [index, file] of availableFiles.entries()) {
+            try {
+                const initialDocs = await loadDocuments([file.localFile], this.logger);
+                const docs: Document[] = []
+                initialDocs.forEach((doc, idx) => {
+                    const _doc = new Document({
+                        pageContent: doc.pageContent,
+                        metadata: {
+                            source: file.remoteFile.relativePath,
+                            provider: file.remoteFile.provider,
+                            provider_id: file.remoteFile.id,
+                            page: idx + 1,
+                        }
+                    })
+                    docs.push(_doc);
+                });
+               
+                const ids = docs.map((doc, idx) => `${file.remoteFile.id}-${index}-${idx}`);
+              
+                const result = await vectorStore.addDocuments(docs, {
+                    ids: ids,
+                });
+                this.logger.info(`Added file ${file.localFile.name} to vector store. Result: ${JSON.stringify(result)}`);
+                outputEmbeddings.files.push({
+                    type: "remote",
+                    id: `${file.remoteFile.id}-${index}`,
+                    provider: `langchain#chroma${name}`,
+                    name: file.remoteFile.name,
+                    relativePath: file.remoteFile.relativePath,
+                    createdAt: new Date().toISOString(),
+                });
+
             } catch (error) {
                 this.logger.error(`Failed to load file ${file.localFile.name}: ${(error as Error).message}`);
                 failedFiles.push({
@@ -176,18 +199,21 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
                     }
                 });
                 continue;
+            } finally {
+                console.log("Deleting file locally", file.localFile.relativePath);
+                await this._deleteFilesLocally([file.localFile]);
             }
+
         }
         return {
             success: true,
             data: {
                 provider: "langchain",
                 id: "langchain-vector-store",
-                embeddings: [embeddings],
+                embeddings: [outputEmbeddings],
                 unsupportedFiles: failedFiles.map(file => file.file),
             }
         }
-
     }
     async addFilesToVectorStore(researchContextExternalID: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
         throw new Error('Method not implemented.');

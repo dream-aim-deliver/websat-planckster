@@ -31,10 +31,50 @@ export default async function DealAnalysisServerPage() {
       createdAt: "2025-04-05T14:51:04.849203",
     },
   ]);
-  return (
-    <div className="flex grow flex-col gap-4">
-      <div className="text-2xl font-bold">Deal Analysis</div>
-      <div className="text-lg">This page is under construction.</div>
+  if (!createVectorStoreDTO.success) {
+    return (
+      <div className="flex grow flex-col gap-4">
+        <div className="text-2xl font-bold">Deal Analysis</div>
+        <div className="text-red-500">Error creating vector store: {JSON.stringify(createVectorStoreDTO.data)}</div>
+      </div>
+    );
+  }
+  const successfulFiles = createVectorStoreDTO.data.embeddings ?? [];
+  console.log("successfulFiles", successfulFiles);
+  const failedFiles = createVectorStoreDTO.data.unsupportedFiles ?? [];
+  return <div className="flex grow flex-col gap-4">
+    <div className="text-2xl font-bold">Deal Analysis</div>
+    <div>
+        <div className="text-green-500">
+            <div className="font-bold">Successful Files:</div>
+            <ul>
+                {successfulFiles.map((file, index) => (
+                    <li key={index}>
+                        <div className="font-bold">{file.provider}</div>
+                        <ul>
+                            {file.files.map((nestedFile, nestedIndex) => (
+                                <li key={nestedIndex}>
+                                    <div className="font-bold">{nestedFile.name}</div>
+                                    {/* <div>{nestedFile.relativePath}</div> */}
+                                    <div>{nestedFile.createdAt}</div>
+                                    <div>{nestedFile.provider}</div>
+                                    <div>{nestedFile.id}</div>
+                                </li>
+                            ))}
+                        </ul>
+                    </li>
+                ))}
+            </ul>
+        </div>
+        <div className="text-red-500 mt-4">
+            <div className="font-bold">Failed Files:</div>
+            <ul>
+                {failedFiles.map((file, index) => (
+                    <li key={index}>{file.relativePath}</li>
+                ))}
+            </ul>
+        </div>
     </div>
-  );
+
+  </div>;
 }

@@ -253,7 +253,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
     }
   }
 
-  async createVectorStore(name: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
+  async createVectorStore(vectorStoreID: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
     try {
       // 1. Upload files to OpenAI
       const uploadFilesDTO = await this.uploadFilesToOpenAI(files);
@@ -322,8 +322,8 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
     }
   }
 
-  async getVectorStore(researchContextExternalID: string): Promise<TGetVectorStoreDTO> {
-    const vectorStoreName = researchContextExternalID;
+  async getVectorStore(vectorStoreID: string): Promise<TGetVectorStoreDTO> {
+    const vectorStoreName = vectorStoreID;
     let openaiVectorStoreID: string;
     try {
       const openaiVectorStore = await this.openai.beta.vectorStores.retrieve(vectorStoreName);
@@ -362,8 +362,8 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
     }
   }
 
-  async deleteVectorStore(researchContextExternalID: string): Promise<TDeleteVectorStoreDTO> {
-    const getVectorStoreDTO = await this.getVectorStore(researchContextExternalID);
+  async deleteVectorStore(vectorStoreID: string): Promise<TDeleteVectorStoreDTO> {
+    const getVectorStoreDTO = await this.getVectorStore(vectorStoreID);
     if (!getVectorStoreDTO.success) {
       return {
         success: false,
@@ -373,17 +373,17 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
         },
       };
     }
-    const vectorStoreID = getVectorStoreDTO.data.id;
+    const openAIVectorStoreID = getVectorStoreDTO.data.id;
     try {
-      await this.openai.beta.vectorStores.del(vectorStoreID);
+      await this.openai.beta.vectorStores.del(openAIVectorStoreID);
       return {
         success: true,
         data: {
-          message: `Successfully deleted vector store: ${vectorStoreID} from OpenAI`,
+          message: `Successfully deleted vector store: ${openAIVectorStoreID} from OpenAI`,
         },
       };
     } catch (error) {
-      this.logger.error({ error }, `Failed to delete vector store: ${vectorStoreID} from OpenAI`);
+      this.logger.error({ error }, `Failed to delete vector store: ${openAIVectorStoreID} from OpenAI`);
       return {
         success: false,
         data: {

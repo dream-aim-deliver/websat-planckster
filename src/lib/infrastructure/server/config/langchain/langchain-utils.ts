@@ -16,7 +16,7 @@ export const loadDocuments = async(files: LocalFile[], logger: Logger): Promise 
     const documents: Document[] = [];
     for(const file of files) {
         let loader;
-        const ext = file.name.split('.').pop();
+        const ext = file.relativePath.split('/').pop()?.split('.').pop();
         if (!ext) {
             logger.error(`File ${file.name} has no extension`);
             continue;
@@ -25,9 +25,7 @@ export const loadDocuments = async(files: LocalFile[], logger: Logger): Promise 
             loader = new TextLoader(file.relativePath);
         }
         else if (ext == "pdf") {
-            loader = new PDFLoader(file.relativePath, {
-                splitPages: true,
-            });
+            loader = new PDFLoader(file.relativePath, {});
         }
         else if (ext == "docx || doc") {
             //loader = new DocxLoader(file.relativePath);
