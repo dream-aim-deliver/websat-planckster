@@ -3,4 +3,6 @@ export interface MessageDetails {
   fromName: string;
   companyId: string;
   jobId: string;
+  threadId: string;
+  messageId: string;
 }

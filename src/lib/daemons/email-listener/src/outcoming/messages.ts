@@ -2,7 +2,7 @@ import { ParsedMail } from "mailparser";
 import { templatesDir } from "../config.js";
 import { MessageDetails } from "../models.js";
 import * as fs from "node:fs";
-import { sendEmail } from "@utils/smtp.js";
+import { sendEmail } from "../smtp.js";
 
 export const getEmailTemplate = async (templateName: string): Promise<string> => {
   try {

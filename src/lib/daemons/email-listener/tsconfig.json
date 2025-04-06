@@ -4,7 +4,7 @@
     "module": "esnext",
     "moduleResolution": "node",
     "outDir": "./dist",
-    "rootDirs": ["./src", "../../utils"],
+    "rootDir": "./src",
     "paths": {
       "@utils/*": ["../../utils/*"]
     },

@@ -2,7 +2,7 @@ import Imap from "imap";
 import { ParsedMail, simpleParser } from "mailparser";
 import { v4 as uuidv4 } from "uuid";
 import { MessageDetails } from "../models.js";
-import { users } from "../config";
+import { users } from "../config.js";
 
 export const parseMessage = async (msg: Imap.ImapMessage): Promise<ParsedMail> => {
   return new Promise((resolve, reject) => {
@@ -28,6 +28,22 @@ export const parseMessage = async (msg: Imap.ImapMessage): Promise<ParsedMail> =
       reject(err);
     });
   });
+};
+
+const extractThreadId = (mail: ParsedMail): string => {
+  if (mail.references && mail.references.length > 0) {
+    return mail.references[0];
+  }
+
+  if (mail.inReplyTo) {
+    return mail.inReplyTo;
+  }
+
+  if (mail.messageId) {
+    return mail.messageId;
+  }
+
+  throw Error("No thread ID found");
 };
 
 export const extractMessageDetails = (mail: ParsedMail): MessageDetails => {
@@ -58,7 +74,13 @@ export const extractMessageDetails = (mail: ParsedMail): MessageDetails => {
     throw new Error("Sender name not found in email");
   }
 
+  if (!mail.messageId) {
+    throw new Error("Message ID not found in email");
+  }
+
   return {
+    messageId: mail.messageId,
+    threadId: extractThreadId(mail),
     fromAddress: address,
     fromName: name,
     companyId,
