@@ -6,6 +6,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
+    "dev:email-listener": "tsc -p src/lib/daemons/email-listener/tsconfig.json && node src/lib/daemons/email-listener/dist/index.js",
     "lint": "next lint",
     "start": "node --require reflect-metadata ./node_modules/.bin/next start",
     "test": "jest",
@@ -37,7 +38,11 @@
     "superjson": "^2.2.1",
     "tslog": "^4.9.3",
     "uuid": "^11.0.2",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "dotenv": "^16.4.7",
+    "imap": "^0.8.19",
+    "mailparser": "^3.7.2",
+    "nodemailer": "^6.10.0"
   },
   "devDependencies": {
     "@inrupt/jest-jsdom-polyfills": "^3.2.1",
@@ -64,7 +69,11 @@
     "tailwindcss": "^3.4.1",
     "ts-jest": "^29.2.4",
     "ts-node": "^10.9.2",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "@types/imap": "^0.8.42",
+    "@types/mailparser": "^3.4.5",
+    "@types/nodemailer": "^6.4.17",
+    "@types/uuid": "^10.0.0"
   },
   "ct3aMetadata": {
     "initVersion": "7.30.0"
