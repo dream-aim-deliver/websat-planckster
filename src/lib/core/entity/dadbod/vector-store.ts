@@ -13,3 +13,5 @@ export const EmbeddingsSchema = z.object({
     algorithm: z.string(),
     files: z.array(RemoteFileSchema),
 });
+
+export type TEmbeddings = z.infer<typeof EmbeddingsSchema>;

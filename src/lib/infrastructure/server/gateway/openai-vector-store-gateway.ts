@@ -22,6 +22,10 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
     this.logger = loggerFactory("OpenAIVectorStoreGateway");
   }
 
+  async addFilesToVectorStore(researchContextExternalID: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
+    throw new Error("Method not implemented in OpenAI Vector Store Gateway. Switch to Langchain Vector Store Gateway.");
+  }
+
   async uploadFilesToOpenAI(files: RemoteFile[]): Promise<
     | {
         status: "success";
@@ -249,7 +253,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
     }
   }
 
-  async createVectorStore(files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
+  async createVectorStore(name: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
     try {
       // 1. Upload files to OpenAI
       const uploadFilesDTO = await this.uploadFilesToOpenAI(files);
