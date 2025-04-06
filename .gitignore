@@ -51,3 +51,4 @@ yarn-error.log*
 # Build output for the email-listener deamon
 src/lib/daemons/email-listener/dist/
 whitelist.txt
+users.json

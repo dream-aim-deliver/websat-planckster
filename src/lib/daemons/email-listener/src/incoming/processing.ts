@@ -48,6 +48,7 @@ const processNewEmails = () => {
       let details: MessageDetails;
 
       try {
+        // TODO: extract the address and name first
         details = extractMessageDetails(mail);
       } catch (_) {
         console.error(`Couldn't extract company ID from message #${sequenceNumber}`);

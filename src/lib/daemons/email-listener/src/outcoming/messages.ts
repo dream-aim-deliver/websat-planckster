@@ -33,6 +33,7 @@ export const fillEmailTemplate = async (templateName: string, data: Record<strin
 };
 
 export const sendWhitelistError = async (mail: ParsedMail) => {
+  // TODO: create a template which won't require the sender name
   const name = mail.from?.value[0]?.name;
   if (!name) {
     throw Error("Missing sender name");
@@ -49,6 +50,7 @@ export const sendCompanyProcessingSuccess = async (mail: ParsedMail, details: Me
 };
 
 export const sendCompanyProcessingError = async (mail: ParsedMail) => {
+  // TODO: create a template which won't require the sender name
   const name = mail.from?.value[0]?.name;
   if (!name) {
     throw Error("Missing sender name");

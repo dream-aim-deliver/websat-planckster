@@ -28,20 +28,25 @@ export const mailboxName = process.env.MAILBOX_NAME ?? "INBOX";
 
 export const templatesDir = process.env.TEMPLATES_DIR ?? "./templates";
 
-const readWhitelist = (filePath: string): string[] => {
+export interface User {
+  name: string;
+  email: string;
+}
+
+const readUsersJson = (filePath: string): User[] => {
   try {
     const fileContent = fs.readFileSync(filePath, "utf-8");
-
-    const lines = fileContent.split("\n").filter((line) => line.trim() !== "");
-
-    return lines;
-  } catch (error) {
-    console.error(`Error reading file: ${error instanceof Error ? error.message : String(error)}`);
+    const users: User[] = JSON.parse(fileContent);
+    return users;
+  } catch (error: any) {
+    console.error(`Error reading users file: ${error.toString()}`);
     return [];
   }
 };
 
-export const whitelist = readWhitelist(process.env.WHITELIST_FILE ?? "./whitelist.txt");
+export const users = readUsersJson(process.env.USERS_FILE ?? "./users.json");
+
+export const whitelist = users.map((user) => user.email);
 
 export const authToken = process.env.KP_AUTH_TOKEN!;
 
