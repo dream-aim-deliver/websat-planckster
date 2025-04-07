@@ -14,7 +14,7 @@ if (process.env.SKIP_ENV_VALIDATION) {
 const config = {
   transpilePackages: ["superjson", "@maany_shr/planckster-ui-kit", "@maany_shr/rage-ui-kit", "@preact/signals-react", "@preact/signals-core"],
   experimental: {
-    serverComponentsExternalPackages: ["pino", "pino-pretty"],
+    serverComponentsExternalPackages: ["pino", "pino-pretty", "onnxruntime-node"],
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {

@@ -25,6 +25,7 @@ const serverEnvSchema = z.object({
   KP_CLIENT_ID: z.number(),
   OPENAI_API_KEY: z.string(),
   SCRATCH_DIR: z.string().optional().default("/tmp/planckster"),
+  CHROMA_DB_SERVER_URL: z.string()
 });
 
 const runtimeEnv = {
@@ -38,6 +39,7 @@ const runtimeEnv = {
   KP_CLIENT_ID: parseInt(process.env.KP_CLIENT_ID ?? "0"),
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,
   SCRATCH_DIR: process.env.SCRATCH_DIR ?? "/tmp/planckster",
+  CHROMA_DB_SERVER_URL: process.env.CHROMA_DB_SERVER_URL,
 };
 
 const envValidationResult = serverEnvSchema.safeParse(runtimeEnv);

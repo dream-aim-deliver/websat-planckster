@@ -1,0 +1,30 @@
+services:
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: chromadb
+    command: ["run", "--host", "0.0.0.0", "--port", "8000", "--path", "/data"]
+    ports:
+      - "8020:8000"
+    environment:
+      - CHROMA_SERVER_CORS_ALLOW_ORIGINS=["*"]
+    volumes:
+      - ./data/chromadb_data:/data
+  anythingllm:
+    image: mintplexlabs/anythingllm
+    container_name: anythingllm
+    ports:
+      - "3001:3001"
+    cap_add:
+      - SYS_ADMIN
+    volumes:
+      - ./data/anythingllm:/app/server/storage
+      - ./data/anythingllm/.env:/app/server/.env
+    environment:
+      - STORAGE_DIR=/app/server/storage
+    restart: unless-stopped
+    healthcheck:
+      # Adjust below to match your container port
+      test: [ "CMD", "curl", "-f", "http://localhost:8020/api/v2/heartbeat" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3

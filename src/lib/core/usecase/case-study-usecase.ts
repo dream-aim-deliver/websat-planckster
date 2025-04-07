@@ -331,7 +331,7 @@ export default class BrowserCaseStudyUsecase implements CaseStudyInputPort {
     });
 
     // 6. Create a new VectorStore with (C), then create a new Agent as usual
-    const createVectorStoreDTO = await this.vectorStore.createVectorStore(agentRemoteFiles);
+    const createVectorStoreDTO = await this.vectorStore.createVectorStore(`${caseStudyName}-${jobID}-${tracerID}`, agentRemoteFiles);
 
     if (!createVectorStoreDTO.success) {
       this.presenter.presentError({

@@ -10,6 +10,8 @@ export const VectorStoreSchema = z.object({
 export const EmbeddingsSchema = z.object({
     id: z.string(),
     provider: z.string(),
-    algorithm: z.string(),
+    model: z.string(),
     files: z.array(RemoteFileSchema),
 });
+
+export type TEmbeddings = z.infer<typeof EmbeddingsSchema>;

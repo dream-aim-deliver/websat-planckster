@@ -32,7 +32,7 @@ export default class CreateResearchContextUsecase implements CreateResearchConte
     }
 
     // 1. Create vector store with the Source Data
-    const createVectorStoreDTO = await this.vectorStore.createVectorStore(sourceDataList);
+    const createVectorStoreDTO = await this.vectorStore.createVectorStore(`rc-${request.title}-vector-store`, sourceDataList);
 
     if (!createVectorStoreDTO.success) {
       this.presenter.presentError({

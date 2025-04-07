@@ -27,6 +27,11 @@ export const OPENAI = {
     OPENAI_SOURCE_DATA_GATEWAY: Symbol.for('OPENAI_SOURCE_DATA_GATEWAY'),
 }
 
+export const LANGCHAIN = {
+    LANGCHAIN_VECTOR_STORE: Symbol.for('LANGCHAIN_VECTOR_STORE'),
+}
+
+
 export const KERNEL = {
     KERNEL_SDK: Symbol.for('KERNEL_OPENAPI_CLIENT'),
 }
