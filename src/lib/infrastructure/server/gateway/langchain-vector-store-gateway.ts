@@ -126,7 +126,7 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
         }
     }
 
-    async createVectorStore(name: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
+    async createVectorStore(vectorStoreID: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
         const localFilesDTO = await this._downloadFilesLocally(files);
         if (localFilesDTO.status == "error") {
             return {
@@ -145,14 +145,14 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
         });
 
         const outputEmbeddings: TEmbeddings = {
-            id: name,
+            id: vectorStoreID,
             provider: "langchain-chroma",
             model: embeddings.model,
             files: []
         }
 
         const vectorStore = new Chroma(embeddings, {
-            collectionName: name,
+            collectionName: vectorStoreID,
             url: env.CHROMA_DB_SERVER_URL, // Optional, will default to this value
         });
 
@@ -173,9 +173,9 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
                     })
                     docs.push(_doc);
                 });
-               
+
                 const ids = docs.map((doc, idx) => `${file.remoteFile.id}-${index}-${idx}`);
-              
+
                 const result = await vectorStore.addDocuments(docs, {
                     ids: ids,
                 });
@@ -183,7 +183,7 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
                 outputEmbeddings.files.push({
                     type: "remote",
                     id: `${file.remoteFile.id}-${index}`,
-                    provider: `langchain#chroma${name}`,
+                    provider: `langchain#chroma${vectorStoreID}`,
                     name: file.remoteFile.name,
                     relativePath: file.remoteFile.relativePath,
                     createdAt: new Date().toISOString(),
@@ -200,7 +200,7 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
                 });
                 continue;
             } finally {
-                console.log("Deleting file locally", file.localFile.relativePath);
+                this.logger.info(`Deleting file locally: ${file.localFile.relativePath}`);
                 await this._deleteFilesLocally([file.localFile]);
             }
 
@@ -215,14 +215,165 @@ export default class LangchainVectorStoreGateway implements VectorStoreOutputPor
             }
         }
     }
-    async addFilesToVectorStore(researchContextExternalID: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
-        throw new Error('Method not implemented.');
+
+    async addFilesToVectorStore(vectorStoreID: string, files: RemoteFile[]): Promise<TCreateVectorStoreDTO> {
+        const localFilesDTO = await this._downloadFilesLocally(files);
+        if (localFilesDTO.status === "error") {
+            return {
+                success: false,
+                data: {
+                    message: localFilesDTO.data.message,
+                    operation: localFilesDTO.data.operation,
+                }
+            };
+        }
+
+        const availableFiles = localFilesDTO.status === "partial" ? localFilesDTO.data.successful : localFilesDTO.data;
+        const failedFiles = localFilesDTO.status === "partial" ? localFilesDTO.data.failed : [];
+        const embeddings = new OpenAIEmbeddings({
+            model: "text-embedding-3-large",
+            openAIApiKey: env.OPENAI_API_KEY,
+        });
+
+        const vectorStore = new Chroma(embeddings, {
+            collectionName: vectorStoreID,
+            url: env.CHROMA_DB_SERVER_URL,
+        });
+
+        for (const [index, file] of availableFiles.entries()) {
+            try {
+                const initialDocs = await loadDocuments([file.localFile], this.logger);
+                const docs: Document[] = [];
+                initialDocs.forEach((doc, idx) => {
+                    const _doc = new Document({
+                        pageContent: doc.pageContent,
+                        metadata: {
+                            source: file.remoteFile.relativePath,
+                            provider: file.remoteFile.provider,
+                            provider_id: file.remoteFile.id,
+                            page: idx + 1,
+                        }
+                    });
+                    docs.push(_doc);
+                });
+
+                const ids = docs.map((doc, idx) => `${file.remoteFile.id}-${index}-${idx}`);
+                const result = await vectorStore.addDocuments(docs, { ids });
+                this.logger.info(`Added file ${file.localFile.name} to vector store. Result: ${JSON.stringify(result)}`);
+            } catch (error) {
+                this.logger.error(`Failed to add file ${file.localFile.name}: ${(error as Error).message}`);
+                failedFiles.push({
+                    file: file.remoteFile,
+                    error: {
+                        message: (error as Error).message,
+                        operation: "langchain-vector-store#add",
+                    }
+                });
+                continue;
+            } finally {
+                this.logger.info(`Deleting file locally: ${file.localFile.relativePath}`);
+                await this._deleteFilesLocally([file.localFile]);
+            }
+        }
+
+        return {
+            success: true,
+            data: {
+                provider: "langchain",
+                id: vectorStoreID,
+                unsupportedFiles: failedFiles.map(file => file.file),
+            }
+        };
     }
-    async getVectorStore(researchContextExternalID: string): Promise<TGetVectorStoreDTO> {
-        throw new Error('Method not implemented.');
+    async getVectorStore(vectorStoreID: string): Promise<TGetVectorStoreDTO> {
+        try {
+            const vectorStore = new Chroma(new OpenAIEmbeddings(), {
+                collectionName: vectorStoreID,
+                url: env.CHROMA_DB_SERVER_URL,
+            });
+
+            const collection = vectorStore.collection;
+            if (!collection) {
+                this.logger.error(`Vector store ${vectorStoreID} not found`);
+                return {
+                    success: false,
+                    data: {
+                        message: `Vector store ${vectorStoreID} not found`,
+                        operation: "langchain-vector-store#get",
+                    }
+                };
+            }
+            const response = await collection.get();
+            if (!response) {
+                this.logger.error(`Failed to retrieve documents in ${vectorStoreID}`);
+                return {
+                    success: false,
+                    data: {
+                        message: `No documents found in vector store ${vectorStoreID}`,
+                        operation: "langchain-vector-store#get",
+                    }
+                };
+            }
+            const documents = response.documents
+            if(!documents || documents.length === 0) {
+                this.logger.error(`No documents found in vector store ${vectorStoreID}`);
+                return {
+                    success: false,
+                    data: {
+                        message: `No documents found in vector store ${vectorStoreID}`,
+                        operation: "langchain-vector-store#get",
+                    }
+                };
+            }
+            // const files: RemoteFile[] = documents.map((doc) => {
+            //     if (!doc || !doc.metadata) {
+            //         this.logger.error(`Document ${doc?.pageContent || "unknown"} has no metadata`);
+            //         return null;
+            //     }
+            //     return {
+            //         type: "remote",
+            //         id: doc.metadata.provider_id,
+            //         provider: doc.metadata.provider,
+            //         name: doc.metadata.source,
+            //         relativePath: doc.metadata.source,
+            //         createdAt: new Date().toISOString(),
+            //     };
+            // }).filter((file): file is RemoteFile => file !== null);
+
+            this.logger.info(`Retrieved vector store ${vectorStoreID} with ${documents.length} documents.`);
+            return {
+                success: true,
+                data: {
+                    status: "created", // or another appropriate status
+                    provider: "langchain",
+                    id: vectorStoreID,
+                }
+            };
+        } catch (error) {
+            this.logger.error(`Failed to retrieve vector store ${vectorStoreID}: ${(error as Error).message}`);
+            return {
+                success: false,
+                data: {
+                    message: (error as Error).message,
+                    operation: "langchain-vector-store#get",
+                }
+            };
+        }
     }
-    async deleteVectorStore(researchContextExternalID: string): Promise<TDeleteVectorStoreDTO> {
-        throw new Error('Method not implemented.');
+    async deleteVectorStore(vectorStoreID: string): Promise<TDeleteVectorStoreDTO> {
+        const vectorStore = new Chroma(new OpenAIEmbeddings(), {
+            collectionName: vectorStoreID,
+            url: env.CHROMA_DB_SERVER_URL,
+        });
+        await vectorStore.collection?.delete();
+        this.logger.info(`Deleted vector store ${vectorStoreID}`);
+        return {
+            success: true,
+            data: {
+                message: `Vector store ${vectorStoreID} deleted`,
+                operation: "langchain-vector-store#delete",
+            }
+        }
     }
 
 
