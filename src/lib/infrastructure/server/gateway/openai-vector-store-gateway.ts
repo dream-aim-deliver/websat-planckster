@@ -293,7 +293,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
 
       // 3. Create vector store
       const vectorStoreName = generateOpenAIVectorStoreName();
-      const openaiVectorStore = await this.openai.beta.vectorStores.create({
+      const openaiVectorStore = await this.openai.vectorStores.create({
         name: vectorStoreName,
         file_ids: supportedFiles.map((file) => file.id),
       });
@@ -326,7 +326,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
     const vectorStoreName = vectorStoreID;
     let openaiVectorStoreID: string;
     try {
-      const openaiVectorStore = await this.openai.beta.vectorStores.retrieve(vectorStoreName);
+      const openaiVectorStore = await this.openai.vectorStores.retrieve(vectorStoreName);
       openaiVectorStoreID = openaiVectorStore.id;
       let vectorStoreStatus: "created" | "processing" | "available" | "error" = "created";
       switch (openaiVectorStore.status) {
@@ -375,7 +375,7 @@ export default class OpenAIVectorStoreGateway implements VectorStoreOutputPort {
     }
     const openAIVectorStoreID = getVectorStoreDTO.data.id;
     try {
-      await this.openai.beta.vectorStores.del(openAIVectorStoreID);
+      await this.openai.vectorStores.del(openAIVectorStoreID);
       return {
         success: true,
         data: {
